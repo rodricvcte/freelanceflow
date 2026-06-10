@@ -85,7 +85,7 @@ export default function NewProposalPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      router.push('/proposals')
+      router.push('/propostas')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro ao criar proposta')
       setSubmitting(false)
@@ -99,7 +99,7 @@ export default function NewProposalPage() {
     <div className="p-6 md:p-8 max-w-2xl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
-        <Link href="/proposals" className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100">
+        <Link href="/propostas" className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
@@ -282,7 +282,7 @@ export default function NewProposalPage() {
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pb-8">
           <Link
-            href="/proposals"
+            href="/propostas"
             className="px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancelar

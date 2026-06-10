@@ -79,7 +79,7 @@ export default function ProposalsPage() {
           <p className="text-sm text-gray-500 mt-0.5">{proposals.length} no total</p>
         </div>
         <Link
-          href="/proposals/new"
+          href="/propostas/new"
           className="flex items-center gap-2 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -186,7 +186,7 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
           <p className="text-sm font-medium text-gray-900 mb-1">Nenhuma proposta ainda</p>
           <p className="text-sm text-gray-500 mb-4">Crie sua primeira proposta e envie para um cliente.</p>
           <Link
-            href="/proposals/new"
+            href="/propostas/new"
             className="px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
           >
             + Nova Proposta
