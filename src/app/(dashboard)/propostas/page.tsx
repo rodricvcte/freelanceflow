@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 type Proposal = {
@@ -47,6 +48,7 @@ function formatDate(iso: string) {
 }
 
 export default function ProposalsPage() {
+  const router = useRouter()
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
@@ -151,7 +153,11 @@ export default function ProposalsPage() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filtered.map(p => (
-                  <tr key={p.id} className="hover:bg-gray-50 transition-colors cursor-pointer">
+                  <tr
+                    key={p.id}
+                    onClick={() => router.push(`/propostas/${p.id}`)}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
                     <td className="px-5 py-4 font-medium text-gray-900">{p.title}</td>
                     <td className="px-5 py-4 text-gray-500">{p.clients?.name ?? '—'}</td>
                     <td className="px-5 py-4 text-gray-700 font-medium">{formatBRL(p.value)}</td>
