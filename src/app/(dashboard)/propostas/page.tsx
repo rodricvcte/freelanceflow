@@ -10,12 +10,16 @@ type Proposal = {
   value: number | null
   status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired'
   created_at: string
+  sent_at: string | null
+  version: number
+  proposal_number: string | null
+  pdf_url: string | null
   clients: { id: string; name: string } | null
 }
 
 const STATUS_CONFIG = {
   draft:    { label: 'Rascunho', className: 'bg-gray-100 text-gray-500' },
-  sent:     { label: 'Enviada',  className: 'bg-gray-200 text-gray-700' },
+  sent:     { label: 'Enviada',  className: 'bg-blue-100 text-blue-700' },
   viewed:   { label: 'Vista',    className: 'bg-yellow-100 text-yellow-700' },
   accepted: { label: 'Aceita',   className: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
   rejected: { label: 'Recusada', className: 'bg-red-100 text-red-700' },
@@ -38,12 +42,13 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-function formatBRL(value: number | null) {
+function fmtBRL(value: number | null) {
   if (value === null) return '—'
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 }
 
-function formatDate(iso: string) {
+function fmtDate(iso: string | null) {
+  if (!iso) return '—'
   return new Intl.DateTimeFormat('pt-BR').format(new Date(iso))
 }
 
@@ -67,13 +72,14 @@ export default function ProposalsPage() {
     return proposals.filter(p => {
       if (statusFilter !== 'all' && p.status !== statusFilter) return false
       if (cutoff && new Date(p.created_at).getTime() < cutoff) return false
-      if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false
+      const q = search.toLowerCase()
+      if (q && !p.title.toLowerCase().includes(q) && !(p.proposal_number?.toLowerCase().includes(q))) return false
       return true
     })
   }, [proposals, statusFilter, periodDays, search])
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl">
+    <div className="p-6 md:p-8 max-w-7xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -93,38 +99,23 @@ export default function ProposalsPage() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        {/* Search */}
         <div className="relative flex-1 max-w-xs">
           <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
           </svg>
-          <input
-            type="text"
-            placeholder="Buscar por título..."
-            value={search}
+          <input type="text" placeholder="Buscar por título ou número..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent"
-          />
+            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent" />
         </div>
-
-        {/* Status filter */}
-        <select
-          value={statusFilter}
-          onChange={e => setStatus(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent"
-        >
+        <select value={statusFilter} onChange={e => setStatus(e.target.value)}
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent">
           <option value="all">Todos os status</option>
           {Object.entries(STATUS_CONFIG).map(([value, { label }]) => (
             <option key={value} value={value}>{label}</option>
           ))}
         </select>
-
-        {/* Period filter */}
-        <select
-          value={periodDays}
-          onChange={e => setPeriod(Number(e.target.value))}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent"
-        >
+        <select value={periodDays} onChange={e => setPeriod(Number(e.target.value))}
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent">
           {PERIOD_OPTIONS.map(o => (
             <option key={o.days} value={o.days}>{o.label}</option>
           ))}
@@ -144,25 +135,50 @@ export default function ProposalsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3">Título</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3">Cliente</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3">Valor</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3">Status</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3">Data</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3">ID / Título</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Versão</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Cliente</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Valor</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Envio</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Status</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filtered.map(p => (
-                  <tr
-                    key={p.id}
-                    onClick={() => router.push(`/propostas/${p.id}`)}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    <td className="px-5 py-4 font-medium text-gray-900">{p.title}</td>
-                    <td className="px-5 py-4 text-gray-500">{p.clients?.name ?? '—'}</td>
-                    <td className="px-5 py-4 text-gray-700 font-medium">{formatBRL(p.value)}</td>
-                    <td className="px-5 py-4"><StatusBadge status={p.status} /></td>
-                    <td className="px-5 py-4 text-gray-500">{formatDate(p.created_at)}</td>
+                  <tr key={p.id} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="px-5 py-3.5">
+                      {p.proposal_number ? (
+                        <span className="font-mono text-xs text-[#1D9E75] font-semibold block mb-0.5">{p.proposal_number}</span>
+                      ) : null}
+                      <span className="font-medium text-gray-900 text-sm line-clamp-1">{p.title}</span>
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
+                      v{p.version ?? 1}
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-500">{p.clients?.name ?? '—'}</td>
+                    <td className="px-4 py-3.5 text-gray-700 font-medium whitespace-nowrap">{fmtBRL(p.value)}</td>
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">{fmtDate(p.sent_at ?? p.created_at)}</td>
+                    <td className="px-4 py-3.5"><StatusBadge status={p.status} /></td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-1.5">
+                        {p.pdf_url && (
+                          <a
+                            href={`/api/proposals/${p.id}/pdf`}
+                            onClick={e => e.stopPropagation()}
+                            className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+                          >
+                            Ver PDF
+                          </a>
+                        )}
+                        <button
+                          onClick={() => router.push(`/propostas/${p.id}`)}
+                          className="px-2.5 py-1.5 text-xs font-medium text-[#1D9E75] border border-[#1D9E75]/30 rounded-lg hover:bg-[#1D9E75]/5 transition-colors whitespace-nowrap"
+                        >
+                          Ver Detalhes
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -191,10 +207,7 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
         <>
           <p className="text-sm font-medium text-gray-900 mb-1">Nenhuma proposta ainda</p>
           <p className="text-sm text-gray-500 mb-4">Crie sua primeira proposta e envie para um cliente.</p>
-          <Link
-            href="/propostas/new"
-            className="px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
-          >
+          <Link href="/propostas/new" className="px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors">
             + Nova Proposta
           </Link>
         </>

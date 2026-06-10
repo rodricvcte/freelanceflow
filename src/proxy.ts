@@ -25,7 +25,6 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  // Refreshes the session — required so Server Components always have an up-to-date token
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -37,7 +36,10 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api/p/') ||
     pathname.startsWith('/api/track/') ||
     pathname.startsWith('/api/webhooks/')
-  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/cadastro')
+
+  const isAuthRoute    = pathname.startsWith('/login') || pathname.startsWith('/cadastro')
+  const isApiRoute     = pathname.startsWith('/api/')
+  const isOnboarding   = pathname === '/onboarding'
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
@@ -49,6 +51,22 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
+  }
+
+  // Gate: authenticated users without freelancer_code must complete onboarding.
+  // Only check page routes (not API) to avoid overhead; skip /onboarding itself.
+  if (user && !isPublicRoute && !isAuthRoute && !isApiRoute && !isOnboarding) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('freelancer_code')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!profile?.freelancer_code) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/onboarding'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

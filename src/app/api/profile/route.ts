@@ -8,7 +8,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('full_name, business_name, phone, logo_url, accent_color')
+    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website')
     .eq('id', user.id)
     .maybeSingle()
 

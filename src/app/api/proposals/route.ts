@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 import { canCreateProposal } from '@/lib/plan'
+import { buildProposalNumber } from '@/lib/proposal-number'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
@@ -10,7 +11,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('proposals')
-    .select('id, title, value, status, created_at, clients(id, name)')
+    .select('id, title, value, status, created_at, sent_at, version, proposal_number, pdf_url, clients(id, name)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -61,11 +62,27 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  // Generate proposal_number if profile has a freelancer_code
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('freelancer_code')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.freelancer_code) {
+    const proposalNumber = buildProposalNumber(data.created_at, profile.freelancer_code, 1)
+    await supabase
+      .from('proposals')
+      .update({ proposal_number: proposalNumber })
+      .eq('id', data.id)
+    data.proposal_number = proposalNumber
+  }
+
   let pdfUrl: string | null = null
   try {
     pdfUrl = await generateAndSaveProposalPDF(data.id, supabase)
   } catch {
-    // PDF generation failure is non-fatal — proposal was saved successfully
+    // PDF generation failure is non-fatal
   }
 
   return NextResponse.json({ ...data, pdf_url: pdfUrl ?? data.pdf_url }, { status: 201 })
