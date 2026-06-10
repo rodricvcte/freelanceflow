@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
@@ -45,5 +46,13 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data, { status: 201 })
+
+  let pdfUrl: string | null = null
+  try {
+    pdfUrl = await generateAndSaveProposalPDF(data.id, supabase)
+  } catch {
+    // PDF generation failure is non-fatal — proposal was saved successfully
+  }
+
+  return NextResponse.json({ ...data, pdf_url: pdfUrl ?? data.pdf_url }, { status: 201 })
 }
