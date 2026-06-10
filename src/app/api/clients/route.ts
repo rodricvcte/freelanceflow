@@ -8,12 +8,27 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('clients')
-    .select('id, name, email, phone')
+    .select('id, name, email, phone, notes, created_at, proposals(id, value, status)')
     .eq('user_id', user.id)
     .order('name')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+
+  const enriched = (data ?? []).map(c => {
+    const proposals = Array.isArray(c.proposals) ? c.proposals : []
+    return {
+      id: c.id,
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      notes: c.notes,
+      created_at: c.created_at,
+      proposal_count: proposals.length,
+      total_value: proposals.reduce((s: number, p: { value: number | null }) => s + (p.value ?? 0), 0),
+    }
+  })
+
+  return NextResponse.json(enriched)
 }
 
 export async function POST(request: Request) {
