@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 type Client = { id: string; name: string; email: string | null; phone: string | null }
+type PlanInfo = { plan: string; used: number; limit: number }
 
 const EMPTY_FORM = {
   title: '',
@@ -27,11 +28,18 @@ export default function NewProposalPage() {
   const [savingClient, setSavingClient] = useState(false)
   const [submitting, setSubmitting]     = useState(false)
   const [error, setError]               = useState<string | null>(null)
+  const [plan, setPlan]                 = useState<PlanInfo | null>(null)
+  const [planLoading, setPlanLoading]   = useState(true)
 
   useEffect(() => {
     fetch('/api/clients')
       .then(r => r.json())
       .then(data => setClients(Array.isArray(data) ? data : []))
+
+    fetch('/api/subscriptions')
+      .then(r => r.json())
+      .then(d => { setPlan(d); setPlanLoading(false) })
+      .catch(() => setPlanLoading(false))
   }, [])
 
   function set(field: keyof typeof EMPTY_FORM, value: string) {
@@ -95,8 +103,24 @@ export default function NewProposalPage() {
   const inputCls = 'w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent'
   const labelCls = 'block text-sm font-medium text-gray-700 mb-1'
 
+  const limitReached = !planLoading && !!plan && plan.plan === 'free' && plan.used >= plan.limit
+
+  if (!planLoading && limitReached) {
+    return <UpgradeModal used={plan!.used} limit={plan!.limit} />
+  }
+
   return (
     <div className="p-6 md:p-8 max-w-2xl">
+      {/* Plano Free — uso */}
+      {plan && plan.plan === 'free' && (
+        <div className="mb-6 flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+          </svg>
+          Plano Free: {plan.used}/{plan.limit} propostas criadas este mês.{' '}
+          <Link href="/configuracoes" className="underline font-medium">Fazer upgrade</Link>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link href="/propostas" className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100">
@@ -296,6 +320,66 @@ export default function NewProposalPage() {
           </button>
         </div>
       </form>
+    </div>
+  )
+}
+
+function UpgradeModal({ used, limit }: { used: number; limit: number }) {
+  return (
+    <div className="p-6 md:p-8 max-w-lg">
+      <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm text-center">
+        {/* Icon */}
+        <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Limite atingido</h2>
+        <p className="text-sm text-gray-500 mb-1">
+          Você criou <span className="font-semibold text-gray-900">{used} de {limit} propostas</span> disponíveis no plano Free este mês.
+        </p>
+        <p className="text-sm text-gray-500 mb-6">
+          Faça upgrade para o Pro e crie propostas ilimitadas.
+        </p>
+
+        {/* Plan card */}
+        <div className="border-2 border-[#1D9E75] rounded-xl p-5 mb-6 text-left">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-bold text-gray-900 text-base">Plano Pro</span>
+            <span className="bg-[#1D9E75]/10 text-[#1D9E75] text-xs font-semibold px-2 py-0.5 rounded-full">Recomendado</span>
+          </div>
+          <div className="flex items-baseline gap-1 mb-4">
+            <span className="text-3xl font-bold text-gray-900">R$39</span>
+            <span className="text-sm text-gray-500">/mês</span>
+          </div>
+          <ul className="space-y-2 text-sm text-gray-600">
+            {[
+              'Propostas ilimitadas',
+              'PDF com sua identidade visual',
+              'Follow-ups automáticos',
+              'Link público rastreável',
+            ].map(f => (
+              <li key={f} className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <Link
+          href="/configuracoes?tab=plano"
+          className="block w-full py-3 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors text-center mb-3"
+        >
+          Fazer upgrade para Pro
+        </Link>
+        <Link href="/propostas" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          Voltar para propostas
+        </Link>
+      </div>
     </div>
   )
 }

@@ -35,7 +35,8 @@ export async function proxy(request: NextRequest) {
     publicRoutes.includes(pathname) ||
     pathname.startsWith('/p/') ||
     pathname.startsWith('/api/p/') ||
-    pathname.startsWith('/api/track/')
+    pathname.startsWith('/api/track/') ||
+    pathname.startsWith('/api/webhooks/')
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/cadastro')
 
   if (!user && !isPublicRoute) {

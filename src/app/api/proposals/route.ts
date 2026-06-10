@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
+import { canCreateProposal } from '@/lib/plan'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
@@ -21,6 +22,19 @@ export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const planCheck = await canCreateProposal(user.id, supabase)
+  if (!planCheck.allowed) {
+    return NextResponse.json(
+      {
+        error: `Limite do plano Free atingido (${planCheck.used}/${planCheck.limit} propostas este mês). Faça upgrade para o plano Pro.`,
+        code: 'PLAN_LIMIT_REACHED',
+        used: planCheck.used,
+        limit: planCheck.limit,
+      },
+      { status: 403 }
+    )
+  }
 
   const body = await request.json()
   const { title, service_description, value, payment_terms, deadline_days, valid_until, client_id } = body
