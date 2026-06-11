@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import ProposalActions from '@/components/proposals/ProposalActions'
+import SendProposalModal from '@/components/proposals/SendProposalModal'
 import type {
   Section,
   TextSection,
@@ -235,10 +236,10 @@ export default async function ProposalDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) notFound()
 
-  const [proposalRes, eventsRes, followUpsRes] = await Promise.all([
+  const [proposalRes, eventsRes, followUpsRes, profileRes] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, created_at, sections, clients(id, name, email, phone)')
+      .select('id, title, service_description, value, total_value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -254,6 +255,11 @@ export default async function ProposalDetailPage({
       .eq('user_id', user.id)
       .is('sent_at', null)
       .order('scheduled_for', { ascending: true }),
+    supabase
+      .from('profiles')
+      .select('full_name, business_name')
+      .eq('id', user.id)
+      .single(),
   ])
 
   if (!proposalRes.data) notFound()
@@ -262,6 +268,9 @@ export default async function ProposalDetailPage({
   const events    = (eventsRes.data  ?? []) as EventRow[]
   const followUps = (followUpsRes.data ?? []) as FollowUpRow[]
   const sections  = Array.isArray(proposal.sections) ? proposal.sections : []
+  const profile   = profileRes.data
+  const freelancerName = profile?.business_name ?? profile?.full_name ?? 'Freelancer'
+  const proposalAny = proposalRes.data as Record<string, unknown>
 
   const statusCfg = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
   const ref       = proposal.proposal_number ?? '#' + proposal.token.substring(0, 8).toUpperCase()
@@ -333,7 +342,7 @@ export default async function ProposalDetailPage({
       )}
 
       {/* ── Actions + PDF (client component) ── */}
-      <div className="mb-6">
+      <div className="mb-6 flex flex-wrap items-center gap-3">
         <ProposalActions
           proposalId={proposal.id}
           token={proposal.token}
@@ -349,6 +358,15 @@ export default async function ProposalDetailPage({
             sections:            proposal.sections ?? [],
           }}
         />
+        {proposal.status === 'rascunho' && (
+          <SendProposalModal
+            proposalId={proposal.id}
+            proposalTitle={proposal.title}
+            clientEmail={(proposalAny.recipient_email as string | null) ?? client?.email ?? null}
+            clientName={(proposalAny.recipient_name as string | null) ?? client?.name ?? null}
+            freelancerName={freelancerName}
+          />
+        )}
       </div>
 
       {/* ── Sections panel ── */}
