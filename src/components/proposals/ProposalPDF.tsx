@@ -23,9 +23,12 @@ export type InstallmentsSection = {
 export type ClausesSection = {
   id: string; type: 'clauses'; title: string; items: string[]
 }
+export type ImageSection = {
+  id: string; type: 'image'; title: string; url: string
+}
 export type Section =
   | TextSection | ScopeSection | ItemsSection
-  | HoursSection | InstallmentsSection | ClausesSection
+  | HoursSection | InstallmentsSection | ClausesSection | ImageSection
 
 // ── Proposal / Profile types ──────────────────────────────────────────────────
 
@@ -81,6 +84,12 @@ function fmtDoc(type: string | null, value: string | null): string | null {
     return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`
   }
   return value
+}
+
+function parseNum(v: string | undefined | null): number {
+  if (!v) return 0
+  const n = parseFloat(String(v).replace(',', '.'))
+  return isNaN(n) ? 0 : n
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -240,6 +249,12 @@ const s = StyleSheet.create({
   tableRowLast: {
     flexDirection: 'row',
   },
+  tableRowTotal: {
+    flexDirection: 'row',
+    backgroundColor: '#f9fafb',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
   tableCell: {
     fontSize: 8.5,
     color: '#374151',
@@ -253,6 +268,18 @@ const s = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
     letterSpacing: 0.3,
+  },
+  tableCellBold: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#111827',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  sectionImage: {
+    width: '100%',
+    maxHeight: 320,
+    objectFit: 'contain',
   },
   valueBox: {
     borderRadius: 8,
@@ -311,8 +338,6 @@ const s = StyleSheet.create({
 })
 
 // ── Section renderers ─────────────────────────────────────────────────────────
-// Each section uses wrap={false} so title + content never split across pages.
-// Individual rows also carry wrap={false} for very long tables.
 
 function RenderText({ sec }: { sec: TextSection }) {
   return (
@@ -341,6 +366,8 @@ function RenderScope({ sec }: { sec: ScopeSection }) {
 }
 
 function RenderItems({ sec }: { sec: ItemsSection }) {
+  const rowTotals = sec.rows.map(r => parseNum(r.quantity) * parseNum(r.unit_price))
+  const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
@@ -350,22 +377,31 @@ function RenderItems({ sec }: { sec: ItemsSection }) {
         <View wrap={false as any} style={s.tableHeaderRow}>
           <Text style={[s.tableCellHeader, { flex: 3 }]}>DESCRIÇÃO</Text>
           <Text style={[s.tableCellHeader, { flex: 1 }]}>QTD</Text>
-          <Text style={[s.tableCellHeader, { flex: 1.5 }]}>VLR UNITÁRIO</Text>
+          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>VLR UNIT.</Text>
+          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>TOTAL</Text>
         </View>
         {sec.rows.map((row, i) => (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          <View key={i} wrap={false as any} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+          <View key={i} wrap={false as any} style={s.tableRow}>
             <Text style={[s.tableCell, { flex: 3 }]}>{row.description}</Text>
             <Text style={[s.tableCell, { flex: 1 }]}>{row.quantity}</Text>
-            <Text style={[s.tableCell, { flex: 1.5 }]}>{row.unit_price}</Text>
+            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{row.unit_price}</Text>
+            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(rowTotals[i])}</Text>
           </View>
         ))}
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={s.tableRowTotal}>
+          <Text style={[s.tableCellBold, { flex: 5.5 }]}>TOTAL GERAL</Text>
+          <Text style={[s.tableCellBold, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
+        </View>
       </View>
     </View>
   )
 }
 
 function RenderHours({ sec }: { sec: HoursSection }) {
+  const rowTotals = sec.rows.map(r => parseNum(r.hours) * parseNum(r.rate))
+  const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
@@ -375,16 +411,23 @@ function RenderHours({ sec }: { sec: HoursSection }) {
         <View wrap={false as any} style={s.tableHeaderRow}>
           <Text style={[s.tableCellHeader, { flex: 2 }]}>PERFIL</Text>
           <Text style={[s.tableCellHeader, { flex: 1 }]}>HORAS</Text>
-          <Text style={[s.tableCellHeader, { flex: 1.5 }]}>VLR/HORA</Text>
+          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>VLR/HORA</Text>
+          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>TOTAL</Text>
         </View>
         {sec.rows.map((row, i) => (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          <View key={i} wrap={false as any} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+          <View key={i} wrap={false as any} style={s.tableRow}>
             <Text style={[s.tableCell, { flex: 2 }]}>{row.profile}</Text>
             <Text style={[s.tableCell, { flex: 1 }]}>{row.hours}</Text>
-            <Text style={[s.tableCell, { flex: 1.5 }]}>{row.rate}</Text>
+            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{row.rate}</Text>
+            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(rowTotals[i])}</Text>
           </View>
         ))}
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={s.tableRowTotal}>
+          <Text style={[s.tableCellBold, { flex: 4.5 }]}>TOTAL GERAL</Text>
+          <Text style={[s.tableCellBold, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
+        </View>
       </View>
     </View>
   )
@@ -431,6 +474,19 @@ function RenderClauses({ sec }: { sec: ClausesSection }) {
   )
 }
 
+function RenderImage({ sec }: { sec: ImageSection }) {
+  if (!sec.url) return null
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      <View style={{ alignItems: 'center' }}>
+        <Image src={sec.url} style={s.sectionImage} />
+      </View>
+    </View>
+  )
+}
+
 function renderSection(sec: Section) {
   switch (sec.type) {
     case 'text':         return <RenderText key={sec.id} sec={sec} />
@@ -439,6 +495,7 @@ function renderSection(sec: Section) {
     case 'hours':        return <RenderHours key={sec.id} sec={sec} />
     case 'installments': return <RenderInstallments key={sec.id} sec={sec} />
     case 'clauses':      return <RenderClauses key={sec.id} sec={sec} />
+    case 'image':        return <RenderImage key={sec.id} sec={sec} />
   }
 }
 
@@ -455,20 +512,15 @@ export function ProposalPDFDocument({
 }) {
   const accent      = profile.accent_color ?? '#1D9E75'
   const displayName = profile.business_name ?? profile.full_name ?? 'Freelancer'
-  // proposal_number already contains the version (e.g. 20260611-RC001-v1)
-  // Only append version when falling back to the token hash
   const ref = proposal.proposal_number
     ?? ('#' + proposal.token.substring(0, 8).toUpperCase() + ' · v' + proposal.version)
   const today        = new Intl.DateTimeFormat('pt-BR').format(new Date())
   const docFormatted = fmtDoc(profile.document_type, profile.cpf_cnpj)
   const sections     = proposal.sections ?? []
 
-  // ── Cover page ──────────────────────────────────────────────────────────────
   const CoverPage = (
     <Page size="A4" style={{ fontFamily: 'Helvetica', backgroundColor: accent }}>
       <View style={{ flex: 1, paddingHorizontal: 48, paddingTop: 60, justifyContent: 'space-between' }}>
-
-        {/* Logo centered + identity */}
         <View style={{ alignItems: 'center', marginBottom: 40 }}>
           {profile.logo_url && (
             <Image
@@ -486,8 +538,6 @@ export function ProposalPDFDocument({
             {displayName}
           </Text>
         </View>
-
-        {/* Client + meta band at bottom */}
         <View style={{ backgroundColor: 'rgba(0,0,0,0.2)', marginHorizontal: -48, paddingHorizontal: 48, paddingVertical: 24 }}>
           <View style={{ flexDirection: 'row', gap: 40 }}>
             {proposal.clients && (
@@ -503,7 +553,6 @@ export function ProposalPDFDocument({
             )}
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>PROPOSTA</Text>
-              {/* ref already includes version for proposal_number; no separate "· vN" */}
               <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>{ref}</Text>
               <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)' }}>Emitida em {today}</Text>
               {proposal.valid_until && (
@@ -518,7 +567,6 @@ export function ProposalPDFDocument({
     </Page>
   )
 
-  // ── Fixed header ────────────────────────────────────────────────────────────
   const FixedHeader = (
     <View fixed style={s.pageHeader}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -526,14 +574,13 @@ export function ProposalPDFDocument({
         <Text style={s.headerName}>{displayName}</Text>
       </View>
       <View style={s.headerRight}>
-        {profile.phone         && <Text style={s.headerSub}>{profile.phone}</Text>}
+        {profile.phone          && <Text style={s.headerSub}>{profile.phone}</Text>}
         {profile.email_business && <Text style={s.headerSub}>{profile.email_business}</Text>}
-        {profile.website       && <Text style={s.headerSub}>{profile.website}</Text>}
+        {profile.website        && <Text style={s.headerSub}>{profile.website}</Text>}
       </View>
     </View>
   )
 
-  // ── Fixed footer ────────────────────────────────────────────────────────────
   const FixedFooter = (
     <View fixed style={s.pageFooter}>
       <Text style={s.footerPageNum} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
@@ -541,15 +588,12 @@ export function ProposalPDFDocument({
     </View>
   )
 
-  // ── Content + acceptance (single page stream) ────────────────────────────────
-  // Value box and acceptance block flow together — no unnecessary page break.
   const ContentPage = (
     <Page size="A4" style={s.contentPage}>
       {FixedHeader}
       {FixedFooter}
 
       <View style={s.content}>
-        {/* Client + freelancer card */}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.clientCard}>
           {proposal.clients && (
@@ -572,7 +616,7 @@ export function ProposalPDFDocument({
           </View>
         </View>
 
-        {/* Legacy service_description (shown only when no sections) */}
+        {/* Legacy service_description */}
         {proposal.service_description && sections.length === 0 && (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <View wrap={false as any} style={s.sectionBlock}>
@@ -581,10 +625,8 @@ export function ProposalPDFDocument({
           </View>
         )}
 
-        {/* Dynamic sections */}
         {sections.map(sec => renderSection(sec))}
 
-        {/* Payment terms / deadline */}
         {(proposal.deadline_days !== null || proposal.payment_terms) && (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <View wrap={false as any} style={{ flexDirection: 'row', gap: 24, marginBottom: 18, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f3f4f6' }}>
@@ -605,14 +647,12 @@ export function ProposalPDFDocument({
           </View>
         )}
 
-        {/* Value total box */}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={[s.valueBox, { backgroundColor: accent }]}>
           <Text style={s.valueLabel}>VALOR TOTAL</Text>
           <Text style={s.valueAmount}>{fmtBRL(proposal.value)}</Text>
         </View>
 
-        {/* Acceptance block — flows directly after value box, no separate page */}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={{ paddingTop: 20, borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
           <Text style={[s.acceptTitle, { borderLeftWidth: 3, borderLeftColor: accent, paddingLeft: 10 }]}>

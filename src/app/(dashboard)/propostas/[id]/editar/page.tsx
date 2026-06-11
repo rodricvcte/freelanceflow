@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 // ── Section types ─────────────────────────────────────────────────────────────
 
-type SectionType = 'text' | 'scope' | 'items' | 'hours' | 'installments' | 'clauses'
+type SectionType = 'text' | 'scope' | 'items' | 'hours' | 'installments' | 'clauses' | 'image'
 
 type TextSection         = { id: string; type: 'text';         title: string; content: string }
 type ScopeSection        = { id: string; type: 'scope';        title: string; items: string[] }
@@ -14,7 +14,8 @@ type ItemsSection        = { id: string; type: 'items';        title: string; ro
 type HoursSection        = { id: string; type: 'hours';        title: string; rows: Array<{ profile: string; hours: string; rate: string }> }
 type InstallmentsSection = { id: string; type: 'installments'; title: string; rows: Array<{ description: string; percentage: string; condition: string }> }
 type ClausesSection      = { id: string; type: 'clauses';      title: string; items: string[] }
-type Section = TextSection | ScopeSection | ItemsSection | HoursSection | InstallmentsSection | ClausesSection
+type ImageSection        = { id: string; type: 'image';        title: string; url: string }
+type Section = TextSection | ScopeSection | ItemsSection | HoursSection | InstallmentsSection | ClausesSection | ImageSection
 
 type Client = { id: string; name: string; email: string | null; phone: string | null }
 
@@ -27,6 +28,7 @@ const SECTION_META: Record<SectionType, { label: string; description: string }> 
   hours:        { label: 'Tabela de horas',  description: 'Perfil, horas e valor/hora' },
   installments: { label: 'Parcelas',         description: 'Descrição, percentual e condição' },
   clauses:      { label: 'Cláusulas',        description: 'Lista numerada de cláusulas' },
+  image:        { label: 'Imagem',           description: 'Foto ou imagem do projeto' },
 }
 
 function createSection(type: SectionType): Section {
@@ -38,7 +40,20 @@ function createSection(type: SectionType): Section {
     case 'hours':        return { id, type, title: '', rows: [{ profile: '', hours: '', rate: '' }] }
     case 'installments': return { id, type, title: '', rows: [{ description: '', percentage: '', condition: '' }] }
     case 'clauses':      return { id, type, title: '', items: [''] }
+    case 'image':        return { id, type, title: '', url: '' }
   }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function parseNum(v: string | undefined | null): number {
+  if (!v) return 0
+  const n = parseFloat(String(v).replace(',', '.'))
+  return isNaN(n) ? 0 : n
+}
+
+function fmtBRL(v: number): string {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
 }
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
@@ -188,6 +203,146 @@ function TableEditor<T extends Record<string, string>>({
   )
 }
 
+function ImageEditor({ sec, onUpdate }: { sec: ImageSection; onUpdate: (p: Partial<ImageSection>) => void }) {
+  const [uploading, setUploading] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setErr(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/proposals/upload-image', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      onUpdate({ url: data.url })
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Erro ao enviar imagem')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {sec.url ? (
+        <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={sec.url} alt="Preview" className="w-full max-h-64 object-contain rounded-lg border border-gray-100" />
+          <button type="button" onClick={() => onUpdate({ url: '' })}
+            className="absolute top-2 right-2 p-1.5 bg-white border border-gray-200 rounded-lg text-gray-400 hover:text-red-500 transition-colors shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      ) : (
+        <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 cursor-pointer hover:border-[#1D9E75] hover:bg-[#1D9E75]/5 transition-colors">
+          {uploading ? (
+            <div className="w-6 h-6 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm text-gray-500">Clique para enviar imagem</p>
+              <p className="text-xs text-gray-400 mt-1">JPG, PNG ou WebP · máx. 5 MB</p>
+            </>
+          )}
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFile} className="hidden" disabled={uploading} />
+        </label>
+      )}
+      {err && <p className="text-xs text-red-600">{err}</p>}
+    </div>
+  )
+}
+
+function ItemsTableEditor({ rows, onChange }: {
+  rows: Array<{ description: string; quantity: string; unit_price: string }>
+  onChange: (rows: Array<{ description: string; quantity: string; unit_price: string }>) => void
+}) {
+  const setCell  = (ri: number, key: string, v: string) => onChange(rows.map((r, i) => i === ri ? { ...r, [key]: v } : r))
+  const addRow   = () => onChange([...rows, { description: '', quantity: '', unit_price: '' }])
+  const removeRow = (i: number) => onChange(rows.filter((_, idx) => idx !== i))
+  const rowTotals = rows.map(r => parseNum(r.quantity) * parseNum(r.unit_price))
+  const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2 px-1">
+        <span style={{ flex: 3 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Descrição</span>
+        <span style={{ flex: 1 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Qtd</span>
+        <span style={{ flex: 1.5 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Vlr unitário</span>
+        <span style={{ flex: 1.5 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide text-right">Total</span>
+        <span className="w-6" />
+      </div>
+      {rows.map((row, ri) => (
+        <div key={ri} className="flex gap-2 items-center">
+          <input type="text" value={row.description} onChange={e => setCell(ri, 'description', e.target.value)} placeholder="Item..." style={{ flex: 3 }} className={inputCls} />
+          <input type="text" value={row.quantity} onChange={e => setCell(ri, 'quantity', e.target.value)} placeholder="1" style={{ flex: 1 }} className={inputCls} />
+          <input type="text" value={row.unit_price} onChange={e => setCell(ri, 'unit_price', e.target.value)} placeholder="R$ 0,00" style={{ flex: 1.5 }} className={inputCls} />
+          <span style={{ flex: 1.5 }} className="text-sm text-right text-gray-600 tabular-nums px-1 shrink-0">{fmtBRL(rowTotals[ri])}</span>
+          <button type="button" onClick={() => removeRow(ri)} disabled={rows.length === 1}
+            className="text-gray-300 hover:text-red-400 disabled:opacity-20 transition-colors w-6 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      ))}
+      <div className="flex items-center gap-2 px-1 pt-2 border-t border-gray-100">
+        <button type="button" onClick={addRow} className="text-xs text-[#1D9E75] font-medium hover:underline flex-1 text-left">+ Adicionar linha</button>
+        <span className="text-xs font-semibold text-gray-700 tabular-nums">Total: {fmtBRL(grandTotal)}</span>
+        <span className="w-6" />
+      </div>
+    </div>
+  )
+}
+
+function HoursTableEditor({ rows, onChange }: {
+  rows: Array<{ profile: string; hours: string; rate: string }>
+  onChange: (rows: Array<{ profile: string; hours: string; rate: string }>) => void
+}) {
+  const setCell  = (ri: number, key: string, v: string) => onChange(rows.map((r, i) => i === ri ? { ...r, [key]: v } : r))
+  const addRow   = () => onChange([...rows, { profile: '', hours: '', rate: '' }])
+  const removeRow = (i: number) => onChange(rows.filter((_, idx) => idx !== i))
+  const rowTotals = rows.map(r => parseNum(r.hours) * parseNum(r.rate))
+  const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2 px-1">
+        <span style={{ flex: 2 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Perfil</span>
+        <span style={{ flex: 1 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Horas</span>
+        <span style={{ flex: 1.5 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Vlr/hora</span>
+        <span style={{ flex: 1.5 }} className="text-xs font-semibold text-gray-400 uppercase tracking-wide text-right">Total</span>
+        <span className="w-6" />
+      </div>
+      {rows.map((row, ri) => (
+        <div key={ri} className="flex gap-2 items-center">
+          <input type="text" value={row.profile} onChange={e => setCell(ri, 'profile', e.target.value)} placeholder="Ex: Dev Senior" style={{ flex: 2 }} className={inputCls} />
+          <input type="text" value={row.hours} onChange={e => setCell(ri, 'hours', e.target.value)} placeholder="40" style={{ flex: 1 }} className={inputCls} />
+          <input type="text" value={row.rate} onChange={e => setCell(ri, 'rate', e.target.value)} placeholder="R$ 100" style={{ flex: 1.5 }} className={inputCls} />
+          <span style={{ flex: 1.5 }} className="text-sm text-right text-gray-600 tabular-nums px-1 shrink-0">{fmtBRL(rowTotals[ri])}</span>
+          <button type="button" onClick={() => removeRow(ri)} disabled={rows.length === 1}
+            className="text-gray-300 hover:text-red-400 disabled:opacity-20 transition-colors w-6 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      ))}
+      <div className="flex items-center gap-2 px-1 pt-2 border-t border-gray-100">
+        <button type="button" onClick={addRow} className="text-xs text-[#1D9E75] font-medium hover:underline flex-1 text-left">+ Adicionar linha</button>
+        <span className="text-xs font-semibold text-gray-700 tabular-nums">Total: {fmtBRL(grandTotal)}</span>
+        <span className="w-6" />
+      </div>
+    </div>
+  )
+}
+
 function SectionEditor({ section, index, total, onUpdate, onRemove, onMoveUp, onMoveDown }: {
   section: Section; index: number; total: number
   onUpdate: (patch: Partial<Section>) => void
@@ -202,20 +357,10 @@ function SectionEditor({ section, index, total, onUpdate, onRemove, onMoveUp, on
         <ListEditor items={section.items} onChange={items => onUpdate({ items })} placeholder="Item do escopo..." />
       )}
       {section.type === 'items' && (
-        <TableEditor rows={section.rows} onChange={rows => onUpdate({ rows })}
-          columns={[
-            { key: 'description', label: 'Descrição',   placeholder: 'Item...',  flex: 3 },
-            { key: 'quantity',    label: 'Qtd',          placeholder: '1',        flex: 1 },
-            { key: 'unit_price',  label: 'Vlr unitário', placeholder: 'R$ 0,00', flex: 1.5 },
-          ]} />
+        <ItemsTableEditor rows={section.rows} onChange={rows => onUpdate({ rows })} />
       )}
       {section.type === 'hours' && (
-        <TableEditor rows={section.rows} onChange={rows => onUpdate({ rows })}
-          columns={[
-            { key: 'profile', label: 'Perfil',   placeholder: 'Ex: Dev Senior', flex: 2 },
-            { key: 'hours',   label: 'Horas',    placeholder: '40',              flex: 1 },
-            { key: 'rate',    label: 'Vlr/hora', placeholder: 'R$ 100',         flex: 1.5 },
-          ]} />
+        <HoursTableEditor rows={section.rows} onChange={rows => onUpdate({ rows })} />
       )}
       {section.type === 'installments' && (
         <TableEditor rows={section.rows} onChange={rows => onUpdate({ rows })}
@@ -227,6 +372,9 @@ function SectionEditor({ section, index, total, onUpdate, onRemove, onMoveUp, on
       )}
       {section.type === 'clauses' && (
         <NumberedListEditor items={section.items} onChange={items => onUpdate({ items })} />
+      )}
+      {section.type === 'image' && (
+        <ImageEditor sec={section} onUpdate={p => onUpdate(p)} />
       )}
     </SectionShell>
   )
