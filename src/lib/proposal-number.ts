@@ -1,34 +1,54 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-export function buildProposalNumber(
-  createdAt: string,
-  freelancerCode: string,
-  version: number
-): string {
-  const date = createdAt.split('T')[0].replace(/-/g, '')
-  return `${date}-${freelancerCode}-v${version}`
+// ─── Format: CODE-YYYYMMDD-SEQ-vN ────────────────────────────────────────────
+// Example: RC001-20260611-001-v1
+
+/**
+ * Bump version suffix: RC001-20260611-001-v1 → RC001-20260611-001-v2
+ * Handles old formats gracefully (appends -v2 if no version found).
+ */
+export function bumpProposalVersion(proposalNumber: string | null): string | null {
+  if (!proposalNumber) return null
+  const match = proposalNumber.match(/^(.+)-v(\d+)$/)
+  if (!match) return `${proposalNumber}-v2`
+  return `${match[1]}-v${parseInt(match[2], 10) + 1}`
 }
 
-// Builds a proposal_number guaranteed unique in the DB.
-// If the base (date-code-v1) is taken, appends -2, -3, … until free.
-export async function buildUniqueProposalNumber(
-  createdAt: string,
+/**
+ * Generates a brand-new proposal_number: CODE-YYYYMMDD-SEQ-v1
+ *
+ * SEQ = (count of already-numbered proposals this freelancer has on this UTC day) + 1
+ * A uniqueness check loops up to 999 to survive race conditions.
+ */
+export async function buildNewProposalNumber(
+  userId: string,
   freelancerCode: string,
-  version: number,
+  createdAt: string,          // ISO string of the new proposal's created_at
   supabase: SupabaseClient
 ): Promise<string> {
-  const base = buildProposalNumber(createdAt, freelancerCode, version)
+  const dateStr  = createdAt.split('T')[0].replace(/-/g, '')   // YYYYMMDD
+  const dayStart = `${createdAt.split('T')[0]}T00:00:00.000Z`
 
-  const { data: taken } = await supabase
+  // Next-day boundary (cleaner than 23:59:59.999)
+  const next = new Date(createdAt)
+  next.setUTCDate(next.getUTCDate() + 1)
+  next.setUTCHours(0, 0, 0, 0)
+  const dayEnd = next.toISOString()
+
+  // Count proposals already numbered for this user on this UTC day
+  const { count } = await supabase
     .from('proposals')
-    .select('id')
-    .eq('proposal_number', base)
-    .maybeSingle()
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', dayStart)
+    .lt('created_at', dayEnd)
+    .not('proposal_number', 'is', null)
 
-  if (!taken) return base
+  let seq = (count ?? 0) + 1
 
-  for (let i = 2; i <= 999; i++) {
-    const candidate = `${base}-${i}`
+  // Uniqueness loop (handles rare race condition)
+  for (let attempt = 0; attempt < 999; attempt++, seq++) {
+    const candidate = `${freelancerCode}-${dateStr}-${String(seq).padStart(3, '0')}-v1`
     const { data } = await supabase
       .from('proposals')
       .select('id')
@@ -37,5 +57,9 @@ export async function buildUniqueProposalNumber(
     if (!data) return candidate
   }
 
-  return base
+  // Should never reach here
+  return `${freelancerCode}-${dateStr}-${String(seq).padStart(3, '0')}-v1`
 }
+
+// Keep old export name as alias for any callers not yet updated
+export { buildNewProposalNumber as buildUniqueProposalNumber }

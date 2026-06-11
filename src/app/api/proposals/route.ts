@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { canCreateProposal } from '@/lib/plan'
-import { buildUniqueProposalNumber } from '@/lib/proposal-number'
+import { buildNewProposalNumber } from '@/lib/proposal-number'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   const updates: Record<string, unknown> = {}
 
   if (profile?.freelancer_code) {
-    updates.proposal_number = await buildUniqueProposalNumber(data.created_at, profile.freelancer_code, 1, supabase)
+    updates.proposal_number = await buildNewProposalNumber(user.id, profile.freelancer_code, data.created_at, supabase)
   }
 
   if (profile) {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { buildProposalNumber } from '@/lib/proposal-number'
+import { bumpProposalVersion, buildNewProposalNumber } from '@/lib/proposal-number'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 
 export const runtime = 'nodejs'
@@ -65,7 +65,7 @@ export async function PUT(
   const [{ data: current }, { data: profile }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, version, created_at')
+      .select('id, version, created_at, proposal_number')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -89,9 +89,12 @@ export async function PUT(
   }
 
   const newVersion = (current.version ?? 1) + 1
-  const proposalNumber = profile?.freelancer_code
-    ? buildProposalNumber(current.created_at, profile.freelancer_code, newVersion)
-    : null
+  // Bump version on existing number, or generate a fresh one if none exists yet
+  const proposalNumber = current.proposal_number
+    ? bumpProposalVersion(current.proposal_number)
+    : profile?.freelancer_code
+      ? await buildNewProposalNumber(user.id, profile.freelancer_code, current.created_at, supabase)
+      : null
 
   const snapshotProfile = profile ? {
     full_name:      profile.full_name,
