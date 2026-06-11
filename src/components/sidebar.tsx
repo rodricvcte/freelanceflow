@@ -60,17 +60,21 @@ export default function Sidebar() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const pathname = usePathname()
 
-  useEffect(() => {
+  function fetchUserInfo() {
     Promise.all([
-      fetch('/api/profile').then(r => r.json()).catch(() => ({})),
-      fetch('/api/subscriptions').then(r => r.json()).catch(() => ({})),
+      fetch('/api/profile',       { cache: 'no-store' }).then(r => r.json()).catch(() => ({})),
+      fetch('/api/subscriptions', { cache: 'no-store' }).then(r => r.json()).catch(() => ({})),
     ]).then(([profile, sub]) => {
       setUserInfo({
         name:  (profile.business_name ?? profile.full_name ?? '') as string,
         isPro: sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing'),
       })
     })
-  }, [])
+  }
+
+  useEffect(() => {
+    fetchUserInfo()
+  }, [pathname]) // re-busca a cada navegação
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
