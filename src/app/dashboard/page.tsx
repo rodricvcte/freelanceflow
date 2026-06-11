@@ -16,18 +16,16 @@ type ProposalRow = {
   status: string
   created_at: string
   sent_at: string | null
+  proposal_number: string | null
   clients: { name: string } | { name: string }[] | null
 }
 
-type FollowUpRow = {
-  id: string
-  type: 'email' | 'whatsapp'
-  proposals: { id: string; title: string } | { id: string; title: string }[] | null
-}
+const STATUS_ORDER = [
+  'rascunho', 'enviada', 'visualizada', 'aprovada', 'reprovada', 'expirada', 'cancelada',
+] as const
+type StatusKey = (typeof STATUS_ORDER)[number]
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<StatusKey, { label: string; textCls: string; bgCls: string; dotCls: string }> = {
   rascunho:    { label: 'Rascunho',    textCls: 'text-gray-600',    bgCls: 'bg-gray-100',    dotCls: 'bg-gray-400'    },
   enviada:     { label: 'Enviada',     textCls: 'text-blue-700',    bgCls: 'bg-blue-100',    dotCls: 'bg-blue-500'    },
   visualizada: { label: 'Visualizada', textCls: 'text-yellow-700',  bgCls: 'bg-yellow-100',  dotCls: 'bg-yellow-500'  },
@@ -35,17 +33,22 @@ const STATUS_CONFIG = {
   reprovada:   { label: 'Reprovada',   textCls: 'text-red-700',     bgCls: 'bg-red-100',     dotCls: 'bg-red-500'     },
   expirada:    { label: 'Expirada',    textCls: 'text-orange-700',  bgCls: 'bg-orange-100',  dotCls: 'bg-orange-500'  },
   cancelada:   { label: 'Cancelada',   textCls: 'text-red-900',     bgCls: 'bg-red-200',     dotCls: 'bg-red-800'     },
-} as const
+}
 
-type StatusKey = keyof typeof STATUS_CONFIG
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmtBRL(v: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
 }
 
-function fmtDate(iso: string) {
-  const [y, m, d] = iso.split('T')[0].split('-').map(Number)
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(y, m - 1, d))
+function fmtFullDate(date: Date): string {
+  const raw = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date)
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
 }
 
 function daysSince(iso: string | null): number {
@@ -67,31 +70,17 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const endOfToday = new Date()
-  endOfToday.setHours(23, 59, 59, 999)
-
-  // Parallel fetches
-  const [profileRes, proposalsRes, followUpsRes, subRes] = await Promise.all([
+  const [profileRes, proposalsRes, subRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('full_name, business_name')
       .eq('id', user.id)
       .single(),
-
     supabase
       .from('proposals')
-      .select('id, title, value, status, created_at, sent_at, clients(name)')
+      .select('id, title, value, status, created_at, sent_at, proposal_number, clients(name)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
-
-    supabase
-      .from('follow_ups')
-      .select('id, type, proposals(id, title)')
-      .eq('user_id', user.id)
-      .is('sent_at', null)
-      .lte('scheduled_for', endOfToday.toISOString())
-      .order('scheduled_for', { ascending: true }),
-
     supabase
       .from('subscriptions')
       .select('plan, status')
@@ -101,7 +90,6 @@ export default async function DashboardPage() {
 
   const profile   = profileRes.data
   const proposals = (proposalsRes.data ?? []) as ProposalRow[]
-  const followUps = (followUpsRes.data ?? []) as FollowUpRow[]
   const sub       = subRes.data
 
   const firstName = profile?.business_name?.split(' ')[0]
@@ -109,51 +97,70 @@ export default async function DashboardPage() {
     ?? 'Freelancer'
 
   const isPro = !!sub && sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
-  const monthStart = new Date()
-  monthStart.setDate(1)
-  monthStart.setHours(0, 0, 0, 0)
-  const usedThisMonth = proposals.filter(p => new Date(p.created_at) >= monthStart).length
-  const showUpgradeBanner = !isPro && usedThisMonth >= 4
 
-  // ── Derived counts ──────────────────────────────────────────────────────────
+  const now         = new Date()
+  const monthStart  = new Date(now.getFullYear(), now.getMonth(), 1)
+  const ago30       = new Date(now.getTime() - 30 * 86_400_000)
+
+  // ── Derived metrics ──────────────────────────────────────────────────────────
   const counts = proposals.reduce<Record<string, number>>((acc, p) => {
     acc[p.status] = (acc[p.status] ?? 0) + 1
     return acc
   }, {})
 
-  const totalApproved = proposals
+  const approvedCount      = counts['aprovada'] ?? 0
+  const totalApprovedValue = proposals
     .filter(p => p.status === 'aprovada')
     .reduce((sum, p) => sum + (p.value ?? 0), 0)
 
-  const recentProposals = proposals.slice(0, 5)
+  const openCount = (counts['enviada'] ?? 0) + (counts['visualizada'] ?? 0)
+
+  const recentClosed  = proposals.filter(p => new Date(p.created_at) >= ago30 && (p.status === 'aprovada' || p.status === 'reprovada'))
+  const approvalRate  = recentClosed.length > 0
+    ? Math.round((recentClosed.filter(p => p.status === 'aprovada').length / recentClosed.length) * 100)
+    : null
+
+  const usedThisMonth    = proposals.filter(p => new Date(p.created_at) >= monthStart).length
+  const showUpgradeBanner = !isPro && usedThisMonth >= 4
 
   // ── Attention items ─────────────────────────────────────────────────────────
   const sentNoView = proposals.filter(p =>
     p.status === 'enviada' && daysSince(p.sent_at ?? p.created_at) >= 5
   )
   const viewedNoResponse = proposals.filter(p =>
-    p.status === 'visualizada' && daysSince(p.created_at) >= 2
+    p.status === 'visualizada' && daysSince(p.sent_at ?? p.created_at) >= 2
   )
-  const totalAttention = sentNoView.length + viewedNoResponse.length + followUps.length
+  const totalAttention = sentNoView.length + viewedNoResponse.length
 
-  // ── Status card rows ────────────────────────────────────────────────────────
-  const statusCards: StatusKey[] = ['rascunho', 'enviada', 'visualizada', 'aprovada', 'reprovada', 'expirada', 'cancelada']
+  // ── Recent proposals ────────────────────────────────────────────────────────
+  const recentProposals = proposals.slice(0, 5)
 
   return (
     <div className="p-6 md:p-8 max-w-6xl">
 
-      {/* ── Upgraded banner (client, lê URL param) ── */}
+      {/* Upgraded banner — client, lê URL param */}
       <Suspense fallback={null}>
         <UpgradedBanner />
       </Suspense>
 
-      {/* ── Greeting ── */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Olá, {firstName}!</h1>
-        <p className="text-sm text-gray-500 mt-1">Aqui está o resumo das suas propostas.</p>
+      {/* ── 1. Header ──────────────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Olá, {firstName}!</h1>
+          <p className="text-sm text-gray-500 mt-1">{fmtFullDate(now)}</p>
+        </div>
+        <Link
+          href="/propostas/new"
+          className="shrink-0 flex items-center gap-2 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Nova Proposta
+        </Link>
       </div>
 
-      {/* ── Upgrade banner (free + 4+ propostas no mês) ── */}
+      {/* Upgrade banner */}
       {showUpgradeBanner && (
         <div className="mb-6 flex items-center justify-between gap-4 px-5 py-4 bg-amber-50 border border-amber-200 rounded-xl">
           <div className="flex items-start gap-3 min-w-0">
@@ -174,74 +181,54 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* ── Featured stat: Valor aprovado ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <div className="bg-[#1D9E75] rounded-2xl p-6 text-white shadow-sm sm:col-span-1">
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-100 mb-2">Valor aprovado</p>
-          <p className="text-3xl font-extrabold leading-none">{fmtBRL(totalApproved)}</p>
+      {/* ── 2. Métricas ────────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+        {/* Valor aprovado */}
+        <div className="bg-[#1D9E75] rounded-xl p-5 text-white shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-100 mb-2">Valor aprovado</p>
+          <p className="text-xl font-extrabold leading-tight tabular-nums">{fmtBRL(totalApprovedValue)}</p>
           <p className="text-xs text-emerald-200 mt-2">
-            {counts['aprovada'] ?? 0} proposta{(counts['aprovada'] ?? 0) !== 1 ? 's' : ''} aprovada{(counts['aprovada'] ?? 0) !== 1 ? 's' : ''}
+            {approvedCount} proposta{approvedCount !== 1 ? 's' : ''} aprovada{approvedCount !== 1 ? 's' : ''}
           </p>
         </div>
 
-        <div className="sm:col-span-2 grid grid-cols-2 gap-3">
-          {(['enviada', 'visualizada', 'reprovada', 'expirada'] as StatusKey[]).map(key => {
-            const cfg = STATUS_CONFIG[key]
-            const count = counts[key] ?? 0
-            return (
-              <Link
-                key={key}
-                href={`/propostas?status=${key}`}
-                className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <p className="text-xs text-gray-400 mb-1">{cfg.label}</p>
-                <div className="flex items-end gap-2">
-                  <span className={`text-2xl font-bold ${cfg.textCls}`}>{count}</span>
-                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full mb-0.5 ${cfg.bgCls} ${cfg.textCls}`}>
-                    {count === 1 ? 'proposta' : 'propostas'}
-                  </span>
-                </div>
-              </Link>
-            )
-          })}
+        {/* Propostas abertas */}
+        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Propostas abertas</p>
+          <p className="text-2xl font-extrabold text-gray-900 leading-tight">{openCount}</p>
+          <p className="text-xs text-gray-400 mt-2">enviadas + visualizadas</p>
         </div>
+
+        {/* Taxa de aprovação */}
+        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Taxa de aprovação</p>
+          <p className="text-2xl font-extrabold text-gray-900 leading-tight">
+            {approvalRate !== null ? `${approvalRate}%` : '—'}
+          </p>
+          <p className="text-xs text-gray-400 mt-2">últimos 30 dias</p>
+        </div>
+
+        {/* Criadas este mês */}
+        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Criadas este mês</p>
+          <p className="text-2xl font-extrabold text-gray-900 leading-tight">{usedThisMonth}</p>
+          <p className="text-xs text-gray-400 mt-2">
+            {isPro ? 'plano pro: ilimitado' : `plano free: ${usedThisMonth} / 5`}
+          </p>
+        </div>
+
       </div>
 
-      {/* ── Remaining status counts ── */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        {(['rascunho', 'cancelada'] as StatusKey[]).map(key => {
-          const cfg = STATUS_CONFIG[key]
-          const count = counts[key] ?? 0
-          return (
-            <Link
-              key={key}
-              href={`/propostas?status=${key}`}
-              className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <p className="text-xs text-gray-400 mb-1">{cfg.label}</p>
-              <span className={`text-2xl font-bold ${cfg.textCls}`}>{count}</span>
-            </Link>
-          )
-        })}
-        {/* Total geral */}
-        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
-          <p className="text-xs text-gray-400 mb-1">Total</p>
-          <span className="text-2xl font-bold text-gray-900">{proposals.length}</span>
-        </div>
-      </div>
-
-      {/* ── Two-column bottom ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      {/* ── 3. Duas colunas ─────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
         {/* Atenção necessária */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <div>
-              <h2 className="text-sm font-semibold text-gray-900">Atenção necessária</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Propostas que precisam de acompanhamento</p>
-            </div>
+            <h2 className="text-sm font-semibold text-gray-900">Atenção necessária</h2>
             {totalAttention > 0 && (
-              <span className="w-5 h-5 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center shrink-0">
+              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center">
                 {totalAttention}
               </span>
             )}
@@ -250,18 +237,23 @@ export default async function DashboardPage() {
           {totalAttention === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center px-5">
               <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-sm text-gray-500">Tudo em dia!</p>
+              <p className="text-sm font-medium text-gray-700">Tudo em dia!</p>
+              <p className="text-xs text-gray-400 mt-1">Nenhuma proposta precisa de atenção</p>
             </div>
           ) : (
             <ul className="divide-y divide-gray-50">
               {sentNoView.map(p => (
                 <li key={p.id}>
-                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-amber-50 transition-colors">
-                    <div className="w-2 h-2 rounded-full bg-blue-400 shrink-0 mt-1.5" />
+                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-amber-50/70 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
@@ -269,106 +261,120 @@ export default async function DashboardPage() {
                         {clientName(p) ? ` · ${clientName(p)}` : ''}
                       </p>
                     </div>
-                    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full shrink-0 font-medium">Enviada</span>
                   </Link>
                 </li>
               ))}
               {viewedNoResponse.map(p => (
                 <li key={p.id}>
-                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-amber-50 transition-colors">
-                    <div className="w-2 h-2 rounded-full bg-yellow-400 shrink-0 mt-1.5" />
+                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-blue-50/70 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Visualizada há {daysSince(p.created_at)} dias sem resposta
+                        Visualizada há {daysSince(p.sent_at ?? p.created_at)} dias sem resposta
                         {clientName(p) ? ` · ${clientName(p)}` : ''}
                       </p>
                     </div>
-                    <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full shrink-0 font-medium">Visualizada</span>
                   </Link>
                 </li>
               ))}
-              {followUps.map(fu => {
-                const prop = Array.isArray(fu.proposals) ? fu.proposals[0] : fu.proposals
-                return (
-                  <li key={fu.id}>
-                    <Link href={prop ? `/propostas/${prop.id}` : '/propostas'} className="flex items-start gap-3 px-5 py-3.5 hover:bg-amber-50 transition-colors">
-                      <div className="w-2 h-2 rounded-full bg-orange-400 shrink-0 mt-1.5" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {prop?.title ?? 'Follow-up pendente'}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Follow-up via {fu.type === 'whatsapp' ? 'WhatsApp' : 'e-mail'} para hoje
-                        </p>
-                      </div>
-                      <span className="text-xs text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full shrink-0 font-medium">Hoje</span>
-                    </Link>
-                  </li>
-                )
-              })}
             </ul>
           )}
         </div>
 
-        {/* Propostas recentes */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <div>
-              <h2 className="text-sm font-semibold text-gray-900">Propostas recentes</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Últimas criadas</p>
-            </div>
-            <Link href="/propostas" className="text-xs text-[#1D9E75] font-medium hover:underline shrink-0">
-              Ver todas →
-            </Link>
+        {/* Por status */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div className="px-5 py-4 border-b border-gray-50">
+            <h2 className="text-sm font-semibold text-gray-900">Por status</h2>
           </div>
-
-          {recentProposals.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-center px-5">
-              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <p className="text-sm text-gray-500">Nenhuma proposta ainda</p>
-              <Link href="/propostas/new" className="mt-3 text-xs font-medium text-[#1D9E75] hover:underline">
-                Criar primeira proposta →
-              </Link>
-            </div>
-          ) : (
-            <ul className="divide-y divide-gray-50">
-              {recentProposals.map(p => {
-                const cfg = STATUS_CONFIG[p.status as StatusKey] ?? STATUS_CONFIG.rascunho
-                const name = clientName(p)
-                return (
-                  <li key={p.id}>
-                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors">
-                      <div className={`w-2 h-2 rounded-full ${cfg.dotCls} shrink-0 mt-1.5`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {name ? `${name} · ` : ''}{fmtDate(p.created_at)}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        {p.value !== null && (
-                          <span className="text-xs font-semibold text-gray-700 tabular-nums">
-                            {fmtBRL(p.value)}
-                          </span>
-                        )}
-                        <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${cfg.bgCls} ${cfg.textCls}`}>
-                          {cfg.label}
-                        </span>
-                      </div>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
+          <ul className="divide-y divide-gray-50">
+            {STATUS_ORDER.map(key => {
+              const cfg   = STATUS_CONFIG[key]
+              const count = counts[key] ?? 0
+              return (
+                <li key={key}>
+                  <Link
+                    href={`/propostas?status=${key}`}
+                    className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                      {cfg.label}
+                    </span>
+                    <span className={`text-sm font-bold tabular-nums ${count > 0 ? 'text-gray-900' : 'text-gray-300'}`}>
+                      {count}
+                    </span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
         </div>
 
       </div>
+
+      {/* ── 4. Propostas recentes ───────────────────────────────────────────────── */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+          <h2 className="text-sm font-semibold text-gray-900">Propostas recentes</h2>
+          <Link href="/propostas" className="text-xs text-[#1D9E75] font-medium hover:underline shrink-0">
+            Ver todas →
+          </Link>
+        </div>
+
+        {recentProposals.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center px-5">
+            <p className="text-sm text-gray-500">Nenhuma proposta ainda</p>
+            <Link href="/propostas/new" className="mt-3 text-xs font-medium text-[#1D9E75] hover:underline">
+              Criar primeira proposta →
+            </Link>
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-50">
+            {recentProposals.map(p => {
+              const cfg  = STATUS_CONFIG[p.status as StatusKey] ?? STATUS_CONFIG.rascunho
+              const name = clientName(p)
+              return (
+                <li key={p.id}>
+                  <Link href={`/propostas/${p.id}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                        {name && (
+                          <span className="text-xs text-gray-400 truncate">{name}</span>
+                        )}
+                        {p.proposal_number && (
+                          <>
+                            {name && <span className="text-gray-300 text-xs shrink-0">·</span>}
+                            <span className="font-mono text-[11px] text-[#1D9E75] font-semibold shrink-0">
+                              {p.proposal_number}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {p.value !== null && (
+                        <span className="text-sm font-semibold text-gray-700 tabular-nums">
+                          {fmtBRL(p.value)}
+                        </span>
+                      )}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                        {cfg.label}
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
+
     </div>
   )
 }
