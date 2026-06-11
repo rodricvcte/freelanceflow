@@ -55,6 +55,7 @@ const STATUS_CONFIG = {
   aprovada:    { label: 'Aprovada',    cls: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
   reprovada:   { label: 'Reprovada',   cls: 'bg-red-100 text-red-700' },
   expirada:    { label: 'Expirada',    cls: 'bg-orange-100 text-orange-700' },
+  cancelada:   { label: 'Cancelada',   cls: 'bg-red-200 text-red-900' },
 } as const
 
 const EVENT_CONFIG: Record<string, { label: string; dot: string; ring: string }> = {
@@ -318,11 +319,25 @@ export default async function ProposalDetailPage({
         </div>
       </div>
 
+      {/* ── Cancelled banner ── */}
+      {proposal.status === 'cancelada' && (
+        <div className="mb-6 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-700 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+          <div>
+            <p className="text-sm font-semibold text-red-900">Proposta cancelada</p>
+            <p className="text-xs text-red-700 mt-0.5">Esta proposta foi cancelada e não pode ser enviada ao cliente.</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Actions + PDF (client component) ── */}
       <div className="mb-6">
         <ProposalActions
           proposalId={proposal.id}
           token={proposal.token}
+          status={proposal.status}
           initialPdfUrl={proposal.pdf_url}
           duplicate={{
             title:               proposal.title,

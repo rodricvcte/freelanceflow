@@ -24,6 +24,7 @@ const STATUS_CONFIG = {
   aprovada:    { label: 'Aprovada',    className: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
   reprovada:   { label: 'Reprovada',   className: 'bg-red-100 text-red-700' },
   expirada:    { label: 'Expirada',    className: 'bg-orange-100 text-orange-700' },
+  cancelada:   { label: 'Cancelada',   className: 'bg-red-200 text-red-900' },
 } as const
 
 const PERIOD_OPTIONS = [
