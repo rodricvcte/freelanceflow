@@ -18,7 +18,17 @@ export default function LoginPage() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    let { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error?.message.toLowerCase().includes('email not confirmed')) {
+      await fetch('/api/auth/confirm-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const retry = await supabase.auth.signInWithPassword({ email, password })
+      error = retry.error
+    }
 
     if (error) {
       setError('Email ou senha inválidos.')

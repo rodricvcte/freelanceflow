@@ -2,10 +2,40 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 
+async function generateFreelancerCode(fullName: string, serviceClient: ReturnType<typeof createServiceClient>): Promise<string> {
+  const parts = fullName.trim().split(/\s+/)
+  const first = parts[0][0].toUpperCase()
+  const last = parts.length >= 2
+    ? parts[parts.length - 1][0].toUpperCase()
+    : (parts[0][1]?.toUpperCase() ?? first)
+  const prefix = first + last
+
+  const { count } = await serviceClient
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .like('freelancer_code', `${prefix}%`)
+
+  let counter = (count ?? 0) + 1
+  let code = `${prefix}${String(counter).padStart(3, '0')}`
+
+  for (let i = 0; i < 100; i++) {
+    const { data } = await serviceClient
+      .from('profiles')
+      .select('id')
+      .eq('freelancer_code', code)
+      .maybeSingle()
+    if (!data) break
+    counter++
+    code = `${prefix}${String(counter).padStart(3, '0')}`
+  }
+
+  return code
+}
+
 export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
   const {
@@ -17,19 +47,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Nome completo é obrigatório' }, { status: 400 })
   }
 
-  // Generate unique freelancer_code via DB function
-  const { data: code, error: codeErr } = await supabase.rpc('generate_freelancer_code', {
-    p_full_name: full_name.trim(),
-  })
+  const serviceClient = createServiceClient()
 
-  if (codeErr || !code) {
-    return NextResponse.json(
-      { error: codeErr?.message ?? 'Erro ao gerar código de freelancer' },
-      { status: 500 }
-    )
+  let code: string
+  try {
+    code = await generateFreelancerCode(full_name.trim(), serviceClient)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Erro ao gerar código'
+    return NextResponse.json({ error: `Erro ao gerar código de freelancer: ${msg}` }, { status: 500 })
   }
 
-  const serviceClient = createServiceClient()
   const { data, error } = await serviceClient
     .from('profiles')
     .upsert(
@@ -52,6 +79,6 @@ export async function POST(request: Request) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: `Erro ao salvar perfil: ${error.message}` }, { status: 500 })
   return NextResponse.json({ profile: data, freelancer_code: code })
 }

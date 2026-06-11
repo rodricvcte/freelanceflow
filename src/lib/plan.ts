@@ -6,6 +6,10 @@ export async function canCreateProposal(
   userId: string,
   supabase: SupabaseClient
 ): Promise<{ allowed: boolean; used: number; limit: number }> {
+  // Check env flag first — avoids any DB query and prevents Infinity leaking into JSON
+  if (process.env.DISABLE_PLAN_LIMITS === 'true')
+    return { allowed: true, used: 0, limit: FREE_MONTHLY_LIMIT }
+
   const { data: sub } = await supabase
     .from('subscriptions')
     .select('plan, status')
@@ -17,17 +21,20 @@ export async function canCreateProposal(
     sub.plan !== 'free' &&
     (sub.status === 'active' || sub.status === 'trialing')
 
-  if (isPro) return { allowed: true, used: 0, limit: Infinity }
+  if (isPro) return { allowed: true, used: 0, limit: FREE_MONTHLY_LIMIT }
 
   const monthStart = new Date()
   monthStart.setDate(1)
   monthStart.setHours(0, 0, 0, 0)
 
-  const { count } = await supabase
+  const { count, error: countError } = await supabase
     .from('proposals')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
     .gte('created_at', monthStart.toISOString())
+
+  // If query fails, fail open (allow creation rather than false-blocking)
+  if (countError) return { allowed: true, used: 0, limit: FREE_MONTHLY_LIMIT }
 
   const used = count ?? 0
   return { allowed: used < FREE_MONTHLY_LIMIT, used, limit: FREE_MONTHLY_LIMIT }

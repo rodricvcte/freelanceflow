@@ -6,20 +6,51 @@ import Image from 'next/image'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+type DocType = 'cpf' | 'cnpj'
+
 type Profile = {
-  full_name: string | null
-  business_name: string | null
-  phone: string | null
-  logo_url: string | null
-  accent_color: string
+  full_name:      string | null
+  business_name:  string | null
+  phone:          string | null
+  logo_url:       string | null
+  accent_color:   string
+  email_business: string | null
+  address:        string | null
+  document_type:  DocType | null
+  cpf_cnpj:       string | null
+  website:        string | null
 }
 
 type SubInfo = {
-  plan: string
-  status: string
-  current_period_end: string | null
-  used: number
-  limit: number
+  plan:                    string
+  status:                  string
+  current_period_end:      string | null
+  used:                    number
+  limit:                   number
+}
+
+// ─── Masks ───────────────────────────────────────────────────────────────────
+
+function maskCPF(v: string) {
+  const d = v.replace(/\D/g, '').slice(0, 11)
+  return d
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+}
+
+function maskCNPJ(v: string) {
+  const d = v.replace(/\D/g, '').slice(0, 14)
+  return d
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+function applyDocMask(raw: string | null, type: DocType | null): string {
+  if (!raw) return ''
+  return (type ?? 'cpf') === 'cpf' ? maskCPF(raw) : maskCNPJ(raw)
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -30,24 +61,46 @@ function fmtDate(s: string) {
 }
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  active:   { label: 'Ativo',        cls: 'bg-green-100 text-green-700' },
-  trialing: { label: 'Teste grátis', cls: 'bg-blue-100 text-blue-700' },
-  canceled: { label: 'Cancelado',    cls: 'bg-gray-100 text-gray-600' },
-  past_due: { label: 'Pagamento pendente', cls: 'bg-red-100 text-red-700' },
+  active:   { label: 'Ativo',              cls: 'bg-green-100 text-green-700' },
+  trialing: { label: 'Teste grátis',        cls: 'bg-blue-100 text-blue-700' },
+  canceled: { label: 'Cancelado',           cls: 'bg-gray-100 text-gray-600' },
+  past_due: { label: 'Pagamento pendente',  cls: 'bg-red-100 text-red-700' },
 }
 
 // ─── Tab: Perfil ─────────────────────────────────────────────────────────────
 
 function ProfileTab({ initial }: { initial: Profile }) {
-  const [form, setForm]       = useState({ ...initial, accent_color: initial.accent_color ?? '#1D9E75' })
+  const [form, setForm] = useState({
+    full_name:      initial.full_name      ?? '',
+    business_name:  initial.business_name  ?? '',
+    phone:          initial.phone          ?? '',
+    email_business: initial.email_business ?? '',
+    address:        initial.address        ?? '',
+    website:        initial.website        ?? '',
+    accent_color:   initial.accent_color   ?? '#1D9E75',
+    logo_url:       initial.logo_url       ?? '',
+    document_type:  (initial.document_type ?? 'cpf') as DocType,
+    cpf_cnpj:       applyDocMask(initial.cpf_cnpj, initial.document_type),
+  })
+
   const [logoPreview, setPreview] = useState<string | null>(initial.logo_url)
-  const [saving, setSaving]   = useState(false)
-  const [uploading, setUp]    = useState(false)
-  const [msg, setMsg]         = useState<string | null>(null)
-  const fileRef               = useRef<HTMLInputElement>(null)
+  const [saving,    setSaving]    = useState(false)
+  const [uploading, setUp]        = useState(false)
+  const [msg,       setMsg]       = useState<{ text: string; ok: boolean } | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   function set<K extends keyof typeof form>(k: K, v: typeof form[K]) {
     setForm(p => ({ ...p, [k]: v }))
+  }
+
+  function handleDocTypeChange(t: DocType) {
+    set('document_type', t)
+    set('cpf_cnpj', '')
+  }
+
+  function handleDocInput(raw: string) {
+    const masked = form.document_type === 'cpf' ? maskCPF(raw) : maskCNPJ(raw)
+    set('cpf_cnpj', masked)
   }
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -58,13 +111,13 @@ function ProfileTab({ initial }: { initial: Profile }) {
     try {
       const fd = new FormData()
       fd.append('file', file)
-      const res = await fetch('/api/profile/logo', { method: 'POST', body: fd })
+      const res  = await fetch('/api/profile/logo', { method: 'POST', body: fd })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       set('logo_url', data.url)
       setPreview(data.url)
     } catch (e: unknown) {
-      setMsg(e instanceof Error ? e.message : 'Erro no upload')
+      setMsg({ text: e instanceof Error ? e.message : 'Erro no upload', ok: false })
     } finally {
       setUp(false)
     }
@@ -78,13 +131,16 @@ function ProfileTab({ initial }: { initial: Profile }) {
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          cpf_cnpj: form.cpf_cnpj.replace(/\D/g, '') || null,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      setMsg('Perfil salvo com sucesso!')
+      setMsg({ text: 'Perfil salvo com sucesso!', ok: true })
     } catch (e: unknown) {
-      setMsg(e instanceof Error ? e.message : 'Erro ao salvar')
+      setMsg({ text: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
       setSaving(false)
     }
@@ -94,10 +150,10 @@ function ProfileTab({ initial }: { initial: Profile }) {
   const labelCls = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {msg && (
-        <div className={`p-3 rounded-lg text-sm ${msg.includes('sucesso') ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
-          {msg}
+        <div className={`p-3 rounded-lg text-sm ${msg.ok ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+          {msg.text}
         </div>
       )}
 
@@ -105,7 +161,7 @@ function ProfileTab({ initial }: { initial: Profile }) {
       <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
         <h3 className="text-sm font-semibold text-gray-900 mb-4">Logo</h3>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50">
+          <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
             {logoPreview ? (
               <Image src={logoPreview} alt="Logo" width={64} height={64} className="w-full h-full object-contain" unoptimized />
             ) : (
@@ -129,24 +185,82 @@ function ProfileTab({ initial }: { initial: Profile }) {
         </div>
       </div>
 
-      {/* Dados */}
+      {/* Dados pessoais */}
       <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm space-y-4">
         <h3 className="text-sm font-semibold text-gray-900">Dados pessoais</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Nome completo</label>
-            <input type="text" value={form.full_name ?? ''} onChange={e => set('full_name', e.target.value)} className={inputCls} />
+            <input type="text" value={form.full_name} onChange={e => set('full_name', e.target.value)}
+              placeholder="Rodrigo Costa" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Nome do negócio</label>
-            <input type="text" value={form.business_name ?? ''} onChange={e => set('business_name', e.target.value)} placeholder="Ex: João Design" className={inputCls} />
+            <input type="text" value={form.business_name} onChange={e => set('business_name', e.target.value)}
+              placeholder="RC Design" className={inputCls} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Telefone</label>
+            <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+              placeholder="(11) 99999-9999" className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>E-mail de contato</label>
+            <input type="email" value={form.email_business} onChange={e => set('email_business', e.target.value)}
+              placeholder="rodrigo@rcdesign.com.br" className={inputCls} />
           </div>
         </div>
 
         <div>
-          <label className={labelCls}>Telefone</label>
-          <input type="tel" value={form.phone ?? ''} onChange={e => set('phone', e.target.value)} placeholder="(11) 99999-9999" className={inputCls} />
+          <label className={labelCls}>Endereço completo</label>
+          <input type="text" value={form.address} onChange={e => set('address', e.target.value)}
+            placeholder="Rua das Flores, 123 — São Paulo, SP" className={inputCls} />
+        </div>
+
+        <div>
+          <label className={labelCls}>Site / portfólio</label>
+          <input type="url" value={form.website} onChange={e => set('website', e.target.value)}
+            placeholder="https://rcdesign.com.br" className={inputCls} />
+        </div>
+      </div>
+
+      {/* Documento */}
+      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm space-y-4">
+        <h3 className="text-sm font-semibold text-gray-900">Documento</h3>
+
+        <div>
+          <label className={labelCls}>Tipo de documento</label>
+          <div className="flex gap-4">
+            {(['cpf', 'cnpj'] as DocType[]).map(t => (
+              <label key={t} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="document_type"
+                  value={t}
+                  checked={form.document_type === t}
+                  onChange={() => handleDocTypeChange(t)}
+                  className="w-4 h-4 text-[#1D9E75] border-gray-300 focus:ring-[#1D9E75]"
+                />
+                <span className="text-sm font-medium text-gray-700 uppercase">{t}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className={labelCls}>{form.document_type.toUpperCase()}</label>
+          <input
+            type="text"
+            value={form.cpf_cnpj}
+            onChange={e => handleDocInput(e.target.value)}
+            placeholder={form.document_type === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
+            maxLength={form.document_type === 'cpf' ? 14 : 18}
+            className={inputCls}
+          />
         </div>
       </div>
 
@@ -160,6 +274,10 @@ function ProfileTab({ initial }: { initial: Profile }) {
             value={form.accent_color}
             onChange={e => set('accent_color', e.target.value)}
             className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white"
+          />
+          <div
+            className="w-8 h-8 rounded-lg border border-gray-100 shadow-sm"
+            style={{ backgroundColor: form.accent_color }}
           />
           <span className="text-sm font-mono text-gray-700">{form.accent_color.toUpperCase()}</span>
           <button
@@ -178,7 +296,7 @@ function ProfileTab({ initial }: { initial: Profile }) {
           disabled={saving}
           className="px-6 py-2.5 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors disabled:opacity-50"
         >
-          {saving ? 'Salvando...' : 'Salvar perfil'}
+          {saving ? 'Salvando...' : 'Salvar alterações'}
         </button>
       </div>
     </form>
@@ -188,8 +306,8 @@ function ProfileTab({ initial }: { initial: Profile }) {
 // ─── Tab: Plano ───────────────────────────────────────────────────────────────
 
 function PlanTab({ sub }: { sub: SubInfo }) {
-  const isPro = sub.plan !== 'free'
-  const st = STATUS_LABELS[sub.status] ?? { label: sub.status, cls: 'bg-gray-100 text-gray-600' }
+  const isPro    = sub.plan !== 'free'
+  const st       = STATUS_LABELS[sub.status] ?? { label: sub.status, cls: 'bg-gray-100 text-gray-600' }
   const usagePct = isPro ? 0 : Math.min(100, (sub.used / sub.limit) * 100)
 
   return (
@@ -212,7 +330,6 @@ function PlanTab({ sub }: { sub: SubInfo }) {
           )}
         </div>
 
-        {/* Usage bar (free only) */}
         {!isPro && (
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1.5">
@@ -240,7 +357,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
         )}
       </div>
 
-      {/* Upgrade card (free only) */}
+      {/* Upgrade card */}
       {!isPro && (
         <div className="bg-white border-2 border-[#1D9E75] rounded-xl p-6 shadow-sm">
           <div className="flex items-start justify-between mb-4">
@@ -273,19 +390,33 @@ function PlanTab({ sub }: { sub: SubInfo }) {
 
           <a
             href={process.env.NEXT_PUBLIC_PAGARME_CHECKOUT_URL ?? '#'}
-            onClick={e => { if (!process.env.NEXT_PUBLIC_PAGARME_CHECKOUT_URL) { e.preventDefault(); alert('Link de pagamento em configuração. Entre em contato: suporte@freelanceflow.com.br') } }}
+            onClick={e => {
+              if (!process.env.NEXT_PUBLIC_PAGARME_CHECKOUT_URL) {
+                e.preventDefault()
+                alert('Link de pagamento em configuração. Entre em contato: suporte@freelanceflow.com.br')
+              }
+            }}
             className="block w-full py-2.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors text-center"
           >
-            Fazer upgrade para Pro
+            Fazer upgrade para Pro — R$39/mês
           </a>
         </div>
       )}
 
-      {/* Cancel info (pro only) */}
+      {/* Cancel info */}
       {isPro && sub.status === 'active' && (
-        <p className="text-xs text-gray-400 text-center">
-          Para cancelar sua assinatura entre em contato: suporte@freelanceflow.com.br
-        </p>
+        <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">Cancelar assinatura</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Você continuará com acesso Pro até {sub.current_period_end ? fmtDate(sub.current_period_end) : 'o fim do período'}.
+          </p>
+          <a
+            href="mailto:suporte@freelanceflow.com.br?subject=Cancelamento de assinatura Pro"
+            className="inline-block px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+          >
+            Solicitar cancelamento
+          </a>
+        </div>
       )}
     </div>
   )
@@ -296,20 +427,20 @@ function PlanTab({ sub }: { sub: SubInfo }) {
 type NotifKeys = 'email_viewed' | 'email_responded' | 'email_followup'
 
 const NOTIF_DEFAULTS: Record<NotifKeys, boolean> = {
-  email_viewed:   true,
+  email_viewed:    true,
   email_responded: true,
-  email_followup: true,
+  email_followup:  true,
 }
 
 const NOTIF_LABELS: Record<NotifKeys, { title: string; desc: string }> = {
-  email_viewed:    { title: 'Proposta visualizada', desc: 'Receber e-mail quando o cliente abrir o link da proposta.' },
-  email_responded: { title: 'Proposta respondida', desc: 'Receber e-mail quando o cliente aceitar ou recusar.' },
-  email_followup:  { title: 'Lembretes de follow-up', desc: 'Receber e-mail diário com os follow-ups do dia.' },
+  email_viewed:    { title: 'Proposta visualizada',      desc: 'Receber e-mail quando o cliente abrir o link da proposta.' },
+  email_responded: { title: 'Proposta aprovada/reprovada', desc: 'Receber e-mail quando o cliente aceitar ou recusar.' },
+  email_followup:  { title: 'Follow-up automático',      desc: 'Receber e-mail diário com os follow-ups agendados.' },
 }
 
 function NotificationsTab() {
   const [prefs, setPrefs] = useState<Record<NotifKeys, boolean>>(NOTIF_DEFAULTS)
-  const [saved, setSaved]  = useState(false)
+  const [saved,  setSaved] = useState(false)
 
   useEffect(() => {
     try {
@@ -325,7 +456,12 @@ function NotificationsTab() {
       return next
     })
     setSaved(true)
-    setTimeout(() => setSaved(false), 1500)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  function handleSave() {
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   return (
@@ -350,13 +486,18 @@ function NotificationsTab() {
         ))}
       </div>
 
-      {saved && (
-        <p className="text-xs text-center text-[#1D9E75]">Preferências salvas.</p>
-      )}
-
-      <p className="text-xs text-gray-400 text-center">
-        As notificações por e-mail serão ativadas quando a funcionalidade de envio automático for configurada.
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-400">
+          E-mails serão enviados quando a integração de envio automático for configurada.
+        </p>
+        <button
+          type="button"
+          onClick={handleSave}
+          className="px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
+        >
+          {saved ? 'Salvo!' : 'Salvar preferências'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -378,11 +519,11 @@ export default function ConfiguracoesPage() {
 }
 
 function ConfiguracoesInner() {
-  const searchParams  = useSearchParams()
-  const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) ?? 'perfil')
-  const [profile, setProfile]   = useState<Profile | null>(null)
-  const [sub, setSub]           = useState<SubInfo | null>(null)
-  const [loading, setLoading]   = useState(true)
+  const searchParams = useSearchParams()
+  const [tab, setTab]       = useState<Tab>((searchParams.get('tab') as Tab) ?? 'perfil')
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [sub,     setSub]     = useState<SubInfo | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
@@ -394,9 +535,9 @@ function ConfiguracoesInner() {
   }, [])
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'perfil',       label: 'Perfil' },
-    { id: 'plano',        label: 'Plano' },
-    { id: 'notificacoes', label: 'Notificações' },
+    { id: 'perfil',        label: 'Perfil' },
+    { id: 'plano',         label: 'Plano' },
+    { id: 'notificacoes',  label: 'Notificações' },
   ]
 
   return (
@@ -432,9 +573,9 @@ function ConfiguracoesInner() {
         </div>
       ) : (
         <>
-          {tab === 'perfil'       && profile && <ProfileTab initial={profile} />}
-          {tab === 'plano'        && sub     && <PlanTab sub={sub} />}
-          {tab === 'notificacoes'            && <NotificationsTab />}
+          {tab === 'perfil'        && profile && <ProfileTab initial={profile} />}
+          {tab === 'plano'         && sub     && <PlanTab sub={sub} />}
+          {tab === 'notificacoes'             && <NotificationsTab />}
         </>
       )}
     </div>

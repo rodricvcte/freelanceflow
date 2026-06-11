@@ -30,14 +30,28 @@ export async function PATCH(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const allowed = ['full_name', 'business_name', 'phone', 'accent_color', 'logo_url'] as const
+  const allowed = [
+    'full_name', 'business_name', 'phone', 'accent_color', 'logo_url',
+    'email_business', 'address', 'website',
+  ] as const
   type Field = typeof allowed[number]
-  const updates: Partial<Record<Field, string | null>> = {}
+  const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj', string | null>> = {}
 
   for (const key of allowed) {
     if (key in body) {
       updates[key] = typeof body[key] === 'string' ? body[key].trim() || null : null
     }
+  }
+
+  if ('document_type' in body) {
+    updates.document_type = body.document_type === 'cpf' || body.document_type === 'cnpj'
+      ? body.document_type
+      : null
+  }
+
+  if ('cpf_cnpj' in body) {
+    const raw = typeof body.cpf_cnpj === 'string' ? body.cpf_cnpj.replace(/\D/g, '') : ''
+    updates.cpf_cnpj = raw || null
   }
 
   const { data, error } = await supabase
