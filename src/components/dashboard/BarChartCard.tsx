@@ -11,9 +11,9 @@ type Props = { labels: string[]; data: number[] }
 
 export default function BarChartCard({ labels, data }: Props) {
   return (
-    <div className="bg-white rounded-[10px] border border-gray-100 px-4 py-4 h-full">
-      <h2 className="text-sm font-medium text-gray-600 mb-3">Propostas por mês</h2>
-      <div style={{ height: 130 }}>
+    <div className="bg-white rounded-[10px] border border-gray-100 px-4 py-4 h-full flex flex-col">
+      <h2 className="text-sm font-medium text-gray-600 mb-3 shrink-0">Propostas por mês</h2>
+      <div className="flex-1 min-h-0">
         <ProposalBarChart labels={labels} data={data} />
       </div>
     </div>
