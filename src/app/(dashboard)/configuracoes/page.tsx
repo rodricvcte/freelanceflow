@@ -22,11 +22,14 @@ type Profile = {
 }
 
 type SubInfo = {
-  plan:                    string
-  status:                  string
-  current_period_end:      string | null
-  used:                    number
-  limit:                   number
+  plan:                   string
+  status:                 string
+  current_period_end:     string | null
+  stripe_customer_id:     string | null
+  stripe_subscription_id: string | null
+  stripe_price_id:        string | null
+  used:                   number
+  limit:                  number
 }
 
 // ─── Masks ───────────────────────────────────────────────────────────────────
@@ -308,32 +311,93 @@ function ProfileTab({ initial }: { initial: Profile }) {
 
 // ─── Tab: Plano ───────────────────────────────────────────────────────────────
 
+const PRO_FEATURES = [
+  'Propostas ilimitadas',
+  'PDF com sua identidade visual',
+  'Envio por e-mail com aprovação via link',
+  'Follow-ups automáticos',
+  'Link público rastreável',
+  'Suporte prioritário',
+]
+
 function PlanTab({ sub }: { sub: SubInfo }) {
-  const isPro    = sub.plan !== 'free'
-  const st       = STATUS_LABELS[sub.status] ?? { label: sub.status, cls: 'bg-gray-100 text-gray-600' }
-  const usagePct = isPro ? 0 : Math.min(100, (sub.used / sub.limit) * 100)
+  const isPro    = sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
+  const isCanceled = sub.plan === 'pro' && sub.status === 'canceled'
+  const isPastDue  = sub.status === 'past_due'
+  const st         = STATUS_LABELS[sub.status] ?? { label: sub.status, cls: 'bg-gray-100 text-gray-600' }
+  const usagePct   = isPro ? 0 : Math.min(100, (sub.used / sub.limit) * 100)
+
+  const [loadingBtn, setLoading] = useState<string | null>(null)
+  const [err, setErr]            = useState<string | null>(null)
+
+  async function handleCheckout(priceId: string) {
+    setLoading(priceId)
+    setErr(null)
+    try {
+      const res  = await fetch('/api/subscriptions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price_id: priceId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      window.location.href = data.url
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Erro ao iniciar checkout')
+      setLoading(null)
+    }
+  }
+
+  async function handlePortal() {
+    setLoading('portal')
+    setErr(null)
+    try {
+      const res  = await fetch('/api/subscriptions/portal', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      window.location.href = data.url
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Erro ao abrir portal')
+      setLoading(null)
+    }
+  }
+
+  const PRICE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY ?? 'price_monthly'
+  const PRICE_YEARLY  = process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY  ?? 'price_yearly'
 
   return (
     <div className="space-y-4">
-      {/* Current plan */}
+      {err && (
+        <div className="p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-700">{err}</div>
+      )}
+
+      {/* Current plan card */}
       <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-start justify-between mb-4">
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Plano atual</p>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900 capitalize">{sub.plan}</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.cls}`}>{st.label}</span>
+              <span className="text-xl font-bold text-gray-900">{isPro || isCanceled ? 'Pro' : 'Free'}</span>
+              {(isPro || isCanceled || isPastDue) && (
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.cls}`}>{st.label}</span>
+              )}
+              {isPro && (
+                <span className="bg-[#1D9E75] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">PRO</span>
+              )}
             </div>
           </div>
           {sub.current_period_end && (
             <div className="text-right">
-              <p className="text-xs text-gray-400">Próxima renovação</p>
+              <p className="text-xs text-gray-400">
+                {isCanceled ? 'Acesso até' : 'Renova em'}
+              </p>
               <p className="text-sm font-medium text-gray-700">{fmtDate(sub.current_period_end)}</p>
             </div>
           )}
         </div>
 
-        {!isPro && (
+        {/* Free: usage bar */}
+        {!isPro && !isCanceled && (
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1.5">
               <span>Propostas este mês</span>
@@ -350,17 +414,46 @@ function PlanTab({ sub }: { sub: SubInfo }) {
           </div>
         )}
 
-        {isPro && (
-          <p className="text-sm text-gray-500 flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Propostas ilimitadas
-          </p>
+        {/* Pro: unlimited + manage button */}
+        {(isPro || isCanceled) && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              {isCanceled ? 'Acesso Pro até o fim do período' : 'Propostas ilimitadas'}
+            </p>
+            {sub.stripe_customer_id && (
+              <button
+                onClick={handlePortal}
+                disabled={loadingBtn === 'portal'}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {loadingBtn === 'portal' && <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />}
+                Gerenciar assinatura →
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Past due warning */}
+        {isPastDue && (
+          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            Há uma falha no pagamento. Atualize seu método de pagamento para continuar com acesso Pro.
+            {sub.stripe_customer_id && (
+              <button
+                onClick={handlePortal}
+                disabled={loadingBtn === 'portal'}
+                className="ml-2 underline font-medium disabled:opacity-50"
+              >
+                Corrigir agora →
+              </button>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Upgrade card */}
+      {/* Upgrade card — show for free or canceled */}
       {!isPro && (
         <div className="bg-white border-2 border-[#1D9E75] rounded-xl p-6 shadow-sm">
           <div className="flex items-start justify-between mb-4">
@@ -375,13 +468,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
           </div>
 
           <ul className="space-y-2 text-sm text-gray-600 mb-5">
-            {[
-              'Propostas ilimitadas',
-              'PDF com sua identidade visual',
-              'Follow-ups automáticos por e-mail',
-              'Link público rastreável',
-              'Suporte prioritário',
-            ].map(f => (
+            {PRO_FEATURES.map(f => (
               <li key={f} className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -391,34 +478,25 @@ function PlanTab({ sub }: { sub: SubInfo }) {
             ))}
           </ul>
 
-          <a
-            href={process.env.NEXT_PUBLIC_PAGARME_CHECKOUT_URL ?? '#'}
-            onClick={e => {
-              if (!process.env.NEXT_PUBLIC_PAGARME_CHECKOUT_URL) {
-                e.preventDefault()
-                alert('Link de pagamento em configuração. Entre em contato: suporte@freelanceflow.com.br')
-              }
-            }}
-            className="block w-full py-2.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors text-center"
-          >
-            Fazer upgrade para Pro — R$39/mês
-          </a>
-        </div>
-      )}
-
-      {/* Cancel info */}
-      {isPro && sub.status === 'active' && (
-        <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Cancelar assinatura</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Você continuará com acesso Pro até {sub.current_period_end ? fmtDate(sub.current_period_end) : 'o fim do período'}.
-          </p>
-          <a
-            href="mailto:suporte@freelanceflow.com.br?subject=Cancelamento de assinatura Pro"
-            className="inline-block px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-          >
-            Solicitar cancelamento
-          </a>
+          <div className="space-y-2.5">
+            <button
+              onClick={() => handleCheckout(PRICE_MONTHLY)}
+              disabled={!!loadingBtn}
+              className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors disabled:opacity-50"
+            >
+              {loadingBtn === PRICE_MONTHLY && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+              Assinar Pro Mensal — R$39/mês
+            </button>
+            <button
+              onClick={() => handleCheckout(PRICE_YEARLY)}
+              disabled={!!loadingBtn}
+              className="flex items-center justify-center gap-2 w-full py-2.5 border border-[#1D9E75] text-[#1D9E75] text-sm font-semibold rounded-xl hover:bg-[#1D9E75]/5 transition-colors disabled:opacity-50"
+            >
+              {loadingBtn === PRICE_YEARLY && <div className="w-4 h-4 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" />}
+              Assinar Pro Anual — R$349/ano
+              <span className="text-[10px] font-bold bg-[#1D9E75] text-white px-1.5 py-0.5 rounded-full">economize 2 meses</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

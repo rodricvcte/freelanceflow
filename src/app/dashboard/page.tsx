@@ -65,7 +65,7 @@ export default async function DashboardPage() {
   endOfToday.setHours(23, 59, 59, 999)
 
   // Parallel fetches
-  const [profileRes, proposalsRes, followUpsRes] = await Promise.all([
+  const [profileRes, proposalsRes, followUpsRes, subRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('full_name, business_name')
@@ -85,15 +85,29 @@ export default async function DashboardPage() {
       .is('sent_at', null)
       .lte('scheduled_for', endOfToday.toISOString())
       .order('scheduled_for', { ascending: true }),
+
+    supabase
+      .from('subscriptions')
+      .select('plan, status')
+      .eq('user_id', user.id)
+      .maybeSingle(),
   ])
 
   const profile   = profileRes.data
   const proposals = (proposalsRes.data ?? []) as ProposalRow[]
   const followUps = (followUpsRes.data ?? []) as FollowUpRow[]
+  const sub       = subRes.data
 
   const firstName = profile?.business_name?.split(' ')[0]
     ?? profile?.full_name?.split(' ')[0]
     ?? 'Freelancer'
+
+  const isPro = !!sub && sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+  const usedThisMonth = proposals.filter(p => new Date(p.created_at) >= monthStart).length
+  const showUpgradeBanner = !isPro && usedThisMonth >= 4
 
   // ── Derived counts ──────────────────────────────────────────────────────────
   const counts = proposals.reduce<Record<string, number>>((acc, p) => {
@@ -127,6 +141,27 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-gray-900">Olá, {firstName}!</h1>
         <p className="text-sm text-gray-500 mt-1">Aqui está o resumo das suas propostas.</p>
       </div>
+
+      {/* ── Upgrade banner (free + 4+ propostas no mês) ── */}
+      {showUpgradeBanner && (
+        <div className="mb-6 flex items-center justify-between gap-4 px-5 py-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <div className="flex items-start gap-3 min-w-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+            </svg>
+            <p className="text-sm text-amber-800">
+              Você usou <strong>{usedThisMonth} de 5</strong> propostas este mês.
+              Faça upgrade para Pro e envie propostas ilimitadas.
+            </p>
+          </div>
+          <Link
+            href="/configuracoes?tab=plano"
+            className="shrink-0 px-4 py-2 bg-[#1D9E75] text-white text-xs font-semibold rounded-lg hover:bg-[#188f68] transition-colors whitespace-nowrap"
+          >
+            Upgrade Pro →
+          </Link>
+        </div>
+      )}
 
       {/* ── Featured stat: Valor aprovado ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">

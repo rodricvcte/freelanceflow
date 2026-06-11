@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -53,16 +53,31 @@ const nav = [
   },
 ]
 
+type UserInfo = { name: string; isPro: boolean }
+
 export default function Sidebar() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]         = useState(false)
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const pathname = usePathname()
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/profile').then(r => r.json()).catch(() => ({})),
+      fetch('/api/subscriptions').then(r => r.json()).catch(() => ({})),
+    ]).then(([profile, sub]) => {
+      setUserInfo({
+        name:  (profile.business_name ?? profile.full_name ?? '') as string,
+        isPro: sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing'),
+      })
+    })
+  }, [])
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
 
   return (
     <>
-      {/* Hamburger button — mobile only */}
+      {/* Hamburger — mobile */}
       <button
         onClick={() => setOpen(true)}
         aria-label="Abrir menu"
@@ -75,31 +90,25 @@ export default function Sidebar() {
 
       {/* Mobile overlay */}
       {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
-          onClick={() => setOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside
-        className={[
-          'fixed top-0 left-0 h-screen w-60 bg-white border-r border-gray-200 z-50 flex flex-col',
-          'transition-transform duration-300 ease-in-out',
-          'md:translate-x-0',
-          open ? 'translate-x-0' : '-translate-x-full',
-        ].join(' ')}
-      >
+      <aside className={[
+        'fixed top-0 left-0 h-screen w-60 bg-white border-r border-gray-200 z-50 flex flex-col',
+        'transition-transform duration-300 ease-in-out',
+        'md:translate-x-0',
+        open ? 'translate-x-0' : '-translate-x-full',
+      ].join(' ')}>
+
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <span className="text-lg font-bold text-[#1D9E75] tracking-tight">
-            FreelanceFlow
-          </span>
+          <span className="text-lg font-bold text-[#1D9E75] tracking-tight">FreelanceFlow</span>
         </div>
 
-        {/* Nav links */}
+        {/* Nav */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
-          {nav.map((item) => (
+          {nav.map(item => (
             <Link
               key={item.href}
               href={item.href}
@@ -117,9 +126,35 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        {/* Footer */}
+        {/* User / plan footer */}
         <div className="p-4 border-t border-gray-100">
-          <p className="text-xs text-gray-400 text-center">FreelanceFlow v0.1</p>
+          {userInfo ? (
+            <Link
+              href="/configuracoes?tab=plano"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors group"
+            >
+              <div className="w-7 h-7 rounded-full bg-[#1D9E75]/10 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-[#1D9E75]">
+                  {(userInfo.name || 'U').charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-gray-700 truncate">
+                  {userInfo.name || 'Meu perfil'}
+                </p>
+                {userInfo.isPro ? (
+                  <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#1D9E75] text-white leading-none mt-0.5">
+                    PRO
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-gray-400">Plano Free</span>
+                )}
+              </div>
+            </Link>
+          ) : (
+            <p className="text-xs text-gray-400 text-center">FreelanceFlow v0.1</p>
+          )}
         </div>
       </aside>
     </>
