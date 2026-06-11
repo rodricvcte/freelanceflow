@@ -19,13 +19,13 @@ export default function DoughnutCard({ labels, data, colors }: Props) {
   return (
     <div className="bg-white rounded-[10px] border border-gray-100 px-4 py-4 h-full flex flex-col">
       <h2 className="text-sm font-medium text-gray-600 mb-3 shrink-0">Valor em negociação</h2>
-      <div className="flex-1 min-h-0 flex items-center gap-5">
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-3">
         <div className="shrink-0" style={{ width: 130, height: 130 }}>
           <ValueDoughnutChart labels={labels} data={data} colors={colors} />
         </div>
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-wrap justify-center gap-x-3 gap-y-1.5">
           {labels.map((label, i) => (
-            <li key={label} className="flex items-center gap-2">
+            <li key={label} className="flex items-center gap-1.5">
               <span
                 className="shrink-0 rounded-[1px]"
                 style={{ width: 8, height: 8, backgroundColor: colors[i] }}
