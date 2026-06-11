@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -104,6 +104,14 @@ const selectCls = 'px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProposalsPage() {
+  return (
+    <Suspense>
+      <ProposalsPageInner />
+    </Suspense>
+  )
+}
+
+function ProposalsPageInner() {
   const router       = useRouter()
   const searchParams = useSearchParams()
 
