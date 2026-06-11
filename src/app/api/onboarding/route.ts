@@ -37,6 +37,11 @@ export async function POST(request: Request) {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'unknown'
+
   const body = await request.json()
   const {
     full_name, business_name, email_business, phone,
@@ -70,9 +75,11 @@ export async function POST(request: Request) {
         document_type: document_type || null,
         cpf_cnpj: cpf_cnpj?.replace(/\D/g, '') || null,
         website: website?.trim() || null,
-        accent_color: accent_color || '#1D9E75',
-        logo_url: logo_url || null,
-        freelancer_code: code,
+        accent_color:       accent_color || '#1D9E75',
+        logo_url:           logo_url || null,
+        freelancer_code:    code,
+        terms_accepted_at:  new Date().toISOString(),
+        terms_accepted_ip:  ip,
       },
       { onConflict: 'id' }
     )

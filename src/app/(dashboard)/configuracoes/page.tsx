@@ -290,7 +290,7 @@ function ProfileTab({ initial }: { initial: Profile }) {
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col items-end gap-2">
         <button
           type="submit"
           disabled={saving}
@@ -298,6 +298,9 @@ function ProfileTab({ initial }: { initial: Profile }) {
         >
           {saving ? 'Salvando...' : 'Salvar alterações'}
         </button>
+        <p className="text-xs text-gray-400 text-right max-w-sm">
+          Ao salvar, você confirma que as informações são verdadeiras e de sua responsabilidade, e que possui autorização para emitir propostas em nome da empresa cadastrada.
+        </p>
       </div>
     </form>
   )

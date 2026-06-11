@@ -45,11 +45,12 @@ const EMPTY = {
 export default function OnboardingPage() {
   const router   = useRouter()
   const fileRef  = useRef<HTMLInputElement>(null)
-  const [form, setForm]         = useState(EMPTY)
+  const [form, setForm]           = useState(EMPTY)
   const [logoPreview, setPreview] = useState<string | null>(null)
-  const [uploading, setUp]      = useState(false)
-  const [submitting, setSub]    = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [uploading, setUp]        = useState(false)
+  const [submitting, setSub]      = useState(false)
+  const [error, setError]         = useState<string | null>(null)
+  const [termsAccepted, setTerms] = useState(false)
 
   // If already onboarded, skip to dashboard
   useEffect(() => {
@@ -239,7 +240,22 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={submitting}
+          {/* Termo de responsabilidade */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={e => setTerms(e.target.checked)}
+                className="mt-0.5 w-4 h-4 shrink-0 rounded border-gray-300 text-[#1D9E75] focus:ring-[#1D9E75] accent-[#1D9E75]"
+              />
+              <span className="text-xs text-gray-700 leading-relaxed">
+                Declaro que as informações fornecidas (nome, razão social, documento, endereço e dados de contato) são verdadeiras e de minha responsabilidade. Confirmo que sou o titular ou representante legalmente autorizado da empresa ou negócio cadastrado, tendo plenos poderes para emitir propostas comerciais em seu nome. Estou ciente que essas informações constarão nas propostas geradas pelo FreelanceFlow.
+              </span>
+            </label>
+          </div>
+
+          <button type="submit" disabled={!termsAccepted || submitting}
             className="w-full py-3 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             {submitting ? 'Salvando...' : 'Concluir configuração →'}
           </button>
