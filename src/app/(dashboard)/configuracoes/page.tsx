@@ -329,6 +329,25 @@ function PlanTab({ sub }: { sub: SubInfo }) {
 
   const [loadingBtn, setLoading] = useState<string | null>(null)
   const [err, setErr]            = useState<string | null>(null)
+  const [syncing, setSyncing]    = useState(false)
+
+  async function handleSync() {
+    setSyncing(true)
+    setErr(null)
+    try {
+      const res  = await fetch('/api/subscriptions/sync', { method: 'POST', cache: 'no-store' })
+      const data = await res.json()
+      if (data.plan === 'pro') {
+        window.location.reload()
+      } else {
+        setErr('Nenhuma assinatura ativa encontrada no Stripe.')
+      }
+    } catch {
+      setErr('Erro ao verificar plano.')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   async function handleCheckout(priceId: string) {
     setLoading(priceId)
@@ -481,7 +500,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
           <div className="space-y-2.5">
             <button
               onClick={() => handleCheckout(PRICE_MONTHLY)}
-              disabled={!!loadingBtn}
+              disabled={!!loadingBtn || syncing}
               className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors disabled:opacity-50"
             >
               {loadingBtn === PRICE_MONTHLY && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
@@ -489,12 +508,20 @@ function PlanTab({ sub }: { sub: SubInfo }) {
             </button>
             <button
               onClick={() => handleCheckout(PRICE_YEARLY)}
-              disabled={!!loadingBtn}
+              disabled={!!loadingBtn || syncing}
               className="flex items-center justify-center gap-2 w-full py-2.5 border border-[#1D9E75] text-[#1D9E75] text-sm font-semibold rounded-xl hover:bg-[#1D9E75]/5 transition-colors disabled:opacity-50"
             >
               {loadingBtn === PRICE_YEARLY && <div className="w-4 h-4 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" />}
               Assinar Pro Anual — R$349/ano
               <span className="text-[10px] font-bold bg-[#1D9E75] text-white px-1.5 py-0.5 rounded-full">economize 2 meses</span>
+            </button>
+            <button
+              onClick={handleSync}
+              disabled={!!loadingBtn || syncing}
+              className="flex items-center justify-center gap-2 w-full py-2 text-xs text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
+            >
+              {syncing && <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />}
+              {syncing ? 'Verificando…' : 'Já assinou? Clique aqui para verificar o plano'}
             </button>
           </div>
         </div>
