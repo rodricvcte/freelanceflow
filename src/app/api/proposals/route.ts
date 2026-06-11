@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { canCreateProposal } from '@/lib/plan'
-import { buildProposalNumber } from '@/lib/proposal-number'
+import { buildUniqueProposalNumber } from '@/lib/proposal-number'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
@@ -65,20 +65,37 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Build proposal_number if profile has a freelancer_code
+  // Fetch full profile for proposal_number + snapshot
   const { data: profile } = await supabase
     .from('profiles')
-    .select('freelancer_code')
+    .select('freelancer_code, full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj')
     .eq('id', user.id)
     .single()
 
+  const updates: Record<string, unknown> = {}
+
   if (profile?.freelancer_code) {
-    const proposalNumber = buildProposalNumber(data.created_at, profile.freelancer_code, 1)
-    await supabase
-      .from('proposals')
-      .update({ proposal_number: proposalNumber })
-      .eq('id', data.id)
-    data.proposal_number = proposalNumber
+    updates.proposal_number = await buildUniqueProposalNumber(data.created_at, profile.freelancer_code, 1, supabase)
+  }
+
+  if (profile) {
+    updates.snapshot_profile = {
+      full_name:      profile.full_name,
+      business_name:  profile.business_name,
+      accent_color:   profile.accent_color,
+      logo_url:       profile.logo_url,
+      phone:          profile.phone,
+      email_business: profile.email_business,
+      address:        profile.address,
+      website:        profile.website,
+      document_type:  profile.document_type,
+      cpf_cnpj:       profile.cpf_cnpj,
+    }
+  }
+
+  if (Object.keys(updates).length > 0) {
+    await supabase.from('proposals').update(updates).eq('id', data.id)
+    Object.assign(data, updates)
   }
 
   return NextResponse.json(data, { status: 201 })

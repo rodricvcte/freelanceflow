@@ -346,6 +346,7 @@ export default async function ProposalDetailPage({
             payment_terms:       proposal.payment_terms,
             deadline_days:       proposal.deadline_days,
             valid_until:         proposal.valid_until,
+            sections:            proposal.sections ?? [],
           }}
         />
       </div>

@@ -11,6 +11,7 @@ type DuplicateData = {
   payment_terms: string | null
   deadline_days: number | null
   valid_until: string | null
+  sections: unknown[]
 }
 
 type Props = {
@@ -52,12 +53,13 @@ export default function ProposalActions({ proposalId, token, status, initialPdfU
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: `Cópia de ${duplicate.title}`,
+          title:               `Cópia de ${duplicate.title}`,
           service_description: duplicate.service_description,
-          value: duplicate.value,
-          payment_terms: duplicate.payment_terms,
-          deadline_days: duplicate.deadline_days,
-          valid_until: duplicate.valid_until,
+          value:               duplicate.value,
+          payment_terms:       duplicate.payment_terms,
+          deadline_days:       duplicate.deadline_days,
+          valid_until:         duplicate.valid_until,
+          sections:            duplicate.sections,
         }),
       })
       const data = await res.json()
