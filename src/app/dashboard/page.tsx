@@ -172,14 +172,17 @@ export default async function DashboardPage() {
   const viewedNoResponse = proposals.filter(p =>
     p.status === 'visualizada' && daysSince(p.sent_at ?? p.created_at) >= 2
   )
+  const staleDrafts = proposals.filter(p =>
+    p.status === 'rascunho' && daysSince(p.created_at) >= 5
+  )
 
   // IDs já cobertos pelas regras de tempo para não duplicar
-  const attentionIds = new Set([...sentNoView, ...viewedNoResponse].map(p => p.id))
+  const attentionIds = new Set([...sentNoView, ...viewedNoResponse, ...staleDrafts].map(p => p.id))
 
   // Follow-ups pendentes de propostas que ainda não aparecem pelas regras acima
   const pendingFups = followUps.filter(f => f.proposals && !attentionIds.has(f.proposals.id))
 
-  const totalAttention = sentNoView.length + viewedNoResponse.length + pendingFups.length
+  const totalAttention = sentNoView.length + viewedNoResponse.length + staleDrafts.length + pendingFups.length
 
   // ── Recent proposals ─────────────────────────────────────────────────────────
   const recentProposals = proposals.slice(0, 5)
@@ -417,6 +420,19 @@ export default async function DashboardPage() {
                       <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
                       <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
                         Visualizada há {daysSince(p.sent_at ?? p.created_at)}d sem resposta
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+              {staleDrafts.map(p => (
+                <li key={p.id}>
+                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-gray-50 transition-colors">
+                    <span className="mt-1.5 w-[6px] h-[6px] rounded-full bg-gray-400 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+                        Rascunho há {daysSince(p.created_at)}d sem envio
                       </p>
                     </div>
                   </Link>
