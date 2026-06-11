@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       // Fetch subscription to get price and period
       const stripeSub = await stripe.subscriptions.retrieve(subscriptionId)
       const priceId = stripeSub.items.data[0]?.price.id ?? null
-      const periodEnd = stripeTimestampToISO(stripeSub.current_period_end as number | null)
+      const periodEnd = stripeTimestampToISO((stripeSub as any).current_period_end ?? null)
 
       const { error: upsertError } = await service.from('subscriptions').upsert({
         user_id: userId,
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       if (!userId) break
 
       const priceId = sub.items.data[0]?.price.id ?? null
-      const periodEnd = stripeTimestampToISO(sub.current_period_end as number | null)
+      const periodEnd = stripeTimestampToISO((sub as any).current_period_end ?? null)
       const status = sub.status === 'active' ? 'active'
         : sub.status === 'trialing' ? 'trialing'
         : sub.status === 'past_due' ? 'past_due'
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
       const userId = await findUserIdByCustomer(customerId)
       if (!userId) break
 
-      const periodEnd = stripeTimestampToISO(sub.current_period_end as number | null)
+      const periodEnd = stripeTimestampToISO((sub as any).current_period_end ?? null)
 
       await service.from('subscriptions').update({
         plan: 'pro',  // mantém pro até expirar
