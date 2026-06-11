@@ -13,7 +13,7 @@ export async function generateAndSaveProposalPDF(
   const [{ data: raw }, { data: authData }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('title, service_description, value, payment_terms, deadline_days, valid_until, token, proposal_number, version, sections, clients(name, email)')
+      .select('title, service_description, value, payment_terms, deadline_days, valid_until, token, proposal_number, version, sections, snapshot_profile, clients(name, email)')
       .eq('id', proposalId)
       .single(),
     supabase.auth.getUser(),
@@ -21,12 +21,17 @@ export async function generateAndSaveProposalPDF(
 
   if (!raw || !authData.user) throw new Error('Proposta ou usuário não encontrado')
 
+  // Use snapshot saved at creation time; fall back to current profile for old proposals
+  const snapshotProfile = (raw as Record<string, unknown>).snapshot_profile as ProfileForPDF | null
+
   const [{ data: profileRaw }, { data: sub }] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj')
-      .eq('id', authData.user.id)
-      .single(),
+    snapshotProfile
+      ? Promise.resolve({ data: null })
+      : supabase
+          .from('profiles')
+          .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj')
+          .eq('id', authData.user.id)
+          .single(),
     supabase
       .from('subscriptions')
       .select('plan, status')
@@ -55,7 +60,7 @@ export async function generateAndSaveProposalPDF(
     clients:             clientsNorm,
   }
 
-  const profile: ProfileForPDF = profileRaw ?? {
+  const profile: ProfileForPDF = snapshotProfile ?? profileRaw ?? {
     full_name: null, business_name: null, accent_color: null, logo_url: null,
     phone: null, email_business: null, address: null, website: null,
     document_type: null, cpf_cnpj: null,
