@@ -31,7 +31,13 @@ const options: ChartOptions<'bar'> = {
       border: { display: false },
       ticks: { font: { size: 11 }, color: '#9CA3AF' },
     },
-    y: { display: false, grid: { display: false }, min: 0 },
+    y: {
+      display: true,
+      min: 0,
+      grid: { color: '#F3F4F6' },
+      border: { display: false, dash: [4, 4] },
+      ticks: { font: { size: 11 }, color: '#9CA3AF', stepSize: 1 },
+    },
   },
 }
 
