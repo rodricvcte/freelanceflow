@@ -260,9 +260,9 @@ export default function ProposalsPage() {
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filtered.map(p => (
-                  <tr key={p.id} className="hover:bg-gray-50/60 transition-colors">
+              <tbody className="divide-y divide-gray-200">
+                {filtered.map((p, i) => (
+                  <tr key={p.id} className={`transition-colors hover:bg-gray-50 ${i % 2 !== 0 ? 'bg-gray-50/70' : 'bg-white'}`}>
                     <td className="px-5 py-3.5 max-w-[220px]">
                       {p.proposal_number && (
                         <span className="font-mono text-xs text-[#1D9E75] font-semibold block mb-0.5">{p.proposal_number}</span>
