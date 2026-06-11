@@ -4,7 +4,8 @@ import { Suspense } from 'react'
 import { unstable_noStore as noStore } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import UpgradedBanner from '@/components/UpgradedBanner'
-import DashboardCharts from '@/components/dashboard/DashboardCharts'
+import BarChartCard  from '@/components/dashboard/BarChartCard'
+import DoughnutCard  from '@/components/dashboard/DoughnutCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,9 +37,9 @@ const STATUS_CONFIG: Record<StatusKey, { label: string; textCls: string; bgCls: 
   cancelada:   { label: 'Cancelada',   textCls: 'text-red-900',     bgCls: 'bg-red-200'     },
 }
 
-const DOUGHNUT_STATUSES = ['aprovada', 'enviada', 'rascunho', 'visualizada', 'reprovada'] as const
-const DOUGHNUT_LABELS   = ['Aprovada', 'Enviada', 'Rascunho', 'Visualizada', 'Reprovada']
-const DOUGHNUT_COLORS   = ['#1D9E75', '#378ADD', '#B4B2A9', '#EF9F27', '#E24B4A']
+const DOUGHNUT_STATUSES = ['aprovada', 'enviada', 'rascunho', 'reprovada'] as const
+const DOUGHNUT_LABELS   = ['Aprovada', 'Enviada', 'Rascunho', 'Reprovada']
+const DOUGHNUT_COLORS   = ['#1D9E75', '#378ADD', '#B4B2A9', '#E24B4A']
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -244,21 +245,95 @@ export default async function DashboardPage() {
 
       </div>
 
-      {/* ── Gráficos (linha 2) ────────────────────────────────────────────────── */}
-      <DashboardCharts
-        barLabels={barLabels}
-        barData={barData}
-        doughnutLabels={DOUGHNUT_LABELS}
-        doughnutData={doughnutData}
-        doughnutColors={DOUGHNUT_COLORS}
-      />
+      {/* ── Linha 3: Gráfico barras | Atenção | Por status ───────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_180px] gap-[10px] mb-[10px] items-start">
 
-      {/* ── Linha 3: Recentes + [Por status + Atenção] ───────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-[10px] items-start">
+        {/* Propostas por mês */}
+        <BarChartCard labels={barLabels} data={barData} />
+
+        {/* Atenção necessária */}
+        <div className={card}>
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50">
+            <h2 className="text-sm font-medium text-gray-600">Atenção necessária</h2>
+            {totalAttention > 0 && (
+              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">
+                {totalAttention}
+              </span>
+            )}
+          </div>
+
+          {totalAttention === 0 ? (
+            <div className="px-4 py-5 text-center">
+              <p className="text-[11px] text-gray-400">Tudo em dia</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-50">
+              {sentNoView.map(p => (
+                <li key={p.id}>
+                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-amber-50/60 transition-colors">
+                    <span className="mt-1.5 w-[6px] h-[6px] rounded-full bg-amber-400 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+                        Enviada há {daysSince(p.sent_at ?? p.created_at)}d sem visualização
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+              {viewedNoResponse.map(p => (
+                <li key={p.id}>
+                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-blue-50/60 transition-colors">
+                    <span className="mt-1.5 w-[6px] h-[6px] rounded-full bg-blue-400 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+                        Visualizada há {daysSince(p.sent_at ?? p.created_at)}d sem resposta
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Por status */}
+        <div className={card}>
+          <div className="px-3 py-3.5 border-b border-gray-50">
+            <h2 className="text-sm font-medium text-gray-600">Por status</h2>
+          </div>
+          <ul className="divide-y divide-gray-50">
+            {STATUS_ORDER.map(key => {
+              const cfg   = STATUS_CONFIG[key]
+              const count = counts[key] ?? 0
+              return (
+                <li key={key}>
+                  <Link
+                    href={`/propostas?status=${key}`}
+                    className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                      {cfg.label}
+                    </span>
+                    <span className={`text-[13px] font-semibold tabular-nums ${count > 0 ? 'text-gray-900' : 'text-gray-300'}`}>
+                      {count}
+                    </span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+
+      </div>
+
+      {/* ── Linha 4: Propostas recentes | Valor em negociação ────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-[10px] items-start">
 
         {/* Propostas recentes */}
         <div className={card}>
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-50">
             <h2 className="text-sm font-medium text-gray-600">Propostas recentes</h2>
             <Link href="/propostas" className="text-xs text-[#1D9E75] font-medium hover:underline shrink-0">
               Ver todas →
@@ -319,85 +394,13 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Coluna direita: Por status + Atenção */}
-        <div className="flex flex-col gap-[10px]">
+        {/* Valor em negociação */}
+        <DoughnutCard
+          labels={DOUGHNUT_LABELS}
+          data={doughnutData}
+          colors={DOUGHNUT_COLORS}
+        />
 
-          {/* Por status */}
-          <div className={card}>
-            <div className="px-4 py-3.5 border-b border-gray-50">
-              <h2 className="text-sm font-medium text-gray-600">Por status</h2>
-            </div>
-            <ul className="divide-y divide-gray-50">
-              {STATUS_ORDER.map(key => {
-                const cfg   = STATUS_CONFIG[key]
-                const count = counts[key] ?? 0
-                return (
-                  <li key={key}>
-                    <Link
-                      href={`/propostas?status=${key}`}
-                      className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
-                    >
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
-                        {cfg.label}
-                      </span>
-                      <span className={`text-sm font-semibold tabular-nums ${count > 0 ? 'text-gray-900' : 'text-gray-300'}`}>
-                        {count}
-                      </span>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-
-          {/* Atenção necessária */}
-          <div className={card}>
-            <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50">
-              <h2 className="text-sm font-medium text-gray-600">Atenção necessária</h2>
-              {totalAttention > 0 && (
-                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-amber-400 text-white text-[11px] font-bold flex items-center justify-center">
-                  {totalAttention}
-                </span>
-              )}
-            </div>
-
-            {totalAttention === 0 ? (
-              <div className="px-4 py-6 text-center">
-                <p className="text-sm text-gray-400">Tudo em dia</p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-gray-50">
-                {sentNoView.map(p => (
-                  <li key={p.id}>
-                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-4 py-3.5 hover:bg-amber-50/60 transition-colors">
-                      <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-800 truncate">{trunc(p.title, 36)}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Enviada há {daysSince(p.sent_at ?? p.created_at)} dias sem visualização
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-                {viewedNoResponse.map(p => (
-                  <li key={p.id}>
-                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-4 py-3.5 hover:bg-blue-50/60 transition-colors">
-                      <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-400 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-800 truncate">{trunc(p.title, 36)}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Visualizada há {daysSince(p.sent_at ?? p.created_at)} dias sem resposta
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-        </div>
       </div>
 
     </div>
