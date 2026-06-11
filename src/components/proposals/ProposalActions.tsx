@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import SendProposalModal from './SendProposalModal'
 
 type DuplicateData = {
   title: string
@@ -15,23 +16,31 @@ type DuplicateData = {
   sections: unknown[]
 }
 
+type SendProps = {
+  proposalTitle: string
+  clientEmail: string | null
+  clientName: string | null
+  freelancerName: string
+}
+
 type Props = {
   proposalId: string
   status: string
   initialPdfUrl: string | null
   duplicate: DuplicateData
+  sendProps?: SendProps
 }
 
-export default function ProposalActions({ proposalId, status, initialPdfUrl, duplicate }: Props) {
+export default function ProposalActions({ proposalId, status, initialPdfUrl, duplicate, sendProps }: Props) {
   const router = useRouter()
   const [duplicating, setDuplicating] = useState(false)
-  const [sending, setSending]         = useState(false)
+  const [showSend, setShowSend]       = useState(false)
   const [showCancel, setShowCancel]   = useState(false)
   const [cancelling, setCancelling]   = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
 
-  const isDraft    = status === 'rascunho'
-  const canCancel  = status !== 'aprovada' && status !== 'cancelada'
+  const isDraft   = status === 'rascunho'
+  const canCancel = status !== 'aprovada' && status !== 'cancelada'
 
   function handleDuplicate() {
     setDuplicating(true)
@@ -52,26 +61,11 @@ export default function ProposalActions({ proposalId, status, initialPdfUrl, dup
     }
   }
 
-  async function handleSend() {
-    setSending(true)
-    try {
-      const res = await fetch(`/api/proposals/${proposalId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'enviada' }),
-      })
-      if (!res.ok) throw new Error()
-      router.refresh()
-    } catch {
-      setSending(false)
-    }
-  }
-
   async function handleConfirmCancel() {
     setCancelling(true)
     setCancelError(null)
     try {
-      const res = await fetch(`/api/proposals/${proposalId}`, {
+      const res  = await fetch(`/api/proposals/${proposalId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'cancelada' }),
@@ -86,87 +80,101 @@ export default function ProposalActions({ proposalId, status, initialPdfUrl, dup
     }
   }
 
-  const secondaryCls = 'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50'
+  const sep = <span className="w-px h-5 bg-gray-200 self-center shrink-0" />
+
+  const secondaryCls =
+    'inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50'
 
   return (
     <>
-      {/* ── Barra de ações: uma linha, space-between ── */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      {/* ── Barra de ações ── */}
+      <div className="flex items-center gap-2 flex-wrap">
 
-        {/* Esquerda: ações principais */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Grupo esquerdo — secundários */}
+        {isDraft && (
+          <Link href={`/propostas/${proposalId}/editar`} className={secondaryCls}>
+            {/* edit icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+              <path d="M13.5 6.5l4 4" />
+            </svg>
+            Editar
+          </Link>
+        )}
 
-          {isDraft && (
-            <Link
-              href={`/propostas/${proposalId}/editar`}
-              className={secondaryCls}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-                <path d="M13.5 6.5l4 4" />
-              </svg>
-              Editar
-            </Link>
+        <button onClick={handleDuplicate} disabled={duplicating} className={secondaryCls}>
+          {duplicating ? (
+            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="8" y="8" width="12" height="12" rx="2" />
+              <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2" />
+            </svg>
           )}
+          {duplicating ? 'Duplicando…' : 'Duplicar'}
+        </button>
 
-          <button onClick={handleDuplicate} disabled={duplicating} className={secondaryCls}>
-            {duplicating ? (
-              <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="8" y="8" width="12" height="12" rx="2" />
-                <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2" />
-              </svg>
-            )}
-            {duplicating ? 'Duplicando…' : 'Duplicar'}
+        {initialPdfUrl && (
+          <a href={initialPdfUrl} target="_blank" rel="noopener noreferrer" className={secondaryCls}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+              <path d="M7 11l5 5l5 -5" />
+              <path d="M12 4l0 12" />
+            </svg>
+            Baixar PDF
+          </a>
+        )}
+
+        {/* Separador */}
+        {isDraft && sendProps && sep}
+
+        {/* Enviar — abre modal */}
+        {isDraft && sendProps && (
+          <button
+            onClick={() => setShowSend(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-[#1D9E75] rounded-lg hover:bg-[#188f68] transition-colors"
+          >
+            {/* mail icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <polyline points="3 7 12 13 21 7" />
+            </svg>
+            Enviar
           </button>
+        )}
 
-          {initialPdfUrl && (
-            <a href={initialPdfUrl} target="_blank" rel="noopener noreferrer" className={secondaryCls}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                <path d="M7 11l5 5l5 -5" />
-                <path d="M12 4l0 12" />
-              </svg>
-              Baixar PDF
-            </a>
-          )}
+        {/* Separador */}
+        {canCancel && sep}
 
-          {isDraft && (
-            <button
-              onClick={handleSend}
-              disabled={sending}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#1D9E75] rounded-lg hover:bg-[#188f68] transition-colors disabled:opacity-50"
-            >
-              {sending ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 14l11 -11" />
-                  <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
-                </svg>
-              )}
-              {sending ? 'Enviando…' : 'Enviar proposta'}
-            </button>
-          )}
-        </div>
-
-        {/* Direita: cancelar */}
+        {/* Cancelar */}
         {canCancel && (
           <button
             onClick={() => setShowCancel(true)}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-red-400 hover:text-red-600 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-400 hover:text-red-600 transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="9" />
               <path d="M5.7 5.7l12.6 12.6" />
             </svg>
-            Cancelar proposta
+            Cancelar
           </button>
         )}
       </div>
 
-      {/* ── Modal de confirmação ── */}
+      {/* ── Modal enviar ── */}
+      {sendProps && (
+        <SendProposalModal
+          open={showSend}
+          onClose={() => setShowSend(false)}
+          proposalId={proposalId}
+          proposalTitle={sendProps.proposalTitle}
+          clientEmail={sendProps.clientEmail}
+          clientName={sendProps.clientName}
+          freelancerName={sendProps.freelancerName}
+        />
+      )}
+
+      {/* ── Modal cancelar ── */}
       {showCancel && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
