@@ -185,24 +185,24 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
         {/* Valor aprovado */}
-        <div className="bg-[#1D9E75] rounded-xl p-5 text-white shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-100 mb-2">Valor aprovado</p>
-          <p className="text-xl font-extrabold leading-tight tabular-nums">{fmtBRL(totalApprovedValue)}</p>
-          <p className="text-xs text-emerald-200 mt-2">
+        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <p className="text-[11px] font-semibold text-gray-400 mb-2">Valor aprovado</p>
+          <p className="text-xl font-extrabold leading-tight tabular-nums text-[#1D9E75]">{fmtBRL(totalApprovedValue)}</p>
+          <p className="text-xs text-gray-400 mt-2">
             {approvedCount} proposta{approvedCount !== 1 ? 's' : ''} aprovada{approvedCount !== 1 ? 's' : ''}
           </p>
         </div>
 
         {/* Propostas abertas */}
         <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Propostas abertas</p>
+          <p className="text-[11px] font-semibold text-gray-400 mb-2">Propostas abertas</p>
           <p className="text-2xl font-extrabold text-gray-900 leading-tight">{openCount}</p>
           <p className="text-xs text-gray-400 mt-2">enviadas + visualizadas</p>
         </div>
 
         {/* Taxa de aprovação */}
         <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Taxa de aprovação</p>
+          <p className="text-[11px] font-semibold text-gray-400 mb-2">Taxa de aprovação</p>
           <p className="text-2xl font-extrabold text-gray-900 leading-tight">
             {approvalRate !== null ? `${approvalRate}%` : '—'}
           </p>
@@ -211,7 +211,7 @@ export default async function DashboardPage() {
 
         {/* Criadas este mês */}
         <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Criadas este mês</p>
+          <p className="text-[11px] font-semibold text-gray-400 mb-2">Criadas este mês</p>
           <p className="text-2xl font-extrabold text-gray-900 leading-tight">{usedThisMonth}</p>
           <p className="text-xs text-gray-400 mt-2">
             {isPro ? 'plano pro: ilimitado' : `plano free: ${usedThisMonth} / 5`}
@@ -224,9 +224,9 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
         {/* Atenção necessária */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm self-start">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <h2 className="text-sm font-semibold text-gray-900">Atenção necessária</h2>
+            <h2 className="text-[13px] font-medium text-gray-500">Atenção necessária</h2>
             {totalAttention > 0 && (
               <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center">
                 {totalAttention}
@@ -290,7 +290,7 @@ export default async function DashboardPage() {
         {/* Por status */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
           <div className="px-5 py-4 border-b border-gray-50">
-            <h2 className="text-sm font-semibold text-gray-900">Por status</h2>
+            <h2 className="text-[13px] font-medium text-gray-500">Por status</h2>
           </div>
           <ul className="divide-y divide-gray-50">
             {STATUS_ORDER.map(key => {
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
       {/* ── 4. Propostas recentes ───────────────────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-          <h2 className="text-sm font-semibold text-gray-900">Propostas recentes</h2>
+          <h2 className="text-[13px] font-medium text-gray-500">Propostas recentes</h2>
           <Link href="/propostas" className="text-xs text-[#1D9E75] font-medium hover:underline shrink-0">
             Ver todas →
           </Link>
@@ -342,7 +342,9 @@ export default async function DashboardPage() {
                 <li key={p.id}>
                   <Link href={`/propostas/${p.id}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {p.title.length > 40 ? p.title.slice(0, 40) + '…' : p.title}
+                      </p>
                       <div className="flex items-center gap-2 mt-0.5 min-w-0">
                         {name && (
                           <span className="text-xs text-gray-400 truncate">{name}</span>
