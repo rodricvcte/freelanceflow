@@ -30,7 +30,7 @@ export default function ValueDoughnutChart({ labels, data, colors }: Props) {
   const options: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%',
+    cutout: '50%',
     plugins: {
       legend: { display: false },
       tooltip: {
