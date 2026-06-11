@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { canCreateProposal } from '@/lib/plan'
 import { buildNewProposalNumber } from '@/lib/proposal-number'
+import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
+
+export const runtime = 'nodejs'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
@@ -99,5 +102,10 @@ export async function POST(request: Request) {
     Object.assign(data, updates)
   }
 
-  return NextResponse.json(data, { status: 201 })
+  let pdfUrl: string | null = data.pdf_url ?? null
+  try {
+    pdfUrl = await generateAndSaveProposalPDF(data.id, supabase)
+  } catch { /* non-fatal */ }
+
+  return NextResponse.json({ ...data, pdf_url: pdfUrl }, { status: 201 })
 }

@@ -17,35 +17,19 @@ type DuplicateData = {
 
 type Props = {
   proposalId: string
-  token: string
   status: string
   initialPdfUrl: string | null
   duplicate: DuplicateData
 }
 
-export default function ProposalActions({ proposalId, token, status, initialPdfUrl, duplicate }: Props) {
+export default function ProposalActions({ proposalId, status, initialPdfUrl, duplicate }: Props) {
   const router = useRouter()
-  const [copied, setCopied]           = useState(false)
   const [duplicating, setDuplicating] = useState(false)
-  const [pdfUrl, setPdfUrl]           = useState(initialPdfUrl)
-  const [pdfLoading, setPdfLoading]   = useState(false)
-  const [pdfError, setPdfError]       = useState<string | null>(null)
   const [showCancel, setShowCancel]   = useState(false)
   const [cancelling, setCancelling]   = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
 
   const canCancel = status !== 'aprovada' && status !== 'cancelada'
-
-  async function handleCopyLink() {
-    const url = `${window.location.origin}/p/${token}`
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      window.prompt('Copie o link da proposta:', url)
-    }
-  }
 
   async function handleDuplicate() {
     setDuplicating(true)
@@ -72,21 +56,6 @@ export default function ProposalActions({ proposalId, token, status, initialPdfU
     }
   }
 
-  async function handleGeneratePDF() {
-    setPdfLoading(true)
-    setPdfError(null)
-    try {
-      const res = await fetch(`/api/proposals/${proposalId}/pdf`, { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar PDF')
-      setPdfUrl(data.pdf_url)
-    } catch (e) {
-      setPdfError(e instanceof Error ? e.message : 'Erro ao gerar PDF')
-    } finally {
-      setPdfLoading(false)
-    }
-  }
-
   async function handleConfirmCancel() {
     setCancelling(true)
     setCancelError(null)
@@ -106,133 +75,89 @@ export default function ProposalActions({ proposalId, token, status, initialPdfU
     }
   }
 
-  const btn = 'flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg border transition-colors'
-
   return (
     <>
-      <div className="space-y-4">
-        {/* Action buttons */}
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={handleCopyLink}
-            className={`${btn} ${copied ? 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/30' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
-          >
-            {copied ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-            )}
-            {copied ? 'Copiado!' : 'Copiar link'}
-          </button>
+      <div className="flex flex-col gap-4">
 
-          {status === 'rascunho' ? (
+        {/* ── Ações principais ── */}
+        <div className="flex flex-wrap items-center gap-2">
+
+          {status === 'rascunho' && (
             <Link
               href={`/propostas/${proposalId}/editar`}
-              className={`${btn} bg-white text-gray-700 border-gray-200 hover:bg-gray-50`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              {/* Tabler: pencil */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                <path d="M13.5 6.5l4 4" />
               </svg>
               Editar
             </Link>
-          ) : (
-            <button
-              disabled
-              title="Apenas rascunhos podem ser editados"
-              className={`${btn} bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Editar
-            </button>
           )}
 
           <button
             onClick={handleDuplicate}
             disabled={duplicating}
-            className={`${btn} bg-white text-gray-700 border-gray-200 hover:bg-gray-50 disabled:opacity-50`}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             {duplicating ? (
               <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              /* Tabler: copy */
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="8" y="8" width="12" height="12" rx="2" />
+                <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2" />
               </svg>
             )}
-            {duplicating ? 'Duplicando...' : 'Duplicar'}
+            {duplicating ? 'Duplicando…' : 'Duplicar'}
           </button>
 
-          {canCancel && (
+          {initialPdfUrl && (
+            <a
+              href={initialPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              {/* Tabler: download */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                <path d="M7 11l5 5l5 -5" />
+                <path d="M12 4l0 12" />
+              </svg>
+              Baixar PDF
+            </a>
+          )}
+        </div>
+
+        {/* ── Ação destrutiva ── */}
+        {canCancel && (
+          <div>
             <button
               onClick={() => setShowCancel(true)}
-              className={`${btn} bg-white text-red-600 border-red-200 hover:bg-red-50`}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-red-400 hover:text-red-600 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              {/* Tabler: ban */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M5.7 5.7l12.6 12.6" />
               </svg>
               Cancelar proposta
             </button>
-          )}
-        </div>
-
-        {/* PDF section */}
-        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">PDF da proposta</p>
-          {pdfUrl ? (
-            <div className="flex flex-wrap gap-2">
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3.5 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Baixar PDF
-              </a>
-              <button
-                onClick={handleGeneratePDF}
-                disabled={pdfLoading}
-                className="px-3.5 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                {pdfLoading ? 'Gerando...' : 'Regenerar'}
-              </button>
-            </div>
-          ) : (
-            <div>
-              <button
-                onClick={handleGeneratePDF}
-                disabled={pdfLoading}
-                className="flex items-center gap-2 px-3.5 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors disabled:opacity-50"
-              >
-                {pdfLoading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                )}
-                {pdfLoading ? 'Gerando PDF...' : 'Gerar PDF'}
-              </button>
-              {pdfError && <p className="mt-2 text-xs text-red-600">{pdfError}</p>}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Cancel confirmation modal */}
+      {/* ── Modal de confirmação ── */}
       {showCancel && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 9v4" />
+                <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+                <path d="M12 16h.01" />
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 text-center mb-2">Cancelar proposta?</h3>
@@ -255,7 +180,7 @@ export default function ProposalActions({ proposalId, token, status, initialPdfU
                 disabled={cancelling}
                 className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
               >
-                {cancelling ? 'Cancelando...' : 'Confirmar'}
+                {cancelling ? 'Cancelando…' : 'Confirmar'}
               </button>
             </div>
           </div>

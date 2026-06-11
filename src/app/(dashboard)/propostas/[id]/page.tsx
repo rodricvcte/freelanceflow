@@ -388,11 +388,10 @@ export default async function ProposalDetailPage({
         </div>
       )}
 
-      {/* ── Actions + PDF (client component) ── */}
-      <div className="mb-6 flex flex-wrap items-center gap-3">
+      {/* ── Actions ── */}
+      <div className="mb-6">
         <ProposalActions
           proposalId={proposal.id}
-          token={proposal.token}
           status={proposal.status}
           initialPdfUrl={proposal.pdf_url}
           duplicate={{
@@ -407,13 +406,15 @@ export default async function ProposalDetailPage({
           }}
         />
         {proposal.status === 'rascunho' && (
-          <SendProposalModal
-            proposalId={proposal.id}
-            proposalTitle={proposal.title}
-            clientEmail={(proposalAny.recipient_email as string | null) ?? client?.email ?? null}
-            clientName={(proposalAny.recipient_name as string | null) ?? client?.name ?? null}
-            freelancerName={freelancerName}
-          />
+          <div className="mt-4">
+            <SendProposalModal
+              proposalId={proposal.id}
+              proposalTitle={proposal.title}
+              clientEmail={(proposalAny.recipient_email as string | null) ?? client?.email ?? null}
+              clientName={(proposalAny.recipient_name as string | null) ?? client?.name ?? null}
+              freelancerName={freelancerName}
+            />
+          </div>
         )}
       </div>
 
