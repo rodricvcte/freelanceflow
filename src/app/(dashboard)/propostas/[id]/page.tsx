@@ -2,6 +2,15 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import ProposalActions from '@/components/proposals/ProposalActions'
+import type {
+  Section,
+  TextSection,
+  ScopeSection,
+  ItemsSection,
+  HoursSection,
+  InstallmentsSection,
+  ClausesSection,
+} from '@/components/proposals/ProposalPDF'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -16,7 +25,9 @@ type ProposalRow = {
   status: string
   pdf_url: string | null
   token: string
+  proposal_number: string | null
   created_at: string
+  sections: Section[]
   clients: { id: string; name: string; email: string | null; phone: string | null } | null
 }
 
@@ -71,6 +82,146 @@ function fmtDateTime(iso: string) {
   }).format(new Date(iso))
 }
 
+function fmtRowBRL(v: string | number | null | undefined) {
+  const n = v === null || v === undefined ? null : typeof v === 'string' ? parseFloat(v) : v
+  return fmtBRL(n !== null && !isNaN(n) ? n : null)
+}
+
+// ─── Section renderers ────────────────────────────────────────────────────────
+
+function SectionCard({ section }: { section: Section }) {
+  const heading = (
+    <p className="text-sm font-semibold text-gray-800 mb-3">{section.title}</p>
+  )
+
+  if (section.type === 'text') {
+    const s = section as TextSection
+    return (
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+        {heading}
+        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{s.content}</p>
+      </div>
+    )
+  }
+
+  if (section.type === 'scope') {
+    const s = section as ScopeSection
+    return (
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+        {heading}
+        <ul className="space-y-1.5">
+          {s.items.map((item, i) => (
+            <li key={i} className="flex gap-2 text-sm text-gray-700">
+              <span className="text-[#1D9E75] shrink-0">•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  if (section.type === 'items') {
+    const s = section as ItemsSection
+    return (
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm overflow-x-auto">
+        {heading}
+        <table className="w-full text-sm min-w-[400px]">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="text-left pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Descrição</th>
+              <th className="text-center pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide w-16">Qtd</th>
+              <th className="text-right pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Valor unit.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {s.rows.map((row, i) => (
+              <tr key={i} className="border-b border-gray-50 last:border-0">
+                <td className="py-2 text-gray-700">{row.description}</td>
+                <td className="py-2 text-center text-gray-600">{row.quantity}</td>
+                <td className="py-2 text-right text-gray-700 tabular-nums">{fmtRowBRL(row.unit_price)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  if (section.type === 'hours') {
+    const s = section as HoursSection
+    return (
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm overflow-x-auto">
+        {heading}
+        <table className="w-full text-sm min-w-[400px]">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="text-left pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Perfil</th>
+              <th className="text-center pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">Horas</th>
+              <th className="text-right pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Valor/hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            {s.rows.map((row, i) => (
+              <tr key={i} className="border-b border-gray-50 last:border-0">
+                <td className="py-2 text-gray-700">{row.profile}</td>
+                <td className="py-2 text-center text-gray-600">{row.hours}</td>
+                <td className="py-2 text-right text-gray-700 tabular-nums">{fmtRowBRL(row.rate)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  if (section.type === 'installments') {
+    const s = section as InstallmentsSection
+    return (
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm overflow-x-auto">
+        {heading}
+        <table className="w-full text-sm min-w-[400px]">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="text-left pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Descrição</th>
+              <th className="text-center pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">%</th>
+              <th className="text-left pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Condição</th>
+            </tr>
+          </thead>
+          <tbody>
+            {s.rows.map((row, i) => (
+              <tr key={i} className="border-b border-gray-50 last:border-0">
+                <td className="py-2 text-gray-700">{row.description}</td>
+                <td className="py-2 text-center text-gray-600">{row.percentage}%</td>
+                <td className="py-2 text-gray-600">{row.condition}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  if (section.type === 'clauses') {
+    const s = section as ClausesSection
+    return (
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+        {heading}
+        <ol className="space-y-2">
+          {s.items.map((item, i) => (
+            <li key={i} className="flex gap-2.5 text-sm text-gray-700">
+              <span className="shrink-0 font-semibold text-gray-400 tabular-nums w-5 text-right">{i + 1}.</span>
+              <span className="leading-relaxed">{item}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    )
+  }
+
+  return null
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ProposalDetailPage({
@@ -86,7 +237,7 @@ export default async function ProposalDetailPage({
   const [proposalRes, eventsRes, followUpsRes] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, created_at, clients(id, name, email, phone)')
+      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, created_at, sections, clients(id, name, email, phone)')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -106,17 +257,23 @@ export default async function ProposalDetailPage({
 
   if (!proposalRes.data) notFound()
 
-  const proposal = proposalRes.data as unknown as ProposalRow
-  const events   = (eventsRes.data  ?? []) as EventRow[]
+  const proposal  = proposalRes.data as unknown as ProposalRow
+  const events    = (eventsRes.data  ?? []) as EventRow[]
   const followUps = (followUpsRes.data ?? []) as FollowUpRow[]
+  const sections  = Array.isArray(proposal.sections) ? proposal.sections : []
 
   const statusCfg = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
-  const ref       = '#' + proposal.token.substring(0, 8).toUpperCase()
+  const ref       = proposal.proposal_number ?? '#' + proposal.token.substring(0, 8).toUpperCase()
 
   const clientsRaw = (proposalRes.data as Record<string, unknown>).clients
   const client = Array.isArray(clientsRaw)
     ? (clientsRaw[0] as ProposalRow['clients']) ?? null
     : clientsRaw as ProposalRow['clients']
+
+  const hasSectionsPanel =
+    !!proposal.service_description ||
+    sections.length > 0 ||
+    !!proposal.payment_terms
 
   return (
     <div className="p-6 md:p-8 max-w-5xl">
@@ -154,13 +311,10 @@ export default async function ProposalDetailPage({
           {client?.email && <p className="text-xs text-gray-500 truncate mt-0.5">{client.email}</p>}
         </div>
         <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm col-span-2 sm:col-span-1">
-          <p className="text-xs text-gray-400 mb-1">Prazo / Pagamento</p>
+          <p className="text-xs text-gray-400 mb-1">Prazo de entrega</p>
           <p className="text-sm font-semibold text-gray-900">
             {proposal.deadline_days !== null ? `${proposal.deadline_days} dias` : '—'}
           </p>
-          {proposal.payment_terms && (
-            <p className="text-xs text-gray-500 truncate mt-0.5">{proposal.payment_terms}</p>
-          )}
         </div>
       </div>
 
@@ -181,21 +335,38 @@ export default async function ProposalDetailPage({
         />
       </div>
 
-      {/* ── Two-column layout ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-        {/* Left: service + timeline */}
-        <div className="lg:col-span-3 space-y-6">
+      {/* ── Sections panel ── */}
+      {hasSectionsPanel && (
+        <div className="space-y-4 mb-6">
 
           {/* Service description */}
           {proposal.service_description && (
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Escopo do Serviço</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Descrição do serviço</p>
               <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{proposal.service_description}</p>
             </div>
           )}
 
-          {/* Timeline */}
+          {/* Dynamic sections */}
+          {sections.map(section => (
+            <SectionCard key={section.id} section={section} />
+          ))}
+
+          {/* Payment terms */}
+          {proposal.payment_terms && (
+            <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Condições de pagamento</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{proposal.payment_terms}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Two-column layout ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+        {/* Left: timeline */}
+        <div className="lg:col-span-3">
           <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Linha do tempo</p>
 
@@ -212,12 +383,10 @@ export default async function ProposalDetailPage({
                   const isLast = i === events.length - 1
                   return (
                     <li key={ev.id} className="flex gap-3">
-                      {/* Connector */}
                       <div className="flex flex-col items-center">
                         <div className={`w-3 h-3 rounded-full ring-4 shrink-0 mt-0.5 ${cfg.dot} ${cfg.ring}`} />
                         {!isLast && <div className="w-px flex-1 bg-gray-100 my-1" />}
                       </div>
-                      {/* Content */}
                       <div className={`pb-4 flex-1 min-w-0 ${isLast ? '' : ''}`}>
                         <p className="text-sm font-medium text-gray-900">{cfg.label}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{fmtDateTime(ev.created_at)}</p>
@@ -243,7 +412,6 @@ export default async function ProposalDetailPage({
               <ul className="space-y-3">
                 {followUps.map(fu => (
                   <li key={fu.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    {/* Type icon */}
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${fu.type === 'whatsapp' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
                       {fu.type === 'whatsapp' ? (
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
