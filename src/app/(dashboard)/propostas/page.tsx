@@ -4,11 +4,13 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 type Proposal = {
   id: string
   title: string
   value: number | null
-  status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired'
+  status: string
   created_at: string
   sent_at: string | null
   version: number
@@ -16,6 +18,10 @@ type Proposal = {
   pdf_url: string | null
   clients: { id: string; name: string } | null
 }
+
+type Client = { id: string; name: string }
+
+// ─── Config ───────────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
   rascunho:    { label: 'Rascunho',    className: 'bg-gray-100 text-gray-500' },
@@ -28,11 +34,62 @@ const STATUS_CONFIG = {
 } as const
 
 const PERIOD_OPTIONS = [
-  { label: 'Todos',    days: 0 },
-  { label: '7 dias',  days: 7 },
-  { label: '30 dias', days: 30 },
-  { label: '90 dias', days: 90 },
+  { label: 'Todos os períodos', value: 'all' },
+  { label: 'Hoje',              value: 'today' },
+  { label: 'Esta semana',       value: 'week' },
+  { label: 'Este mês',          value: 'month' },
+  { label: 'Últimos 3 meses',   value: '3months' },
 ]
+
+const VALUE_OPTIONS = [
+  { label: 'Todos os valores', value: 'all' },
+  { label: 'Até R$ 1.000',    value: 'lt1k' },
+  { label: 'R$ 1k – R$ 10k',  value: '1k-10k' },
+  { label: 'R$ 10k – R$ 50k', value: '10k-50k' },
+  { label: 'Acima de R$ 50k', value: 'gt50k' },
+]
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function fmtBRL(value: number | null) {
+  if (value === null) return '—'
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+}
+
+function fmtDate(iso: string | null) {
+  if (!iso) return '—'
+  const [y, m, d] = iso.split('T')[0].split('-').map(Number)
+  return new Intl.DateTimeFormat('pt-BR').format(new Date(y, m - 1, d))
+}
+
+function getPeriodCutoff(period: string): number {
+  const now = new Date()
+  switch (period) {
+    case 'today': {
+      const d = new Date(now); d.setHours(0, 0, 0, 0); return d.getTime()
+    }
+    case 'week':   return now.getTime() - 7 * 86_400_000
+    case 'month': {
+      const d = new Date(now.getFullYear(), now.getMonth(), 1); return d.getTime()
+    }
+    case '3months': return now.getTime() - 90 * 86_400_000
+    default: return 0
+  }
+}
+
+function matchesValueRange(value: number | null, range: string): boolean {
+  if (range === 'all') return true
+  const v = value ?? 0
+  switch (range) {
+    case 'lt1k':    return v <= 1000
+    case '1k-10k':  return v > 1000 && v <= 10000
+    case '10k-50k': return v > 10000 && v <= 50000
+    case 'gt50k':   return v > 50000
+    default:        return true
+  }
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
   const cfg = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
@@ -43,46 +100,62 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-function fmtBRL(value: number | null) {
-  if (value === null) return '—'
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-}
+const selectCls = 'px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent'
 
-function fmtDate(iso: string | null) {
-  if (!iso) return '—'
-  return new Intl.DateTimeFormat('pt-BR').format(new Date(iso))
-}
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProposalsPage() {
-  const router = useRouter()
+  const router       = useRouter()
   const searchParams = useSearchParams()
+
   const [proposals, setProposals] = useState<Proposal[]>([])
+  const [clients, setClients]     = useState<Client[]>([])
   const [loading, setLoading]     = useState(true)
-  const [search, setSearch]       = useState('')
-  const [statusFilter, setStatus] = useState(searchParams.get('status') ?? 'all')
-  const [periodDays, setPeriod]   = useState(0)
+
+  // Filters
+  const [search,       setSearch]       = useState('')
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? 'all')
+  const [period,       setPeriod]       = useState('all')
+  const [clientFilter, setClientFilter] = useState('all')
+  const [valueRange,   setValueRange]   = useState('all')
 
   useEffect(() => {
-    fetch('/api/proposals')
-      .then(r => r.json())
-      .then(data => { setProposals(Array.isArray(data) ? data : []); setLoading(false) })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/proposals').then(r => r.json()),
+      fetch('/api/clients').then(r => r.json()).catch(() => []),
+    ]).then(([data, clientData]) => {
+      setProposals(Array.isArray(data) ? data : [])
+      setClients(Array.isArray(clientData) ? clientData : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
+  const hasActiveFilters = search !== '' || statusFilter !== 'all' || period !== 'all' || clientFilter !== 'all' || valueRange !== 'all'
+
+  function clearFilters() {
+    setSearch(''); setStatusFilter('all'); setPeriod('all'); setClientFilter('all'); setValueRange('all')
+  }
+
   const filtered = useMemo(() => {
-    const cutoff = periodDays > 0 ? Date.now() - periodDays * 86_400_000 : 0
+    const cutoff = getPeriodCutoff(period)
     return proposals.filter(p => {
       if (statusFilter !== 'all' && p.status !== statusFilter) return false
       if (cutoff && new Date(p.created_at).getTime() < cutoff) return false
+      if (clientFilter !== 'all') {
+        const cid = p.clients?.id ?? ''
+        if (cid !== clientFilter) return false
+      }
+      if (!matchesValueRange(p.value, valueRange)) return false
       const q = search.toLowerCase()
       if (q && !p.title.toLowerCase().includes(q) && !(p.proposal_number?.toLowerCase().includes(q))) return false
       return true
     })
-  }, [proposals, statusFilter, periodDays, search])
+  }, [proposals, search, statusFilter, period, clientFilter, valueRange])
 
   return (
     <div className="p-6 md:p-8 max-w-7xl">
-      {/* Header */}
+
+      {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Propostas</h1>
@@ -99,69 +172,123 @@ export default function ProposalsPage() {
         </Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-xs">
-          <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
-          </svg>
-          <input type="text" placeholder="Buscar por título ou número..." value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent" />
+      {/* ── Filters ── */}
+      <div className="space-y-3 mb-4">
+        <div className="flex flex-wrap gap-3">
+          {/* Search */}
+          <div className="relative flex-1 min-w-[200px] max-w-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Buscar por título ou número..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent"
+            />
+          </div>
+
+          {/* Status */}
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className={selectCls}>
+            <option value="all">Todos os status</option>
+            {Object.entries(STATUS_CONFIG).map(([value, { label }]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+
+          {/* Period */}
+          <select value={period} onChange={e => setPeriod(e.target.value)} className={selectCls}>
+            {PERIOD_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+
+          {/* Client */}
+          <select value={clientFilter} onChange={e => setClientFilter(e.target.value)} className={selectCls}>
+            <option value="all">Todos os clientes</option>
+            {clients.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+
+          {/* Value range */}
+          <select value={valueRange} onChange={e => setValueRange(e.target.value)} className={selectCls}>
+            {VALUE_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
         </div>
-        <select value={statusFilter} onChange={e => setStatus(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent">
-          <option value="all">Todos os status</option>
-          {Object.entries(STATUS_CONFIG).map(([value, { label }]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-        <select value={periodDays} onChange={e => setPeriod(Number(e.target.value))}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent">
-          {PERIOD_OPTIONS.map(o => (
-            <option key={o.days} value={o.days}>{o.label}</option>
-          ))}
-        </select>
+
+        {/* Counter + Clear */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Mostrando <span className="font-medium text-gray-900">{filtered.length}</span> de <span className="font-medium text-gray-900">{proposals.length}</span> propostas
+          </p>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="text-sm text-[#1D9E75] font-medium hover:underline flex items-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Limpar filtros
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Table */}
+      {/* ── Table ── */}
       <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-6 h-6 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <EmptyState hasFilters={search !== '' || statusFilter !== 'all' || periodDays > 0} />
+          <EmptyState hasFilters={hasActiveFilters} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3">ID / Título</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Versão</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Cliente</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Valor</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Envio</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Status</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Ações</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3 whitespace-nowrap">ID / Título</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Versão</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Cliente</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Valor total</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Data de criação</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Data de envio</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Status</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filtered.map(p => (
                   <tr key={p.id} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="px-5 py-3.5">
-                      {p.proposal_number ? (
+                    <td className="px-5 py-3.5 max-w-[220px]">
+                      {p.proposal_number && (
                         <span className="font-mono text-xs text-[#1D9E75] font-semibold block mb-0.5">{p.proposal_number}</span>
-                      ) : null}
+                      )}
                       <span className="font-medium text-gray-900 text-sm line-clamp-1">{p.title}</span>
                     </td>
                     <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
                       v{p.version ?? 1}
                     </td>
-                    <td className="px-4 py-3.5 text-gray-500">{p.clients?.name ?? '—'}</td>
-                    <td className="px-4 py-3.5 text-gray-700 font-medium whitespace-nowrap">{fmtBRL(p.value)}</td>
-                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">{fmtDate(p.sent_at ?? p.created_at)}</td>
-                    <td className="px-4 py-3.5"><StatusBadge status={p.status} /></td>
+                    <td className="px-4 py-3.5 text-gray-500 max-w-[140px]">
+                      <span className="line-clamp-1">{p.clients?.name ?? '—'}</span>
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-700 font-medium whitespace-nowrap tabular-nums">
+                      {fmtBRL(p.value)}
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
+                      {fmtDate(p.created_at)}
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
+                      {p.sent_at ? fmtDate(p.sent_at) : '—'}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <StatusBadge status={p.status} />
+                    </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1.5">
                         {p.pdf_url && (

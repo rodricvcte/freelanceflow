@@ -65,7 +65,7 @@ export async function PUT(
   const [{ data: current }, { data: profile }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, version, created_at, proposal_number')
+      .select('id, version, created_at, proposal_number, status')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -77,6 +77,10 @@ export async function PUT(
   ])
 
   if (!current) return NextResponse.json({ error: 'Proposta não encontrada' }, { status: 404 })
+
+  if (current.status !== 'rascunho') {
+    return NextResponse.json({ error: 'Proposta já enviada não pode ser editada' }, { status: 403 })
+  }
 
   const body = await request.json()
   const {

@@ -127,15 +127,28 @@ export default function ProposalActions({ proposalId, token, status, initialPdfU
             {copied ? 'Copiado!' : 'Copiar link'}
           </button>
 
-          <Link
-            href={`/propostas/${proposalId}/editar`}
-            className={`${btn} bg-white text-gray-700 border-gray-200 hover:bg-gray-50`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Editar
-          </Link>
+          {status === 'rascunho' ? (
+            <Link
+              href={`/propostas/${proposalId}/editar`}
+              className={`${btn} bg-white text-gray-700 border-gray-200 hover:bg-gray-50`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Editar
+            </Link>
+          ) : (
+            <button
+              disabled
+              title="Apenas rascunhos podem ser editados"
+              className={`${btn} bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Editar
+            </button>
+          )}
 
           <button
             onClick={handleDuplicate}

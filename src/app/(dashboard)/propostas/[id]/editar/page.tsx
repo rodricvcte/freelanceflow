@@ -283,12 +283,13 @@ export default function EditarPropostaPage() {
   const { id } = useParams<{ id: string }>()
   const router  = useRouter()
 
-  const [form, setForm]       = useState(EMPTY_FORM)
+  const [form, setForm]         = useState(EMPTY_FORM)
   const [sections, setSections] = useState<Section[]>([])
-  const [clients, setClients] = useState<Client[]>([])
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSub]  = useState(false)
-  const [error, setError]     = useState<string | null>(null)
+  const [clients, setClients]   = useState<Client[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [blocked, setBlocked]   = useState(false)
+  const [submitting, setSub]    = useState(false)
+  const [error, setError]       = useState<string | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -296,6 +297,14 @@ export default function EditarPropostaPage() {
       fetch('/api/clients').then(r => r.json()),
     ]).then(([proposal, clientList]) => {
       if (proposal.error) { setError(proposal.error); setLoading(false); return }
+
+      if (proposal.status !== 'rascunho') {
+        setBlocked(true)
+        setLoading(false)
+        setTimeout(() => router.replace(`/propostas/${id}`), 2000)
+        return
+      }
+
       setForm({
         title:               proposal.title ?? '',
         service_description: proposal.service_description ?? '',
@@ -366,6 +375,25 @@ export default function EditarPropostaPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-6 h-6 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (blocked) {
+    return (
+      <div className="p-6 md:p-8 max-w-2xl">
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+          <div>
+            <p className="text-sm font-semibold text-amber-900">Edição não permitida</p>
+            <p className="text-xs text-amber-700 mt-0.5">Apenas rascunhos podem ser editados. Redirecionando…</p>
+          </div>
+        </div>
+        <Link href={`/propostas/${id}`} className="text-sm text-[#1D9E75] font-medium hover:underline">
+          ← Voltar para a proposta
+        </Link>
       </div>
     )
   }
