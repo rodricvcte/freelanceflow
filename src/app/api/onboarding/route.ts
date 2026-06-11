@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-service'
 
 export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient()
@@ -28,7 +29,8 @@ export async function POST(request: Request) {
     )
   }
 
-  const { data, error } = await supabase
+  const serviceClient = createServiceClient()
+  const { data, error } = await serviceClient
     .from('profiles')
     .upsert(
       {
