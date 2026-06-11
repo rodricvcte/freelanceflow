@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase-browser'
 
 const nav = [
   {
@@ -59,6 +60,13 @@ export default function Sidebar() {
   const [open, setOpen]         = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const pathname = usePathname()
+  const router   = useRouter()
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   function fetchUserInfo() {
     Promise.all([
@@ -131,12 +139,12 @@ export default function Sidebar() {
         </nav>
 
         {/* User / plan footer */}
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100 space-y-1">
           {userInfo ? (
             <Link
               href="/configuracoes?tab=plano"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors group"
+              className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="w-7 h-7 rounded-full bg-[#1D9E75]/10 flex items-center justify-center shrink-0">
                 <span className="text-xs font-bold text-[#1D9E75]">
@@ -157,8 +165,19 @@ export default function Sidebar() {
               </div>
             </Link>
           ) : (
-            <p className="text-xs text-gray-400 text-center">FreelanceFlow v0.1</p>
+            <p className="text-xs text-gray-400 text-center py-1">FreelanceFlow v0.1</p>
           )}
+
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
+            {/* logout icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sair
+          </button>
         </div>
       </aside>
     </>
