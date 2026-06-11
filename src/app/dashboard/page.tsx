@@ -245,58 +245,18 @@ export default async function DashboardPage() {
 
       </div>
 
-      {/* ── Linha 3: Gráfico barras | Atenção | Por status ───────────────────── */}
+      {/* ── Linha 3: Gráfico barras | Valor em negociação | Por status ─────── */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_180px] gap-[10px] mb-[10px] items-start">
 
         {/* Propostas por mês */}
         <BarChartCard labels={barLabels} data={barData} />
 
-        {/* Atenção necessária */}
-        <div className={card}>
-          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50">
-            <h2 className="text-sm font-medium text-gray-600">Atenção necessária</h2>
-            {totalAttention > 0 && (
-              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">
-                {totalAttention}
-              </span>
-            )}
-          </div>
-
-          {totalAttention === 0 ? (
-            <div className="px-4 py-5 text-center">
-              <p className="text-[11px] text-gray-400">Tudo em dia</p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-gray-50">
-              {sentNoView.map(p => (
-                <li key={p.id}>
-                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-amber-50/60 transition-colors">
-                    <span className="mt-1.5 w-[6px] h-[6px] rounded-full bg-amber-400 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
-                        Enviada há {daysSince(p.sent_at ?? p.created_at)}d sem visualização
-                      </p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-              {viewedNoResponse.map(p => (
-                <li key={p.id}>
-                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-blue-50/60 transition-colors">
-                    <span className="mt-1.5 w-[6px] h-[6px] rounded-full bg-blue-400 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
-                        Visualizada há {daysSince(p.sent_at ?? p.created_at)}d sem resposta
-                      </p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {/* Valor em negociação */}
+        <DoughnutCard
+          labels={DOUGHNUT_LABELS}
+          data={doughnutData}
+          colors={DOUGHNUT_COLORS}
+        />
 
         {/* Por status */}
         <div className={card}>
@@ -328,7 +288,7 @@ export default async function DashboardPage() {
 
       </div>
 
-      {/* ── Linha 4: Propostas recentes | Valor em negociação ────────────────── */}
+      {/* ── Linha 4: Propostas recentes | Atenção necessária ────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-[10px] items-start">
 
         {/* Propostas recentes */}
@@ -394,12 +354,52 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Valor em negociação */}
-        <DoughnutCard
-          labels={DOUGHNUT_LABELS}
-          data={doughnutData}
-          colors={DOUGHNUT_COLORS}
-        />
+        {/* Atenção necessária */}
+        <div className={card}>
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50">
+            <h2 className="text-sm font-medium text-gray-600">Atenção necessária</h2>
+            {totalAttention > 0 && (
+              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">
+                {totalAttention}
+              </span>
+            )}
+          </div>
+
+          {totalAttention === 0 ? (
+            <div className="px-4 py-5 text-center">
+              <p className="text-[11px] text-gray-400">Tudo em dia</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-50">
+              {sentNoView.map(p => (
+                <li key={p.id}>
+                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-amber-50/60 transition-colors">
+                    <span className="mt-1.5 w-[6px] h-[6px] rounded-full bg-amber-400 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+                        Enviada há {daysSince(p.sent_at ?? p.created_at)}d sem visualização
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+              {viewedNoResponse.map(p => (
+                <li key={p.id}>
+                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-blue-50/60 transition-colors">
+                    <span className="mt-1.5 w-[6px] h-[6px] rounded-full bg-blue-400 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+                        Visualizada há {daysSince(p.sent_at ?? p.created_at)}d sem resposta
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
       </div>
 
