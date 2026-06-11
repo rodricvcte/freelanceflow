@@ -17,7 +17,7 @@ type Props = {
 
 export default function DoughnutCard({ labels, data, colors }: Props) {
   return (
-    <div className="bg-white rounded-[10px] border border-gray-100 px-4 py-4">
+    <div className="bg-white rounded-[10px] border border-gray-100 px-4 py-4 h-full">
       <h2 className="text-sm font-medium text-gray-600 mb-3">Valor em negociação</h2>
       <div className="flex gap-5 items-center">
         <div className="shrink-0" style={{ width: 130, height: 130 }}>

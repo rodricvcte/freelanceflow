@@ -246,7 +246,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Linha 3: Gráfico barras | Valor em negociação | Por status ─────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_180px] gap-[10px] mb-[10px] items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_180px] gap-[10px] mb-[10px]">
 
         {/* Propostas por mês */}
         <BarChartCard labels={barLabels} data={barData} />
