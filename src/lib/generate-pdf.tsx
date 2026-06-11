@@ -29,7 +29,7 @@ export async function generateAndSaveProposalPDF(
       ? Promise.resolve({ data: null })
       : supabase
           .from('profiles')
-          .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj')
+          .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj, instagram, linkedin, facebook, youtube, tiktok')
           .eq('id', authData.user.id)
           .single(),
     supabase
@@ -64,6 +64,7 @@ export async function generateAndSaveProposalPDF(
     full_name: null, business_name: null, accent_color: null, logo_url: null,
     phone: null, email_business: null, address: null, website: null,
     document_type: null, cpf_cnpj: null,
+    instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

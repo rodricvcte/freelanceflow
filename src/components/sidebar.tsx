@@ -139,7 +139,7 @@ export default function Sidebar() {
         </nav>
 
         {/* User / plan footer */}
-        <div className="p-4 border-t border-gray-100 space-y-1">
+        <div className="p-4 border-t border-gray-100">
           {userInfo ? (
             <Link
               href="/configuracoes?tab=plano"
@@ -157,10 +157,10 @@ export default function Sidebar() {
                 </p>
                 {userInfo.isPro ? (
                   <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#1D9E75] text-white leading-none mt-0.5">
-                    PRO
+                    FreelanceFlow Pro
                   </span>
                 ) : (
-                  <span className="text-[10px] text-gray-400">Plano Free</span>
+                  <span className="text-[10px] text-gray-400">FreelanceFlow Free</span>
                 )}
               </div>
             </Link>
@@ -168,6 +168,7 @@ export default function Sidebar() {
             <p className="text-xs text-gray-400 text-center py-1">FreelanceFlow v0.1</p>
           )}
 
+          <div className="border-t border-gray-100 my-1" />
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"

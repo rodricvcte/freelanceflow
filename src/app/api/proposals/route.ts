@@ -72,7 +72,7 @@ export async function POST(request: Request) {
   // Fetch full profile for proposal_number + snapshot
   const { data: profile } = await supabase
     .from('profiles')
-    .select('freelancer_code, full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj')
+    .select('freelancer_code, full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj, instagram, linkedin, facebook, youtube, tiktok')
     .eq('id', user.id)
     .single()
 
@@ -94,6 +94,11 @@ export async function POST(request: Request) {
       website:        profile.website,
       document_type:  profile.document_type,
       cpf_cnpj:       profile.cpf_cnpj,
+      instagram:      profile.instagram,
+      linkedin:       profile.linkedin,
+      facebook:       profile.facebook,
+      youtube:        profile.youtube,
+      tiktok:         profile.tiktok,
     }
   }
 

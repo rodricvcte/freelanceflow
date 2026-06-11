@@ -59,6 +59,11 @@ export type ProfileForPDF = {
   website: string | null
   document_type: string | null
   cpf_cnpj: string | null
+  instagram: string | null
+  linkedin: string | null
+  facebook: string | null
+  youtube: string | null
+  tiktok: string | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -183,13 +188,12 @@ const s = StyleSheet.create({
     marginBottom: 18,
   },
   sectionTitle: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#374151',
     marginBottom: 8,
+    paddingLeft: 8,
     paddingBottom: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
   },
   bodyText: {
     fontSize: 10,
@@ -339,21 +343,32 @@ const s = StyleSheet.create({
 
 // ── Section renderers ─────────────────────────────────────────────────────────
 
-function RenderText({ sec }: { sec: TextSection }) {
+function SectionTitle({ title, accent }: { title: string; accent: string }) {
+  return (
+    <Text
+      minPresenceAhead={40}
+      style={[s.sectionTitle, { borderLeftWidth: 2.5, borderLeftColor: accent }]}
+    >
+      {title}
+    </Text>
+  )
+}
+
+function RenderText({ sec, accent }: { sec: TextSection; accent: string }) {
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
-      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       <Text style={s.bodyText}>{sec.content}</Text>
     </View>
   )
 }
 
-function RenderScope({ sec }: { sec: ScopeSection }) {
+function RenderScope({ sec, accent }: { sec: ScopeSection; accent: string }) {
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
-      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       {sec.items.filter(Boolean).map((item, i) => (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <View key={i} wrap={false as any} style={s.bulletRow}>
@@ -365,13 +380,13 @@ function RenderScope({ sec }: { sec: ScopeSection }) {
   )
 }
 
-function RenderItems({ sec }: { sec: ItemsSection }) {
+function RenderItems({ sec, accent }: { sec: ItemsSection; accent: string }) {
   const rowTotals = sec.rows.map(r => parseNum(r.quantity) * parseNum(r.unit_price))
   const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
-      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
@@ -399,13 +414,13 @@ function RenderItems({ sec }: { sec: ItemsSection }) {
   )
 }
 
-function RenderHours({ sec }: { sec: HoursSection }) {
+function RenderHours({ sec, accent }: { sec: HoursSection; accent: string }) {
   const rowTotals = sec.rows.map(r => parseNum(r.hours) * parseNum(r.rate))
   const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
-      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
@@ -433,11 +448,11 @@ function RenderHours({ sec }: { sec: HoursSection }) {
   )
 }
 
-function RenderInstallments({ sec }: { sec: InstallmentsSection }) {
+function RenderInstallments({ sec, accent }: { sec: InstallmentsSection; accent: string }) {
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
-      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
@@ -458,11 +473,11 @@ function RenderInstallments({ sec }: { sec: InstallmentsSection }) {
   )
 }
 
-function RenderClauses({ sec }: { sec: ClausesSection }) {
+function RenderClauses({ sec, accent }: { sec: ClausesSection; accent: string }) {
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
-      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       {sec.items.filter(Boolean).map((item, i) => (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <View key={i} wrap={false as any} style={s.clauseRow}>
@@ -474,12 +489,12 @@ function RenderClauses({ sec }: { sec: ClausesSection }) {
   )
 }
 
-function RenderImage({ sec }: { sec: ImageSection }) {
+function RenderImage({ sec, accent }: { sec: ImageSection; accent: string }) {
   if (!sec.url) return null
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
-      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       <View style={{ alignItems: 'center' }}>
         <Image src={sec.url} style={s.sectionImage} />
       </View>
@@ -487,15 +502,15 @@ function RenderImage({ sec }: { sec: ImageSection }) {
   )
 }
 
-function renderSection(sec: Section) {
+function renderSection(sec: Section, accent: string) {
   switch (sec.type) {
-    case 'text':         return <RenderText key={sec.id} sec={sec} />
-    case 'scope':        return <RenderScope key={sec.id} sec={sec} />
-    case 'items':        return <RenderItems key={sec.id} sec={sec} />
-    case 'hours':        return <RenderHours key={sec.id} sec={sec} />
-    case 'installments': return <RenderInstallments key={sec.id} sec={sec} />
-    case 'clauses':      return <RenderClauses key={sec.id} sec={sec} />
-    case 'image':        return <RenderImage key={sec.id} sec={sec} />
+    case 'text':         return <RenderText key={sec.id} sec={sec} accent={accent} />
+    case 'scope':        return <RenderScope key={sec.id} sec={sec} accent={accent} />
+    case 'items':        return <RenderItems key={sec.id} sec={sec} accent={accent} />
+    case 'hours':        return <RenderHours key={sec.id} sec={sec} accent={accent} />
+    case 'installments': return <RenderInstallments key={sec.id} sec={sec} accent={accent} />
+    case 'clauses':      return <RenderClauses key={sec.id} sec={sec} accent={accent} />
+    case 'image':        return <RenderImage key={sec.id} sec={sec} accent={accent} />
   }
 }
 
@@ -542,7 +557,7 @@ export function ProposalPDFDocument({
           <View style={{ flexDirection: 'row', gap: 40 }}>
             {proposal.clients && (
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>PARA</Text>
+                <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>CLIENTE</Text>
                 <Text style={{ fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>
                   {proposal.clients.name}
                 </Text>
@@ -596,36 +611,41 @@ export function ProposalPDFDocument({
       <View style={s.content}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.clientCard}>
+          <View style={s.clientCol}>
+            <Text style={s.fieldLabel}>FORNECEDOR</Text>
+            <Text style={s.fieldValue}>{displayName}</Text>
+            {docFormatted && (
+              <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
+            )}
+            {profile.address        && <Text style={s.fieldSub}>{profile.address}</Text>}
+            {profile.email_business && <Text style={s.fieldSub}>{profile.email_business}</Text>}
+            {profile.phone          && <Text style={s.fieldSub}>{profile.phone}</Text>}
+            {profile.website        && <Text style={s.fieldSub}>{profile.website}</Text>}
+            {profile.instagram      && <Text style={s.fieldSub}>Instagram: {profile.instagram}</Text>}
+            {profile.linkedin       && <Text style={s.fieldSub}>LinkedIn: {profile.linkedin}</Text>}
+            {profile.facebook       && <Text style={s.fieldSub}>Facebook: {profile.facebook}</Text>}
+            {profile.youtube        && <Text style={s.fieldSub}>YouTube: {profile.youtube}</Text>}
+            {profile.tiktok         && <Text style={s.fieldSub}>TikTok: {profile.tiktok}</Text>}
+          </View>
           {proposal.clients && (
             <View style={s.clientCol}>
-              <Text style={s.fieldLabel}>PARA</Text>
+              <Text style={s.fieldLabel}>CLIENTE</Text>
               <Text style={s.fieldValue}>{proposal.clients.name}</Text>
               {proposal.clients.email && <Text style={s.fieldSub}>{proposal.clients.email}</Text>}
             </View>
           )}
-          <View style={s.clientCol}>
-            <Text style={s.fieldLabel}>DE</Text>
-            <Text style={s.fieldValue}>{displayName}</Text>
-            {profile.phone          && <Text style={s.fieldSub}>{profile.phone}</Text>}
-            {profile.email_business && <Text style={s.fieldSub}>{profile.email_business}</Text>}
-            {profile.website        && <Text style={s.fieldSub}>{profile.website}</Text>}
-            {profile.address        && <Text style={s.fieldSub}>{profile.address}</Text>}
-            {docFormatted && (
-              <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
-            )}
-          </View>
         </View>
 
         {/* Legacy service_description */}
         {proposal.service_description && sections.length === 0 && (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <View wrap={false as any} style={s.sectionBlock}>
-            <Text minPresenceAhead={40} style={s.sectionTitle}>ESCOPO DO SERVIÇO</Text>
+            <SectionTitle title="ESCOPO DO SERVIÇO" accent={accent} />
             <Text style={s.bodyText}>{proposal.service_description}</Text>
           </View>
         )}
 
-        {sections.map(sec => renderSection(sec))}
+        {sections.map(sec => renderSection(sec, accent))}
 
         {(proposal.deadline_days !== null || proposal.payment_terms) && (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -659,7 +679,7 @@ export function ProposalPDFDocument({
             Aceite
           </Text>
           <Text style={s.acceptSub}>
-            Ao assinar abaixo, o contratante declara ter lido e concordado com todos os termos e condições desta proposta comercial.
+            Ao assinar abaixo, o contratante declara ter lido e concordado com todos os termos e condições desta proposta comercial. Esta proposta tem validade conforme indicado acima. Os preços, condições e escopo aqui descritos são exclusivos para o projeto especificado e podem ser revisados caso o escopo seja alterado.
           </Text>
           <View style={s.signRow}>
             <View style={s.signCol}>
@@ -673,9 +693,8 @@ export function ProposalPDFDocument({
               <Text style={s.signRole}>Contratante</Text>
             </View>
             <View style={[s.signCol, { maxWidth: 110 }]}>
-              <View style={s.signLine} />
-              <Text style={s.signName}>Data</Text>
-              <Text style={s.signRole}>{today}</Text>
+              <View style={{ height: 28, marginBottom: 5 }} />
+              <Text style={s.signName}>Data: ___/___/______</Text>
             </View>
           </View>
         </View>

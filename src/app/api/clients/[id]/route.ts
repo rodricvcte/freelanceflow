@@ -60,6 +60,19 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { count } = await supabase
+    .from('proposals')
+    .select('id', { count: 'exact', head: true })
+    .eq('client_id', id)
+    .eq('user_id', user.id)
+
+  if ((count ?? 0) > 0) {
+    return NextResponse.json(
+      { error: 'Este cliente possui propostas vinculadas e não pode ser excluído.' },
+      { status: 409 }
+    )
+  }
+
   const { error } = await supabase
     .from('clients')
     .delete()

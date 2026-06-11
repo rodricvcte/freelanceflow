@@ -24,33 +24,27 @@ type Props = {
 
 export default function ProposalActions({ proposalId, status, initialPdfUrl, duplicate }: Props) {
   const router = useRouter()
-  const [duplicating, setDuplicating] = useState(false)
+  const [duplicating, setDuplicating] = useState(false) // brief flash before navigation
   const [showCancel, setShowCancel]   = useState(false)
   const [cancelling, setCancelling]   = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
 
   const canCancel = status !== 'aprovada' && status !== 'cancelada'
 
-  async function handleDuplicate() {
+  function handleDuplicate() {
     setDuplicating(true)
     try {
-      const res = await fetch('/api/proposals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title:               `Cópia de ${duplicate.title}`,
-          service_description: duplicate.service_description,
-          value:               duplicate.value,
-          payment_terms:       duplicate.payment_terms,
-          deadline_days:       duplicate.deadline_days,
-          valid_until:         duplicate.valid_until,
-          client_id:           duplicate.client_id,
-          sections:            duplicate.sections,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      router.push(`/propostas/${data.id}/editar`)
+      sessionStorage.setItem('ff_duplicate_draft', JSON.stringify({
+        title:               `Cópia de ${duplicate.title}`,
+        service_description: duplicate.service_description,
+        value:               duplicate.value,
+        payment_terms:       duplicate.payment_terms,
+        deadline_days:       duplicate.deadline_days,
+        valid_until:         duplicate.valid_until,
+        client_id:           duplicate.client_id,
+        sections:            duplicate.sections,
+      }))
+      router.push('/propostas/new?mode=duplicate')
     } catch {
       setDuplicating(false)
     }

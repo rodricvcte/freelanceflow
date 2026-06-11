@@ -96,42 +96,44 @@ export default function ClientesPage() {
 
 function ClientCard({ client: c }: { client: Client }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
       {/* Avatar + info */}
-      <div className="flex items-start gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-[#1D9E75]/10 flex items-center justify-center shrink-0">
-          <span className="text-sm font-bold text-[#1D9E75]">{initials(c.name)}</span>
+      <div className="flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-full bg-[#1D9E75]/10 flex items-center justify-center shrink-0">
+          <span className="text-xs font-bold text-[#1D9E75]">{initials(c.name)}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 truncate">{c.name}</p>
-          {c.email && <p className="text-sm text-gray-500 truncate">{c.email}</p>}
-          {c.phone && <p className="text-xs text-gray-400 mt-0.5">{c.phone}</p>}
+          <p className="font-semibold text-gray-900 text-sm truncate">{c.name}</p>
+          {c.email && <p className="text-xs text-gray-500 truncate">{c.email}</p>}
         </div>
       </div>
 
       {/* Stats */}
-      <div className="flex items-center gap-2 text-xs text-gray-500 pt-3 border-t border-gray-50 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
+      <div className="flex items-center gap-1.5 text-xs text-gray-500">
         <span>{c.proposal_count} {c.proposal_count === 1 ? 'proposta' : 'propostas'}</span>
         <span>·</span>
         <span className="font-medium text-gray-700">{fmtBRL(c.total_value)}</span>
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 mt-auto">
+      <div className="flex gap-1.5">
         <Link
           href={`/clientes/${c.id}`}
-          className="flex-1 text-center py-1.5 text-sm font-medium text-white bg-[#1D9E75] rounded-lg hover:bg-[#188f68] transition-colors"
+          className="flex-1 text-center py-1 text-xs font-medium text-white bg-[#1D9E75] rounded-lg hover:bg-[#188f68] transition-colors"
         >
           Ver
         </Link>
         <Link
           href={`/clientes/${c.id}/editar`}
-          className="flex-1 text-center py-1.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          className="flex-1 text-center py-1 text-xs font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
         >
           Editar
+        </Link>
+        <Link
+          href={`/propostas/new?client_id=${c.id}`}
+          className="flex-1 text-center py-1 text-xs font-medium text-[#1D9E75] border border-[#1D9E75]/30 rounded-lg hover:bg-[#1D9E75]/5 transition-colors whitespace-nowrap"
+        >
+          + Proposta
         </Link>
       </div>
     </div>

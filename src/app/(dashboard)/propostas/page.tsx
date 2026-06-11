@@ -12,7 +12,6 @@ type Proposal = {
   value: number | null
   status: string
   created_at: string
-  sent_at: string | null
   version: number
   proposal_number: string | null
   pdf_url: string | null
@@ -254,10 +253,9 @@ export default function ProposalsPage() {
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-5 py-3 whitespace-nowrap">ID / Título</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Versão</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Data de criação</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Cliente</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Valor total</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Data de criação</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Data de envio</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Status</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Ações</th>
                 </tr>
@@ -274,17 +272,14 @@ export default function ProposalsPage() {
                     <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
                       v{p.version ?? 1}
                     </td>
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
+                      {fmtDate(p.created_at)}
+                    </td>
                     <td className="px-4 py-3.5 text-gray-500 max-w-[140px]">
                       <span className="line-clamp-1">{p.clients?.name ?? '—'}</span>
                     </td>
                     <td className="px-4 py-3.5 text-gray-700 font-medium whitespace-nowrap tabular-nums">
                       {fmtBRL(p.value)}
-                    </td>
-                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
-                      {fmtDate(p.created_at)}
-                    </td>
-                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
-                      {p.sent_at ? fmtDate(p.sent_at) : '—'}
                     </td>
                     <td className="px-4 py-3.5">
                       <StatusBadge status={p.status} />
