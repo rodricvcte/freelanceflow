@@ -1,6 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
+import { unstable_noStore as noStore } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import UpgradedBanner from '@/components/UpgradedBanner'
+
+export const dynamic = 'force-dynamic'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,6 +62,7 @@ function clientName(p: ProposalRow): string | null {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
+  noStore()
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -135,6 +141,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-6xl">
+
+      {/* ── Upgraded banner (client, lê URL param) ── */}
+      <Suspense fallback={null}>
+        <UpgradedBanner />
+      </Suspense>
 
       {/* ── Greeting ── */}
       <div className="mb-8">

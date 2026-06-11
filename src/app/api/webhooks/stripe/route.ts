@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase-service'
 import { Resend } from 'resend'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 async function findUserIdByCustomer(customerId: string): Promise<string | null> {
   const service = createServiceClient()
@@ -17,23 +18,31 @@ async function findUserIdByCustomer(customerId: string): Promise<string | null> 
 }
 
 export async function POST(request: Request) {
+  console.log('[stripe-webhook] POST received at', new Date().toISOString())
+
   const rawBody = await request.text()
   const sig = request.headers.get('stripe-signature') ?? ''
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
+  console.log('[stripe-webhook] has signature:', !!sig, '| has secret:', !!webhookSecret)
 
   let event: Stripe.Event
 
   if (webhookSecret) {
     try {
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
-    } catch {
+      console.log('[stripe-webhook] signature OK, event:', event.type)
+    } catch (err) {
+      console.error('[stripe-webhook] signature FAILED:', err instanceof Error ? err.message : err)
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
   } else {
     // No secret configured — parse without verification (dev only)
     try {
       event = JSON.parse(rawBody) as Stripe.Event
+      console.log('[stripe-webhook] no-secret mode, event:', event.type)
     } catch {
+      console.error('[stripe-webhook] invalid JSON body')
       return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
     }
   }
@@ -43,6 +52,7 @@ export async function POST(request: Request) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
+      console.log('[stripe-webhook] checkout.session.completed — mode:', session.mode, 'customer:', session.customer)
       if (session.mode !== 'subscription') break
 
       const customerId = session.customer as string
@@ -50,14 +60,19 @@ export async function POST(request: Request) {
       const userId = session.metadata?.supabase_user_id
         ?? await findUserIdByCustomer(customerId)
 
-      if (!userId) break
+      console.log('[stripe-webhook] userId:', userId, '| subscriptionId:', subscriptionId)
+
+      if (!userId) {
+        console.error('[stripe-webhook] user not found for customer:', customerId)
+        break
+      }
 
       // Fetch subscription to get price and period
       const stripeSub = await stripe.subscriptions.retrieve(subscriptionId)
       const priceId = stripeSub.items.data[0]?.price.id ?? null
       const periodEnd = new Date(stripeSub.current_period_end * 1000).toISOString()
 
-      await service.from('subscriptions').upsert({
+      const { error: upsertError } = await service.from('subscriptions').upsert({
         user_id: userId,
         plan: 'pro',
         status: 'active',
@@ -66,6 +81,12 @@ export async function POST(request: Request) {
         stripe_price_id: priceId,
         current_period_end: periodEnd,
       }, { onConflict: 'user_id' })
+
+      if (upsertError) {
+        console.error('[stripe-webhook] upsert error:', upsertError)
+      } else {
+        console.log('[stripe-webhook] subscription activated for user:', userId)
+      }
       break
     }
 

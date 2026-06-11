@@ -606,14 +606,26 @@ function ConfiguracoesInner() {
   const [sub,     setSub]     = useState<SubInfo | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  function loadData() {
+    setLoading(true)
     Promise.all([
-      fetch('/api/profile').then(r => r.json()),
-      fetch('/api/subscriptions').then(r => r.json()),
+      fetch('/api/profile',        { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/subscriptions',  { cache: 'no-store' }).then(r => r.json()),
     ])
       .then(([p, s]) => { setProfile(p); setSub(s) })
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => {
+    loadData()
+
+    // Re-busca ao voltar à aba (ex: após checkout Stripe)
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') loadData()
+    }
+    document.addEventListener('visibilitychange', onFocus)
+    return () => document.removeEventListener('visibilitychange', onFocus)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'perfil',        label: 'Perfil' },
