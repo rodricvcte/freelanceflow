@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 type Proposal = {
@@ -55,10 +55,11 @@ function fmtDate(iso: string | null) {
 
 export default function ProposalsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
-  const [statusFilter, setStatus] = useState('all')
+  const [statusFilter, setStatus] = useState(searchParams.get('status') ?? 'all')
   const [periodDays, setPeriod]   = useState(0)
 
   useEffect(() => {
