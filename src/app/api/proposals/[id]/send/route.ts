@@ -90,7 +90,7 @@ export async function POST(
   const subject = `Proposta Comercial — ${proposal.title ?? 'Proposta'} — ${freelancerName}`
 
   const { error: sendError } = await resend.emails.send({
-    from: `${freelancerName} via FreelanceFlow <noreply@freelanceflow.app>`,
+    from: `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
     to: body.recipient_email.trim(),
     subject,
     html,
