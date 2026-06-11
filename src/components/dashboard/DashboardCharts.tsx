@@ -41,26 +41,24 @@ export default function DashboardCharts({
       {/* Valor em negociação */}
       <div className="bg-white rounded-[10px] border border-gray-100 px-5 py-5">
         <h2 className="text-sm font-medium text-gray-600 mb-4">Valor em negociação</h2>
-        <div className="flex gap-6 items-center" style={{ height: 160 }}>
-          <div className="shrink-0" style={{ width: 160, height: 160 }}>
+        <div className="flex gap-5 items-center" style={{ height: 160 }}>
+          <div className="shrink-0" style={{ width: 140, height: 140 }}>
             <ValueDoughnutChart
               labels={doughnutLabels}
               data={doughnutData}
               colors={doughnutColors}
             />
           </div>
-          {/* Mini legenda */}
+          {/* Legenda HTML — quadradinhos 10×10 */}
           <ul className="flex flex-col gap-2 min-w-0">
             {doughnutLabels.map((label, i) => (
-              doughnutData[i] > 0 && (
-                <li key={label} className="flex items-center gap-2 min-w-0">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: doughnutColors[i] }}
-                  />
-                  <span className="text-xs text-gray-500 truncate">{label}</span>
-                </li>
-              )
+              <li key={label} className="flex items-center gap-2 min-w-0">
+                <span
+                  className="shrink-0 rounded-[2px]"
+                  style={{ width: 10, height: 10, backgroundColor: doughnutColors[i] }}
+                />
+                <span className="text-[11px] text-gray-500 truncate">{label}</span>
+              </li>
             ))}
           </ul>
         </div>

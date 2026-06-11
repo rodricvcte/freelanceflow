@@ -204,40 +204,40 @@ export default async function DashboardPage() {
       )}
 
       {/* ── Métricas (4 cards) ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[10px] mb-5">
 
         {/* Valor aprovado */}
-        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
-          <p className="text-xs font-medium text-gray-400 mb-2">Valor aprovado</p>
+        <div className="rounded-[8px] px-[14px] py-3" style={{ background: 'var(--color-background-secondary)' }}>
+          <p className="text-xs font-medium text-gray-400 mb-1.5">Valor aprovado</p>
           <p className="text-2xl font-bold leading-tight tabular-nums text-[#1D9E75]">
             {fmtBRL(totalApprovedValue)}
           </p>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-gray-400 mt-1.5">
             {approvedCount} aprovada{approvedCount !== 1 ? 's' : ''}
           </p>
         </div>
 
         {/* Em aberto */}
-        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
-          <p className="text-xs font-medium text-gray-400 mb-2">Em aberto</p>
+        <div className="rounded-[8px] px-[14px] py-3" style={{ background: 'var(--color-background-secondary)' }}>
+          <p className="text-xs font-medium text-gray-400 mb-1.5">Em aberto</p>
           <p className="text-2xl font-bold text-gray-900 leading-tight">{openCount}</p>
-          <p className="text-xs text-gray-400 mt-2">enviadas + visualizadas</p>
+          <p className="text-xs text-gray-400 mt-1.5">enviadas + visualizadas</p>
         </div>
 
         {/* Taxa de aprovação */}
-        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
-          <p className="text-xs font-medium text-gray-400 mb-2">Taxa de aprovação</p>
+        <div className="rounded-[8px] px-[14px] py-3" style={{ background: 'var(--color-background-secondary)' }}>
+          <p className="text-xs font-medium text-gray-400 mb-1.5">Taxa de aprovação</p>
           <p className="text-2xl font-bold text-gray-900 leading-tight">
             {approvalRate !== null ? `${approvalRate}%` : '—'}
           </p>
-          <p className="text-xs text-gray-400 mt-2">últimos 30 dias</p>
+          <p className="text-xs text-gray-400 mt-1.5">últimos 30 dias</p>
         </div>
 
         {/* Este mês */}
-        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
-          <p className="text-xs font-medium text-gray-400 mb-2">Este mês</p>
+        <div className="rounded-[8px] px-[14px] py-3" style={{ background: 'var(--color-background-secondary)' }}>
+          <p className="text-xs font-medium text-gray-400 mb-1.5">Este mês</p>
           <p className="text-2xl font-bold text-gray-900 leading-tight">{usedThisMonth}</p>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-gray-400 mt-1.5">
             {isPro ? 'plano pro: ilimitado' : `free: ${usedThisMonth}/5`}
           </p>
         </div>
@@ -254,7 +254,7 @@ export default async function DashboardPage() {
       />
 
       {/* ── Linha 3: Recentes + [Por status + Atenção] ───────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-[10px] items-start">
 
         {/* Propostas recentes */}
         <div className={card}>
@@ -281,33 +281,33 @@ export default async function DashboardPage() {
                   <li key={p.id}>
                     <Link
                       href={`/propostas/${p.id}`}
-                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate leading-snug">
+                        <p className="text-[13px] font-medium text-gray-900 truncate leading-snug">
                           {trunc(p.title, 40)}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                        <div className="flex items-center gap-1 mt-0.5 min-w-0">
                           {p.proposal_number && (
-                            <span className="font-mono text-xs text-gray-400 shrink-0">
+                            <span className="font-mono text-[11px] text-gray-400 shrink-0">
                               {p.proposal_number}
                             </span>
                           )}
-                          {name && p.proposal_number && (
-                            <span className="text-gray-300 text-xs shrink-0">·</span>
-                          )}
                           {name && (
-                            <span className="text-xs text-gray-400 truncate">{name}</span>
+                            <>
+                              {p.proposal_number && <span className="text-gray-300 text-[11px] shrink-0">·</span>}
+                              <span className="text-[11px] text-gray-400 truncate">{name}</span>
+                            </>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2.5 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         {p.value !== null && (
-                          <span className="text-sm font-semibold text-gray-700 tabular-nums">
+                          <span className="text-[13px] font-semibold text-gray-700 tabular-nums">
                             {fmtBRL(p.value)}
                           </span>
                         )}
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${cfg.bgCls} ${cfg.textCls}`}>
                           {cfg.label}
                         </span>
                       </div>
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Coluna direita: Por status + Atenção */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-[10px]">
 
           {/* Por status */}
           <div className={card}>
