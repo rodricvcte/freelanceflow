@@ -86,7 +86,6 @@ function fmtDoc(type: string | null, value: string | null): string | null {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  // Content page (all non-cover pages)
   contentPage: {
     fontFamily: 'Helvetica',
     backgroundColor: '#ffffff',
@@ -94,7 +93,6 @@ const s = StyleSheet.create({
     paddingBottom: 52,
     paddingHorizontal: 40,
   },
-  // Fixed page header (content + acceptance pages)
   pageHeader: {
     position: 'absolute',
     top: 0, left: 0, right: 0,
@@ -124,7 +122,6 @@ const s = StyleSheet.create({
     color: '#9ca3af',
     marginTop: 1,
   },
-  // Fixed page footer
   pageFooter: {
     position: 'absolute',
     bottom: 0, left: 0, right: 0,
@@ -144,11 +141,9 @@ const s = StyleSheet.create({
     fontSize: 8,
     color: '#d1d5db',
   },
-  // Content area
   content: {
     flex: 1,
   },
-  // Client card
   clientCard: {
     flexDirection: 'row',
     backgroundColor: '#f9fafb',
@@ -175,7 +170,6 @@ const s = StyleSheet.create({
     color: '#6b7280',
     marginTop: 2,
   },
-  // Section blocks
   sectionBlock: {
     marginBottom: 18,
   },
@@ -193,7 +187,6 @@ const s = StyleSheet.create({
     color: '#374151',
     lineHeight: 1.6,
   },
-  // Bullet list (scope)
   bulletRow: {
     flexDirection: 'row',
     gap: 6,
@@ -210,7 +203,6 @@ const s = StyleSheet.create({
     flex: 1,
     lineHeight: 1.5,
   },
-  // Numbered list (clauses)
   clauseRow: {
     flexDirection: 'row',
     gap: 8,
@@ -228,7 +220,6 @@ const s = StyleSheet.create({
     flex: 1,
     lineHeight: 1.55,
   },
-  // Table
   table: {
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -263,14 +254,13 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     letterSpacing: 0.3,
   },
-  // Value box
   valueBox: {
     borderRadius: 8,
     paddingVertical: 22,
     paddingHorizontal: 28,
     alignItems: 'center',
     marginTop: 8,
-    marginBottom: 6,
+    marginBottom: 24,
   },
   valueLabel: {
     fontSize: 8,
@@ -284,31 +274,29 @@ const s = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     color: '#ffffff',
   },
-  // Acceptance page
   acceptTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Helvetica-Bold',
     color: '#111827',
     marginBottom: 8,
   },
   acceptSub: {
-    fontSize: 9.5,
+    fontSize: 9,
     color: '#6b7280',
     lineHeight: 1.6,
-    marginBottom: 40,
+    marginBottom: 28,
     maxWidth: 360,
   },
   signRow: {
     flexDirection: 'row',
-    gap: 32,
-    marginTop: 20,
+    gap: 28,
   },
   signCol: { flex: 1 },
   signLine: {
     borderBottomWidth: 1,
     borderBottomColor: '#d1d5db',
-    height: 32,
-    marginBottom: 6,
+    height: 28,
+    marginBottom: 5,
   },
   signName: {
     fontSize: 9,
@@ -323,11 +311,14 @@ const s = StyleSheet.create({
 })
 
 // ── Section renderers ─────────────────────────────────────────────────────────
+// Each section uses wrap={false} so title + content never split across pages.
+// Individual rows also carry wrap={false} for very long tables.
 
 function RenderText({ sec }: { sec: TextSection }) {
   return (
-    <View style={s.sectionBlock}>
-      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
       <Text style={s.bodyText}>{sec.content}</Text>
     </View>
   )
@@ -335,10 +326,12 @@ function RenderText({ sec }: { sec: TextSection }) {
 
 function RenderScope({ sec }: { sec: ScopeSection }) {
   return (
-    <View style={s.sectionBlock}>
-      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
       {sec.items.filter(Boolean).map((item, i) => (
-        <View key={i} style={s.bulletRow}>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        <View key={i} wrap={false as any} style={s.bulletRow}>
           <Text style={s.bullet}>•</Text>
           <Text style={s.bulletText}>{item}</Text>
         </View>
@@ -349,16 +342,19 @@ function RenderScope({ sec }: { sec: ScopeSection }) {
 
 function RenderItems({ sec }: { sec: ItemsSection }) {
   return (
-    <View style={s.sectionBlock}>
-      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
       <View style={s.table}>
-        <View style={s.tableHeaderRow}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={s.tableHeaderRow}>
           <Text style={[s.tableCellHeader, { flex: 3 }]}>DESCRIÇÃO</Text>
           <Text style={[s.tableCellHeader, { flex: 1 }]}>QTD</Text>
           <Text style={[s.tableCellHeader, { flex: 1.5 }]}>VLR UNITÁRIO</Text>
         </View>
         {sec.rows.map((row, i) => (
-          <View key={i} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View key={i} wrap={false as any} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
             <Text style={[s.tableCell, { flex: 3 }]}>{row.description}</Text>
             <Text style={[s.tableCell, { flex: 1 }]}>{row.quantity}</Text>
             <Text style={[s.tableCell, { flex: 1.5 }]}>{row.unit_price}</Text>
@@ -371,16 +367,19 @@ function RenderItems({ sec }: { sec: ItemsSection }) {
 
 function RenderHours({ sec }: { sec: HoursSection }) {
   return (
-    <View style={s.sectionBlock}>
-      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
       <View style={s.table}>
-        <View style={s.tableHeaderRow}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={s.tableHeaderRow}>
           <Text style={[s.tableCellHeader, { flex: 2 }]}>PERFIL</Text>
           <Text style={[s.tableCellHeader, { flex: 1 }]}>HORAS</Text>
           <Text style={[s.tableCellHeader, { flex: 1.5 }]}>VLR/HORA</Text>
         </View>
         {sec.rows.map((row, i) => (
-          <View key={i} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View key={i} wrap={false as any} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
             <Text style={[s.tableCell, { flex: 2 }]}>{row.profile}</Text>
             <Text style={[s.tableCell, { flex: 1 }]}>{row.hours}</Text>
             <Text style={[s.tableCell, { flex: 1.5 }]}>{row.rate}</Text>
@@ -393,16 +392,19 @@ function RenderHours({ sec }: { sec: HoursSection }) {
 
 function RenderInstallments({ sec }: { sec: InstallmentsSection }) {
   return (
-    <View style={s.sectionBlock}>
-      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
       <View style={s.table}>
-        <View style={s.tableHeaderRow}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={s.tableHeaderRow}>
           <Text style={[s.tableCellHeader, { flex: 2.5 }]}>DESCRIÇÃO</Text>
           <Text style={[s.tableCellHeader, { flex: 1 }]}>%</Text>
           <Text style={[s.tableCellHeader, { flex: 2 }]}>CONDIÇÃO</Text>
         </View>
         {sec.rows.map((row, i) => (
-          <View key={i} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View key={i} wrap={false as any} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
             <Text style={[s.tableCell, { flex: 2.5 }]}>{row.description}</Text>
             <Text style={[s.tableCell, { flex: 1 }]}>{row.percentage}</Text>
             <Text style={[s.tableCell, { flex: 2 }]}>{row.condition}</Text>
@@ -415,10 +417,12 @@ function RenderInstallments({ sec }: { sec: InstallmentsSection }) {
 
 function RenderClauses({ sec }: { sec: ClausesSection }) {
   return (
-    <View style={s.sectionBlock}>
-      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <Text minPresenceAhead={40} style={s.sectionTitle}>{sec.title}</Text> : null}
       {sec.items.filter(Boolean).map((item, i) => (
-        <View key={i} style={s.clauseRow}>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        <View key={i} wrap={false as any} style={s.clauseRow}>
           <Text style={s.clauseNum}>{i + 1}.</Text>
           <Text style={s.clauseText}>{item}</Text>
         </View>
@@ -449,29 +453,33 @@ export function ProposalPDFDocument({
   profile: ProfileForPDF
   isFreePlan?: boolean
 }) {
-  const accent = profile.accent_color ?? '#1D9E75'
+  const accent      = profile.accent_color ?? '#1D9E75'
   const displayName = profile.business_name ?? profile.full_name ?? 'Freelancer'
-  const ref = proposal.proposal_number ?? ('#' + proposal.token.substring(0, 8).toUpperCase())
-  const today = new Intl.DateTimeFormat('pt-BR').format(new Date())
+  // proposal_number already contains the version (e.g. 20260611-RC001-v1)
+  // Only append version when falling back to the token hash
+  const ref = proposal.proposal_number
+    ?? ('#' + proposal.token.substring(0, 8).toUpperCase() + ' · v' + proposal.version)
+  const today        = new Intl.DateTimeFormat('pt-BR').format(new Date())
   const docFormatted = fmtDoc(profile.document_type, profile.cpf_cnpj)
-  const sections = proposal.sections ?? []
+  const sections     = proposal.sections ?? []
 
   // ── Cover page ──────────────────────────────────────────────────────────────
   const CoverPage = (
     <Page size="A4" style={{ fontFamily: 'Helvetica', backgroundColor: accent }}>
       <View style={{ flex: 1, paddingHorizontal: 48, paddingTop: 60, justifyContent: 'space-between' }}>
-        {/* Top */}
-        <View>
+
+        {/* Logo centered + identity */}
+        <View style={{ alignItems: 'center', marginBottom: 40 }}>
           {profile.logo_url && (
             <Image
               src={profile.logo_url}
-              style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 28 }}
+              style={{ width: 110, height: 110, objectFit: 'contain', marginBottom: 20 }}
             />
           )}
           <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', letterSpacing: 3, marginBottom: 14, fontFamily: 'Helvetica' }}>
             PROPOSTA COMERCIAL
           </Text>
-          <Text style={{ fontSize: 30, fontFamily: 'Helvetica-Bold', color: '#ffffff', maxWidth: 380, lineHeight: 1.25, marginBottom: 10 }}>
+          <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#ffffff', maxWidth: 380, lineHeight: 1.25, marginBottom: 10, textAlign: 'center' }}>
             {proposal.title}
           </Text>
           <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontFamily: 'Helvetica' }}>
@@ -479,7 +487,7 @@ export function ProposalPDFDocument({
           </Text>
         </View>
 
-        {/* Client + meta band */}
+        {/* Client + meta band at bottom */}
         <View style={{ backgroundColor: 'rgba(0,0,0,0.2)', marginHorizontal: -48, paddingHorizontal: 48, paddingVertical: 24 }}>
           <View style={{ flexDirection: 'row', gap: 40 }}>
             {proposal.clients && (
@@ -495,7 +503,8 @@ export function ProposalPDFDocument({
             )}
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>PROPOSTA</Text>
-              <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>{ref} · v{proposal.version}</Text>
+              {/* ref already includes version for proposal_number; no separate "· vN" */}
+              <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>{ref}</Text>
               <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)' }}>Emitida em {today}</Text>
               {proposal.valid_until && (
                 <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>
@@ -509,7 +518,7 @@ export function ProposalPDFDocument({
     </Page>
   )
 
-  // ── Reusable fixed header (content + acceptance pages) ────────────────────
+  // ── Fixed header ────────────────────────────────────────────────────────────
   const FixedHeader = (
     <View fixed style={s.pageHeader}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -517,14 +526,14 @@ export function ProposalPDFDocument({
         <Text style={s.headerName}>{displayName}</Text>
       </View>
       <View style={s.headerRight}>
-        {profile.phone && <Text style={s.headerSub}>{profile.phone}</Text>}
+        {profile.phone         && <Text style={s.headerSub}>{profile.phone}</Text>}
         {profile.email_business && <Text style={s.headerSub}>{profile.email_business}</Text>}
-        {profile.website && <Text style={s.headerSub}>{profile.website}</Text>}
+        {profile.website       && <Text style={s.headerSub}>{profile.website}</Text>}
       </View>
     </View>
   )
 
-  // ── Reusable fixed footer ──────────────────────────────────────────────────
+  // ── Fixed footer ────────────────────────────────────────────────────────────
   const FixedFooter = (
     <View fixed style={s.pageFooter}>
       <Text style={s.footerPageNum} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
@@ -532,7 +541,8 @@ export function ProposalPDFDocument({
     </View>
   )
 
-  // ── Content page ──────────────────────────────────────────────────────────
+  // ── Content + acceptance (single page stream) ────────────────────────────────
+  // Value box and acceptance block flow together — no unnecessary page break.
   const ContentPage = (
     <Page size="A4" style={s.contentPage}>
       {FixedHeader}
@@ -540,7 +550,8 @@ export function ProposalPDFDocument({
 
       <View style={s.content}>
         {/* Client + freelancer card */}
-        <View style={s.clientCard}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={s.clientCard}>
           {proposal.clients && (
             <View style={s.clientCol}>
               <Text style={s.fieldLabel}>PARA</Text>
@@ -551,20 +562,21 @@ export function ProposalPDFDocument({
           <View style={s.clientCol}>
             <Text style={s.fieldLabel}>DE</Text>
             <Text style={s.fieldValue}>{displayName}</Text>
-            {profile.phone         && <Text style={s.fieldSub}>{profile.phone}</Text>}
+            {profile.phone          && <Text style={s.fieldSub}>{profile.phone}</Text>}
             {profile.email_business && <Text style={s.fieldSub}>{profile.email_business}</Text>}
-            {profile.website       && <Text style={s.fieldSub}>{profile.website}</Text>}
-            {profile.address       && <Text style={s.fieldSub}>{profile.address}</Text>}
+            {profile.website        && <Text style={s.fieldSub}>{profile.website}</Text>}
+            {profile.address        && <Text style={s.fieldSub}>{profile.address}</Text>}
             {docFormatted && (
               <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
             )}
           </View>
         </View>
 
-        {/* Legacy service_description (shown if no sections) */}
+        {/* Legacy service_description (shown only when no sections) */}
         {proposal.service_description && sections.length === 0 && (
-          <View style={s.sectionBlock}>
-            <Text style={s.sectionTitle}>ESCOPO DO SERVIÇO</Text>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View wrap={false as any} style={s.sectionBlock}>
+            <Text minPresenceAhead={40} style={s.sectionTitle}>ESCOPO DO SERVIÇO</Text>
             <Text style={s.bodyText}>{proposal.service_description}</Text>
           </View>
         )}
@@ -574,7 +586,8 @@ export function ProposalPDFDocument({
 
         {/* Payment terms / deadline */}
         {(proposal.deadline_days !== null || proposal.payment_terms) && (
-          <View style={{ flexDirection: 'row', gap: 24, marginBottom: 18, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f3f4f6' }}>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View wrap={false as any} style={{ flexDirection: 'row', gap: 24, marginBottom: 18, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f3f4f6' }}>
             {proposal.deadline_days !== null && (
               <View style={{ flex: 1 }}>
                 <Text style={s.fieldLabel}>PRAZO DE ENTREGA</Text>
@@ -593,43 +606,37 @@ export function ProposalPDFDocument({
         )}
 
         {/* Value total box */}
-        <View style={[s.valueBox, { backgroundColor: accent }]}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={[s.valueBox, { backgroundColor: accent }]}>
           <Text style={s.valueLabel}>VALOR TOTAL</Text>
           <Text style={s.valueAmount}>{fmtBRL(proposal.value)}</Text>
         </View>
-      </View>
-    </Page>
-  )
 
-  // ── Acceptance page ────────────────────────────────────────────────────────
-  const AcceptancePage = (
-    <Page size="A4" style={s.contentPage}>
-      {FixedHeader}
-      {FixedFooter}
-
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Text style={[s.acceptTitle, { borderLeftWidth: 3, borderLeftColor: accent, paddingLeft: 12 }]}>
-          Aceite
-        </Text>
-        <Text style={s.acceptSub}>
-          Ao assinar abaixo, o contratante declara ter lido e concordado com todos os termos e condições desta proposta comercial.
-        </Text>
-
-        <View style={s.signRow}>
-          <View style={s.signCol}>
-            <View style={s.signLine} />
-            <Text style={s.signName}>{displayName}</Text>
-            <Text style={s.signRole}>Prestador de serviços</Text>
-          </View>
-          <View style={s.signCol}>
-            <View style={s.signLine} />
-            <Text style={s.signName}>{proposal.clients?.name ?? 'Cliente'}</Text>
-            <Text style={s.signRole}>Contratante</Text>
-          </View>
-          <View style={[s.signCol, { maxWidth: 110 }]}>
-            <View style={s.signLine} />
-            <Text style={s.signName}>Data</Text>
-            <Text style={s.signRole}>{today}</Text>
+        {/* Acceptance block — flows directly after value box, no separate page */}
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={{ paddingTop: 20, borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
+          <Text style={[s.acceptTitle, { borderLeftWidth: 3, borderLeftColor: accent, paddingLeft: 10 }]}>
+            Aceite
+          </Text>
+          <Text style={s.acceptSub}>
+            Ao assinar abaixo, o contratante declara ter lido e concordado com todos os termos e condições desta proposta comercial.
+          </Text>
+          <View style={s.signRow}>
+            <View style={s.signCol}>
+              <View style={s.signLine} />
+              <Text style={s.signName}>{displayName}</Text>
+              <Text style={s.signRole}>Prestador de serviços</Text>
+            </View>
+            <View style={s.signCol}>
+              <View style={s.signLine} />
+              <Text style={s.signName}>{proposal.clients?.name ?? 'Cliente'}</Text>
+              <Text style={s.signRole}>Contratante</Text>
+            </View>
+            <View style={[s.signCol, { maxWidth: 110 }]}>
+              <View style={s.signLine} />
+              <Text style={s.signName}>Data</Text>
+              <Text style={s.signRole}>{today}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -640,7 +647,6 @@ export function ProposalPDFDocument({
     <Document>
       {CoverPage}
       {ContentPage}
-      {AcceptancePage}
     </Document>
   )
 }

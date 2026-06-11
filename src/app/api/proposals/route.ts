@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     .single()
 
   if (profile?.freelancer_code) {
-    const proposalNumber = buildProposalNumber(data.created_at, profile.freelancer_code, 1, data.id)
+    const proposalNumber = buildProposalNumber(data.created_at, profile.freelancer_code, 1)
     await supabase
       .from('proposals')
       .update({ proposal_number: proposalNumber })

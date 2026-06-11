@@ -90,7 +90,7 @@ export async function PUT(
 
   const newVersion = (current.version ?? 1) + 1
   const proposalNumber = profile?.freelancer_code
-    ? buildProposalNumber(current.created_at, profile.freelancer_code, newVersion, id)
+    ? buildProposalNumber(current.created_at, profile.freelancer_code, newVersion)
     : null
 
   const { data, error } = await supabase
