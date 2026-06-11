@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
-import { stripe } from '@/lib/stripe'
+import { stripe, stripeTimestampToISO } from '@/lib/stripe'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,7 +41,7 @@ export async function POST() {
   }
 
   const priceId   = active.items.data[0]?.price.id ?? null
-  const periodEnd = new Date(active.current_period_end * 1000).toISOString()
+  const periodEnd = stripeTimestampToISO(active.current_period_end as number | null)
 
   await service.from('subscriptions').upsert({
     user_id: user.id,
