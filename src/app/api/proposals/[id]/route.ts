@@ -71,7 +71,7 @@ export async function PUT(
       .single(),
     supabase
       .from('profiles')
-      .select('freelancer_code')
+      .select('freelancer_code, full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj')
       .eq('id', user.id)
       .single(),
   ])
@@ -93,6 +93,19 @@ export async function PUT(
     ? buildProposalNumber(current.created_at, profile.freelancer_code, newVersion)
     : null
 
+  const snapshotProfile = profile ? {
+    full_name:      profile.full_name,
+    business_name:  profile.business_name,
+    accent_color:   profile.accent_color,
+    logo_url:       profile.logo_url,
+    phone:          profile.phone,
+    email_business: profile.email_business,
+    address:        profile.address,
+    website:        profile.website,
+    document_type:  profile.document_type,
+    cpf_cnpj:       profile.cpf_cnpj,
+  } : undefined
+
   const { data, error } = await supabase
     .from('proposals')
     .update({
@@ -105,7 +118,8 @@ export async function PUT(
       client_id:           client_id || null,
       sections:            Array.isArray(sections) ? sections : [],
       version:             newVersion,
-      ...(proposalNumber ? { proposal_number: proposalNumber } : {}),
+      ...(proposalNumber  ? { proposal_number: proposalNumber } : {}),
+      ...(snapshotProfile ? { snapshot_profile: snapshotProfile } : {}),
     })
     .eq('id', id)
     .eq('user_id', user.id)
