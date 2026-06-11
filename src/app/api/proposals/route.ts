@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 import { canCreateProposal } from '@/lib/plan'
 import { buildProposalNumber } from '@/lib/proposal-number'
 
@@ -38,31 +37,35 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { title, service_description, value, payment_terms, deadline_days, valid_until, client_id } = body
+  const {
+    title, service_description, value, payment_terms,
+    deadline_days, valid_until, client_id, sections,
+  } = body
 
-  if (!title?.trim() || !service_description?.trim() || value === undefined || value === '') {
-    return NextResponse.json({ error: 'Título, descrição e valor são obrigatórios' }, { status: 400 })
+  if (!title?.trim() || value === undefined || value === '') {
+    return NextResponse.json({ error: 'Título e valor são obrigatórios' }, { status: 400 })
   }
 
   const { data, error } = await supabase
     .from('proposals')
     .insert({
-      user_id: user.id,
-      title: title.trim(),
-      service_description: service_description.trim(),
-      value: parseFloat(value),
-      payment_terms: payment_terms?.trim() || null,
-      deadline_days: deadline_days ? parseInt(deadline_days) : null,
-      valid_until: valid_until || null,
-      client_id: client_id || null,
-      status: 'sent',
+      user_id:             user.id,
+      title:               title.trim(),
+      service_description: service_description?.trim() || null,
+      value:               parseFloat(value),
+      payment_terms:       payment_terms?.trim() || null,
+      deadline_days:       deadline_days ? parseInt(deadline_days) : null,
+      valid_until:         valid_until || null,
+      client_id:           client_id || null,
+      sections:            Array.isArray(sections) ? sections : [],
+      status:              'rascunho',
     })
     .select()
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Generate proposal_number if profile has a freelancer_code
+  // Build proposal_number if profile has a freelancer_code
   const { data: profile } = await supabase
     .from('profiles')
     .select('freelancer_code')
@@ -78,12 +81,5 @@ export async function POST(request: Request) {
     data.proposal_number = proposalNumber
   }
 
-  let pdfUrl: string | null = null
-  try {
-    pdfUrl = await generateAndSaveProposalPDF(data.id, supabase)
-  } catch {
-    // PDF generation failure is non-fatal
-  }
-
-  return NextResponse.json({ ...data, pdf_url: pdfUrl ?? data.pdf_url }, { status: 201 })
+  return NextResponse.json(data, { status: 201 })
 }

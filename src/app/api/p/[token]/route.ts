@@ -10,7 +10,7 @@ export async function GET(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, token, created_at, user_id, clients(name, email)')
+    .select('id, title, service_description, sections, value, payment_terms, deadline_days, valid_until, status, token, created_at, user_id, clients(name, email)')
     .eq('token', token)
     .single()
 

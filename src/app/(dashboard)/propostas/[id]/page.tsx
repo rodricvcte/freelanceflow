@@ -38,12 +38,12 @@ type FollowUpRow = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
-  draft:    { label: 'Rascunho', cls: 'bg-gray-100 text-gray-500' },
-  sent:     { label: 'Enviada',  cls: 'bg-gray-200 text-gray-700' },
-  viewed:   { label: 'Vista',    cls: 'bg-yellow-100 text-yellow-700' },
-  accepted: { label: 'Aceita',   cls: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
-  rejected: { label: 'Recusada', cls: 'bg-red-100 text-red-700' },
-  expired:  { label: 'Expirada', cls: 'bg-orange-100 text-orange-700' },
+  rascunho:    { label: 'Rascunho',    cls: 'bg-gray-100 text-gray-500' },
+  enviada:     { label: 'Enviada',     cls: 'bg-blue-100 text-blue-700' },
+  visualizada: { label: 'Visualizada', cls: 'bg-yellow-100 text-yellow-700' },
+  aprovada:    { label: 'Aprovada',    cls: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
+  reprovada:   { label: 'Reprovada',   cls: 'bg-red-100 text-red-700' },
+  expirada:    { label: 'Expirada',    cls: 'bg-orange-100 text-orange-700' },
 } as const
 
 const EVENT_CONFIG: Record<string, { label: string; dot: string; ring: string }> = {
@@ -110,7 +110,7 @@ export default async function ProposalDetailPage({
   const events   = (eventsRes.data  ?? []) as EventRow[]
   const followUps = (followUpsRes.data ?? []) as FollowUpRow[]
 
-  const statusCfg = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.draft
+  const statusCfg = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
   const ref       = '#' + proposal.token.substring(0, 8).toUpperCase()
 
   const clientsRaw = (proposalRes.data as Record<string, unknown>).clients

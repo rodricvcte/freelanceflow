@@ -37,7 +37,7 @@ function fmtDate(iso: string | null) {
   return new Intl.DateTimeFormat('pt-BR').format(new Date(y, m - 1, d))
 }
 
-const FINAL_STATUSES = ['accepted', 'rejected']
+const FINAL_STATUSES = ['aprovada', 'reprovada']
 
 export default function PublicProposalPage() {
   const { token } = useParams<{ token: string }>()
@@ -78,7 +78,7 @@ export default function PublicProposalPage() {
       if (!res.ok) throw new Error(data.error)
       setProposal(prev => prev ? {
         ...prev,
-        status: action === 'accept' ? 'accepted' : 'rejected',
+        status: action === 'accept' ? 'aprovada' : 'reprovada',
       } : prev)
     } catch (e) {
       setActionError(e instanceof Error ? e.message : 'Erro ao processar resposta')
@@ -155,11 +155,11 @@ export default function PublicProposalPage() {
           {/* Status banner if final */}
           {isFinal && (
             <div className={`mt-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium ${
-              proposal.status === 'accepted'
+              proposal.status === 'aprovada'
                 ? 'bg-green-50 text-green-700 border border-green-100'
                 : 'bg-gray-100 text-gray-600 border border-gray-200'
             }`}>
-              {proposal.status === 'accepted' ? (
+              {proposal.status === 'aprovada' ? (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

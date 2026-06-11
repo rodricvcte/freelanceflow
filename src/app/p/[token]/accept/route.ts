@@ -16,13 +16,13 @@ export async function POST(
 
   if (!proposal) return NextResponse.json({ error: 'Proposta não encontrada' }, { status: 404 })
 
-  if (['accepted', 'rejected'].includes(proposal.status)) {
+  if (['aprovada', 'reprovada'].includes(proposal.status)) {
     return NextResponse.json({ error: 'Proposta já respondida' }, { status: 409 })
   }
 
   await service
     .from('proposals')
-    .update({ status: 'accepted', responded_at: new Date().toISOString() })
+    .update({ status: 'aprovada', responded_at: new Date().toISOString() })
     .eq('id', proposal.id)
 
   await service

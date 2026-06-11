@@ -35,7 +35,10 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const allowed = ['status', 'title', 'service_description', 'value', 'payment_terms', 'deadline_days', 'valid_until']
+  const allowed = [
+    'status', 'title', 'service_description', 'value', 'payment_terms',
+    'deadline_days', 'valid_until', 'sections', 'installments',
+  ]
   const patch = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)))
 
   const { data, error } = await supabase
@@ -59,7 +62,6 @@ export async function PUT(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Fetch current proposal + profile in parallel
   const [{ data: current }, { data: profile }] = await Promise.all([
     supabase
       .from('proposals')
@@ -77,10 +79,13 @@ export async function PUT(
   if (!current) return NextResponse.json({ error: 'Proposta não encontrada' }, { status: 404 })
 
   const body = await request.json()
-  const { title, service_description, value, payment_terms, deadline_days, valid_until, client_id } = body
+  const {
+    title, service_description, value, payment_terms,
+    deadline_days, valid_until, client_id, sections,
+  } = body
 
-  if (!title?.trim() || !service_description?.trim() || value === undefined || value === '') {
-    return NextResponse.json({ error: 'Título, descrição e valor são obrigatórios' }, { status: 400 })
+  if (!title?.trim() || value === undefined || value === '') {
+    return NextResponse.json({ error: 'Título e valor são obrigatórios' }, { status: 400 })
   }
 
   const newVersion = (current.version ?? 1) + 1
@@ -91,14 +96,15 @@ export async function PUT(
   const { data, error } = await supabase
     .from('proposals')
     .update({
-      title: title.trim(),
-      service_description: service_description.trim(),
-      value: parseFloat(value),
-      payment_terms: payment_terms?.trim() || null,
-      deadline_days: deadline_days ? parseInt(deadline_days) : null,
-      valid_until: valid_until || null,
-      client_id: client_id || null,
-      version: newVersion,
+      title:               title.trim(),
+      service_description: service_description?.trim() || null,
+      value:               parseFloat(value),
+      payment_terms:       payment_terms?.trim() || null,
+      deadline_days:       deadline_days ? parseInt(deadline_days) : null,
+      valid_until:         valid_until || null,
+      client_id:           client_id || null,
+      sections:            Array.isArray(sections) ? sections : [],
+      version:             newVersion,
       ...(proposalNumber ? { proposal_number: proposalNumber } : {}),
     })
     .eq('id', id)
@@ -108,7 +114,6 @@ export async function PUT(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Regenerate PDF non-fatally
   let pdfUrl: string | null = data.pdf_url
   try {
     pdfUrl = await generateAndSaveProposalPDF(id, supabase)

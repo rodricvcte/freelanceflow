@@ -15,10 +15,10 @@ export async function GET(
     .single()
 
   if (proposal) {
-    if (proposal.status === 'sent') {
+    if (proposal.status === 'enviada') {
       await service
         .from('proposals')
-        .update({ status: 'viewed', viewed_at: new Date().toISOString() })
+        .update({ status: 'visualizada', viewed_at: new Date().toISOString() })
         .eq('id', proposal.id)
     }
 

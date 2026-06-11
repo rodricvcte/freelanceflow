@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const { data: r1Proposals } = await supabase
     .from('proposals')
     .select('id, user_id')
-    .eq('status', 'sent')
+    .eq('status', 'enviada')
     .lt('sent_at', r1Cutoff.toISOString())
 
   if (r1Proposals?.length) {
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
   const { data: r2Proposals } = await supabase
     .from('proposals')
     .select('id, user_id')
-    .eq('status', 'viewed')
+    .eq('status', 'visualizada')
     .lt('viewed_at', r2Cutoff.toISOString())
     .is('responded_at', null)
 
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
     .from('proposals')
     .update({ status: 'expired' })
     .lt('valid_until', todayStr)
-    .in('status', ['draft', 'sent', 'viewed'])
+    .in('status', ['rascunho', 'enviada', 'visualizada'])
     .select('id')
 
   if (!r3Err) results.r3_expired = expired?.length ?? 0

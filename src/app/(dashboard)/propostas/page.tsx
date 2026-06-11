@@ -18,12 +18,12 @@ type Proposal = {
 }
 
 const STATUS_CONFIG = {
-  draft:    { label: 'Rascunho', className: 'bg-gray-100 text-gray-500' },
-  sent:     { label: 'Enviada',  className: 'bg-blue-100 text-blue-700' },
-  viewed:   { label: 'Vista',    className: 'bg-yellow-100 text-yellow-700' },
-  accepted: { label: 'Aceita',   className: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
-  rejected: { label: 'Recusada', className: 'bg-red-100 text-red-700' },
-  expired:  { label: 'Expirada', className: 'bg-orange-100 text-orange-700' },
+  rascunho:    { label: 'Rascunho',    className: 'bg-gray-100 text-gray-500' },
+  enviada:     { label: 'Enviada',     className: 'bg-blue-100 text-blue-700' },
+  visualizada: { label: 'Visualizada', className: 'bg-yellow-100 text-yellow-700' },
+  aprovada:    { label: 'Aprovada',    className: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
+  reprovada:   { label: 'Reprovada',   className: 'bg-red-100 text-red-700' },
+  expirada:    { label: 'Expirada',    className: 'bg-orange-100 text-orange-700' },
 } as const
 
 const PERIOD_OPTIONS = [
@@ -34,7 +34,7 @@ const PERIOD_OPTIONS = [
 ]
 
 function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.draft
+  const cfg = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.className}`}>
       {cfg.label}

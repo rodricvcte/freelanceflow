@@ -1,7 +1,7 @@
 import { renderToBuffer } from '@react-pdf/renderer'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { ProposalPDFDocument } from '@/components/proposals/ProposalPDF'
-import type { ProposalForPDF, ProfileForPDF } from '@/components/proposals/ProposalPDF'
+import type { ProposalForPDF, ProfileForPDF, Section } from '@/components/proposals/ProposalPDF'
 import { createServiceClient } from '@/lib/supabase-service'
 
 const BUCKET = 'proposals-pdfs'
@@ -13,7 +13,7 @@ export async function generateAndSaveProposalPDF(
   const [{ data: raw }, { data: authData }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('title, service_description, value, payment_terms, deadline_days, valid_until, token, proposal_number, version, clients(name, email)')
+      .select('title, service_description, value, payment_terms, deadline_days, valid_until, token, proposal_number, version, sections, clients(name, email)')
       .eq('id', proposalId)
       .single(),
     supabase.auth.getUser(),
@@ -42,29 +42,23 @@ export async function generateAndSaveProposalPDF(
     : (rawClients as { name: string; email: string | null } | null)
 
   const proposal: ProposalForPDF = {
-    title: raw.title,
+    title:               raw.title,
     service_description: raw.service_description,
-    value: raw.value,
-    payment_terms: raw.payment_terms,
-    deadline_days: raw.deadline_days,
-    valid_until: raw.valid_until,
-    token: raw.token,
-    proposal_number: raw.proposal_number ?? null,
-    version: raw.version ?? 1,
-    clients: clientsNorm,
+    value:               raw.value,
+    payment_terms:       raw.payment_terms,
+    deadline_days:       raw.deadline_days,
+    valid_until:         raw.valid_until,
+    token:               raw.token,
+    proposal_number:     raw.proposal_number ?? null,
+    version:             raw.version ?? 1,
+    sections:            (raw.sections as Section[] | null) ?? [],
+    clients:             clientsNorm,
   }
 
   const profile: ProfileForPDF = profileRaw ?? {
-    full_name: null,
-    business_name: null,
-    accent_color: null,
-    logo_url: null,
-    phone: null,
-    email_business: null,
-    address: null,
-    website: null,
-    document_type: null,
-    cpf_cnpj: null,
+    full_name: null, business_name: null, accent_color: null, logo_url: null,
+    phone: null, email_business: null, address: null, website: null,
+    document_type: null, cpf_cnpj: null,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

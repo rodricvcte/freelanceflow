@@ -1,5 +1,34 @@
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 
+// ── Section types ──────────────────────────────────────────────────────────────
+
+export type TextSection = {
+  id: string; type: 'text'; title: string; content: string
+}
+export type ScopeSection = {
+  id: string; type: 'scope'; title: string; items: string[]
+}
+export type ItemsRow = { description: string; quantity: string; unit_price: string }
+export type ItemsSection = {
+  id: string; type: 'items'; title: string; rows: ItemsRow[]
+}
+export type HoursRow = { profile: string; hours: string; rate: string }
+export type HoursSection = {
+  id: string; type: 'hours'; title: string; rows: HoursRow[]
+}
+export type InstallmentRow = { description: string; percentage: string; condition: string }
+export type InstallmentsSection = {
+  id: string; type: 'installments'; title: string; rows: InstallmentRow[]
+}
+export type ClausesSection = {
+  id: string; type: 'clauses'; title: string; items: string[]
+}
+export type Section =
+  | TextSection | ScopeSection | ItemsSection
+  | HoursSection | InstallmentsSection | ClausesSection
+
+// ── Proposal / Profile types ──────────────────────────────────────────────────
+
 type Client = { name: string; email: string | null }
 
 export type ProposalForPDF = {
@@ -12,6 +41,7 @@ export type ProposalForPDF = {
   token: string
   proposal_number: string | null
   version: number
+  sections: Section[]
   clients: Client | null
 }
 
@@ -28,6 +58,8 @@ export type ProfileForPDF = {
   cpf_cnpj: string | null
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function fmtBRL(v: number | null) {
   if (v === null) return '—'
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
@@ -43,93 +75,89 @@ function fmtDoc(type: string | null, value: string | null): string | null {
   if (!value) return null
   const d = value.replace(/\D/g, '')
   if (type === 'cnpj' && d.length === 14) {
-    return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
+    return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`
   }
   if (type === 'cpf' && d.length === 11) {
-    return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`
+    return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`
   }
   return value
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
+
 const s = StyleSheet.create({
-  page: {
+  // Content page (all non-cover pages)
+  contentPage: {
     fontFamily: 'Helvetica',
     backgroundColor: '#ffffff',
-    paddingBottom: 64,
+    paddingTop: 64,
+    paddingBottom: 52,
+    paddingHorizontal: 40,
   },
-  header: {
-    paddingVertical: 24,
+  // Fixed page header (content + acceptance pages)
+  pageHeader: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0,
+    height: 56,
     paddingHorizontal: 40,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    objectFit: 'contain',
-    borderRadius: 4,
-  },
-  headerText: {
-    flex: 1,
-  },
-  headerName: {
-    fontSize: 18,
-    fontFamily: 'Helvetica-Bold',
-    color: '#ffffff',
-    marginBottom: 2,
-  },
-  headerSub: {
-    fontSize: 8,
-    color: '#ffffff',
-    letterSpacing: 1.5,
-  },
-  content: {
-    paddingHorizontal: 40,
-    paddingTop: 20,
-  },
-  titleRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 18,
-    paddingBottom: 14,
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
-  proposalTitle: {
-    fontSize: 14,
-    fontFamily: 'Helvetica-Bold',
-    color: '#111827',
-    maxWidth: 280,
-    flexShrink: 1,
-    marginRight: 16,
+  headerLogo: {
+    width: 32, height: 32,
+    objectFit: 'contain',
   },
-  metaBlock: {
+  headerRight: {
     alignItems: 'flex-end',
   },
-  metaRef: {
+  headerName: {
     fontSize: 9,
     fontFamily: 'Helvetica-Bold',
-    color: '#374151',
-    marginBottom: 3,
+    color: '#111827',
   },
-  metaDate: {
+  headerSub: {
+    fontSize: 7,
+    color: '#9ca3af',
+    marginTop: 1,
+  },
+  // Fixed page footer
+  pageFooter: {
+    position: 'absolute',
+    bottom: 0, left: 0, right: 0,
+    height: 40,
+    paddingHorizontal: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: '#f3f4f6',
+  },
+  footerPageNum: {
     fontSize: 8,
-    color: '#6b7280',
-    marginBottom: 2,
+    color: '#d1d5db',
   },
+  footerBrand: {
+    fontSize: 8,
+    color: '#d1d5db',
+  },
+  // Content area
+  content: {
+    flex: 1,
+  },
+  // Client card
   clientCard: {
     flexDirection: 'row',
     backgroundColor: '#f9fafb',
     borderRadius: 6,
     padding: 14,
     marginBottom: 20,
-    gap: 16,
+    gap: 20,
   },
-  clientCol: {
-    flex: 1,
-  },
+  clientCol: { flex: 1 },
   fieldLabel: {
     fontSize: 7,
     fontFamily: 'Helvetica-Bold',
@@ -143,92 +171,274 @@ const s = StyleSheet.create({
     color: '#111827',
   },
   fieldSub: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#6b7280',
     marginTop: 2,
   },
-  section: {
-    marginBottom: 20,
+  // Section blocks
+  sectionBlock: {
+    marginBottom: 18,
   },
-  sectionLabel: {
-    fontSize: 7,
+  sectionTitle: {
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
-    color: '#9ca3af',
+    color: '#374151',
     marginBottom: 8,
-    letterSpacing: 0.5,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
   },
   bodyText: {
     fontSize: 10,
     color: '#374151',
     lineHeight: 1.6,
   },
-  termsRow: {
+  // Bullet list (scope)
+  bulletRow: {
     flexDirection: 'row',
-    paddingTop: 14,
-    marginBottom: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    gap: 6,
+    marginBottom: 4,
   },
-  termCol: {
-    flex: 1,
-    marginRight: 16,
+  bullet: {
+    fontSize: 10,
+    color: '#6b7280',
+    width: 8,
   },
-  termValue: {
+  bulletText: {
     fontSize: 10,
     color: '#374151',
-  },
-  valueBox: {
-    borderRadius: 8,
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  valueLabel: {
-    fontSize: 7,
-    fontFamily: 'Helvetica-Bold',
-    color: '#ffffff',
-    letterSpacing: 1.5,
-    marginBottom: 8,
-  },
-  valueAmount: {
-    fontSize: 26,
-    fontFamily: 'Helvetica-Bold',
-    color: '#ffffff',
-  },
-  signatureSection: {
-    marginTop: 24,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    flexDirection: 'row',
-    gap: 32,
-  },
-  signatureCol: {
     flex: 1,
+    lineHeight: 1.5,
   },
-  signatureLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#d1d5db',
-    height: 28,
+  // Numbered list (clauses)
+  clauseRow: {
+    flexDirection: 'row',
+    gap: 8,
     marginBottom: 6,
   },
-  signatureLabel: {
-    fontSize: 8,
+  clauseNum: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#374151',
+    width: 16,
+  },
+  clauseText: {
+    fontSize: 9.5,
+    color: '#374151',
+    flex: 1,
+    lineHeight: 1.55,
+  },
+  // Table
+  table: {
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    backgroundColor: '#f9fafb',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  tableRowLast: {
+    flexDirection: 'row',
+  },
+  tableCell: {
+    fontSize: 8.5,
+    color: '#374151',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  tableCellHeader: {
+    fontSize: 7.5,
+    fontFamily: 'Helvetica-Bold',
     color: '#6b7280',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    letterSpacing: 0.3,
   },
-  footer: {
-    position: 'absolute',
-    bottom: 16,
-    left: 0,
-    right: 0,
+  // Value box
+  valueBox: {
+    borderRadius: 8,
+    paddingVertical: 22,
+    paddingHorizontal: 28,
     alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 6,
   },
-  footerText: {
+  valueLabel: {
     fontSize: 8,
-    color: '#d1d5db',
+    fontFamily: 'Helvetica-Bold',
+    color: '#ffffff',
+    letterSpacing: 2,
+    marginBottom: 10,
+  },
+  valueAmount: {
+    fontSize: 28,
+    fontFamily: 'Helvetica-Bold',
+    color: '#ffffff',
+  },
+  // Acceptance page
+  acceptTitle: {
+    fontSize: 20,
+    fontFamily: 'Helvetica-Bold',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  acceptSub: {
+    fontSize: 9.5,
+    color: '#6b7280',
+    lineHeight: 1.6,
+    marginBottom: 40,
+    maxWidth: 360,
+  },
+  signRow: {
+    flexDirection: 'row',
+    gap: 32,
+    marginTop: 20,
+  },
+  signCol: { flex: 1 },
+  signLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#d1d5db',
+    height: 32,
+    marginBottom: 6,
+  },
+  signName: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#374151',
+    marginBottom: 2,
+  },
+  signRole: {
+    fontSize: 8,
+    color: '#9ca3af',
   },
 })
+
+// ── Section renderers ─────────────────────────────────────────────────────────
+
+function RenderText({ sec }: { sec: TextSection }) {
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+      <Text style={s.bodyText}>{sec.content}</Text>
+    </View>
+  )
+}
+
+function RenderScope({ sec }: { sec: ScopeSection }) {
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.items.filter(Boolean).map((item, i) => (
+        <View key={i} style={s.bulletRow}>
+          <Text style={s.bullet}>•</Text>
+          <Text style={s.bulletText}>{item}</Text>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function RenderItems({ sec }: { sec: ItemsSection }) {
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+      <View style={s.table}>
+        <View style={s.tableHeaderRow}>
+          <Text style={[s.tableCellHeader, { flex: 3 }]}>DESCRIÇÃO</Text>
+          <Text style={[s.tableCellHeader, { flex: 1 }]}>QTD</Text>
+          <Text style={[s.tableCellHeader, { flex: 1.5 }]}>VLR UNITÁRIO</Text>
+        </View>
+        {sec.rows.map((row, i) => (
+          <View key={i} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+            <Text style={[s.tableCell, { flex: 3 }]}>{row.description}</Text>
+            <Text style={[s.tableCell, { flex: 1 }]}>{row.quantity}</Text>
+            <Text style={[s.tableCell, { flex: 1.5 }]}>{row.unit_price}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  )
+}
+
+function RenderHours({ sec }: { sec: HoursSection }) {
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+      <View style={s.table}>
+        <View style={s.tableHeaderRow}>
+          <Text style={[s.tableCellHeader, { flex: 2 }]}>PERFIL</Text>
+          <Text style={[s.tableCellHeader, { flex: 1 }]}>HORAS</Text>
+          <Text style={[s.tableCellHeader, { flex: 1.5 }]}>VLR/HORA</Text>
+        </View>
+        {sec.rows.map((row, i) => (
+          <View key={i} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+            <Text style={[s.tableCell, { flex: 2 }]}>{row.profile}</Text>
+            <Text style={[s.tableCell, { flex: 1 }]}>{row.hours}</Text>
+            <Text style={[s.tableCell, { flex: 1.5 }]}>{row.rate}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  )
+}
+
+function RenderInstallments({ sec }: { sec: InstallmentsSection }) {
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+      <View style={s.table}>
+        <View style={s.tableHeaderRow}>
+          <Text style={[s.tableCellHeader, { flex: 2.5 }]}>DESCRIÇÃO</Text>
+          <Text style={[s.tableCellHeader, { flex: 1 }]}>%</Text>
+          <Text style={[s.tableCellHeader, { flex: 2 }]}>CONDIÇÃO</Text>
+        </View>
+        {sec.rows.map((row, i) => (
+          <View key={i} style={i === sec.rows.length - 1 ? s.tableRowLast : s.tableRow}>
+            <Text style={[s.tableCell, { flex: 2.5 }]}>{row.description}</Text>
+            <Text style={[s.tableCell, { flex: 1 }]}>{row.percentage}</Text>
+            <Text style={[s.tableCell, { flex: 2 }]}>{row.condition}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  )
+}
+
+function RenderClauses({ sec }: { sec: ClausesSection }) {
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <Text style={s.sectionTitle}>{sec.title}</Text> : null}
+      {sec.items.filter(Boolean).map((item, i) => (
+        <View key={i} style={s.clauseRow}>
+          <Text style={s.clauseNum}>{i + 1}.</Text>
+          <Text style={s.clauseText}>{item}</Text>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function renderSection(sec: Section) {
+  switch (sec.type) {
+    case 'text':         return <RenderText key={sec.id} sec={sec} />
+    case 'scope':        return <RenderScope key={sec.id} sec={sec} />
+    case 'items':        return <RenderItems key={sec.id} sec={sec} />
+    case 'hours':        return <RenderHours key={sec.id} sec={sec} />
+    case 'installments': return <RenderInstallments key={sec.id} sec={sec} />
+    case 'clauses':      return <RenderClauses key={sec.id} sec={sec} />
+  }
+}
+
+// ── Main document ─────────────────────────────────────────────────────────────
 
 export function ProposalPDFDocument({
   proposal,
@@ -244,119 +454,193 @@ export function ProposalPDFDocument({
   const ref = proposal.proposal_number ?? ('#' + proposal.token.substring(0, 8).toUpperCase())
   const today = new Intl.DateTimeFormat('pt-BR').format(new Date())
   const docFormatted = fmtDoc(profile.document_type, profile.cpf_cnpj)
+  const sections = proposal.sections ?? []
 
-  return (
-    <Document>
-      <Page size="A4" style={s.page}>
-        {/* Header */}
-        <View style={[s.header, { backgroundColor: accent }]}>
+  // ── Cover page ──────────────────────────────────────────────────────────────
+  const CoverPage = (
+    <Page size="A4" style={{ fontFamily: 'Helvetica', backgroundColor: accent }}>
+      <View style={{ flex: 1, paddingHorizontal: 48, paddingTop: 60, justifyContent: 'space-between' }}>
+        {/* Top */}
+        <View>
           {profile.logo_url && (
-            <Image src={profile.logo_url} style={s.logo} />
+            <Image
+              src={profile.logo_url}
+              style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 28 }}
+            />
           )}
-          <View style={s.headerText}>
-            <Text style={s.headerName}>{displayName}</Text>
-            <Text style={s.headerSub}>PROPOSTA COMERCIAL</Text>
-          </View>
+          <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', letterSpacing: 3, marginBottom: 14, fontFamily: 'Helvetica' }}>
+            PROPOSTA COMERCIAL
+          </Text>
+          <Text style={{ fontSize: 30, fontFamily: 'Helvetica-Bold', color: '#ffffff', maxWidth: 380, lineHeight: 1.25, marginBottom: 10 }}>
+            {proposal.title}
+          </Text>
+          <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontFamily: 'Helvetica' }}>
+            {displayName}
+          </Text>
         </View>
 
-        <View style={s.content}>
-          {/* Title + meta */}
-          <View style={s.titleRow}>
-            <View>
-              <Text style={s.proposalTitle}>{proposal.title}</Text>
-            </View>
-            <View style={s.metaBlock}>
-              <Text style={s.metaRef}>{ref} · v{proposal.version}</Text>
-              <Text style={s.metaDate}>Emitida em {today}</Text>
-              {proposal.valid_until && (
-                <Text style={s.metaDate}>Válida até {fmtDate(proposal.valid_until)}</Text>
-              )}
-            </View>
-          </View>
-
-          {/* Client + Freelancer card */}
-          <View style={s.clientCard}>
+        {/* Client + meta band */}
+        <View style={{ backgroundColor: 'rgba(0,0,0,0.2)', marginHorizontal: -48, paddingHorizontal: 48, paddingVertical: 24 }}>
+          <View style={{ flexDirection: 'row', gap: 40 }}>
             {proposal.clients && (
-              <View style={s.clientCol}>
-                <Text style={s.fieldLabel}>PARA</Text>
-                <Text style={s.fieldValue}>{proposal.clients.name}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>PARA</Text>
+                <Text style={{ fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>
+                  {proposal.clients.name}
+                </Text>
                 {proposal.clients.email && (
-                  <Text style={s.fieldSub}>{proposal.clients.email}</Text>
+                  <Text style={{ fontSize: 9, color: 'rgba(255,255,255,0.65)' }}>{proposal.clients.email}</Text>
                 )}
               </View>
             )}
-            <View style={s.clientCol}>
-              <Text style={s.fieldLabel}>DE</Text>
-              <Text style={s.fieldValue}>{displayName}</Text>
-              {profile.phone && <Text style={s.fieldSub}>{profile.phone}</Text>}
-              {profile.email_business && <Text style={s.fieldSub}>{profile.email_business}</Text>}
-              {profile.website && <Text style={s.fieldSub}>{profile.website}</Text>}
-              {profile.address && <Text style={s.fieldSub}>{profile.address}</Text>}
-              {docFormatted && (
-                <Text style={s.fieldSub}>
-                  {profile.document_type?.toUpperCase()}: {docFormatted}
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>PROPOSTA</Text>
+              <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>{ref} · v{proposal.version}</Text>
+              <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)' }}>Emitida em {today}</Text>
+              {proposal.valid_until && (
+                <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>
+                  Válida até {fmtDate(proposal.valid_until)}
                 </Text>
               )}
             </View>
           </View>
+        </View>
+      </View>
+    </Page>
+  )
 
-          {/* Scope */}
-          {proposal.service_description && (
-            <View style={s.section}>
-              <Text style={s.sectionLabel}>ESCOPO DO SERVIÇO</Text>
-              <Text style={s.bodyText}>{proposal.service_description}</Text>
+  // ── Reusable fixed header (content + acceptance pages) ────────────────────
+  const FixedHeader = (
+    <View fixed style={s.pageHeader}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        {profile.logo_url && <Image src={profile.logo_url} style={s.headerLogo} />}
+        <Text style={s.headerName}>{displayName}</Text>
+      </View>
+      <View style={s.headerRight}>
+        {profile.phone && <Text style={s.headerSub}>{profile.phone}</Text>}
+        {profile.email_business && <Text style={s.headerSub}>{profile.email_business}</Text>}
+        {profile.website && <Text style={s.headerSub}>{profile.website}</Text>}
+      </View>
+    </View>
+  )
+
+  // ── Reusable fixed footer ──────────────────────────────────────────────────
+  const FixedFooter = (
+    <View fixed style={s.pageFooter}>
+      <Text style={s.footerPageNum} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
+      {isFreePlan && <Text style={s.footerBrand}>Gerado com FreelanceFlow</Text>}
+    </View>
+  )
+
+  // ── Content page ──────────────────────────────────────────────────────────
+  const ContentPage = (
+    <Page size="A4" style={s.contentPage}>
+      {FixedHeader}
+      {FixedFooter}
+
+      <View style={s.content}>
+        {/* Client + freelancer card */}
+        <View style={s.clientCard}>
+          {proposal.clients && (
+            <View style={s.clientCol}>
+              <Text style={s.fieldLabel}>PARA</Text>
+              <Text style={s.fieldValue}>{proposal.clients.name}</Text>
+              {proposal.clients.email && <Text style={s.fieldSub}>{proposal.clients.email}</Text>}
             </View>
           )}
-
-          {/* Terms */}
-          {(proposal.deadline_days !== null || proposal.payment_terms) && (
-            <View style={s.termsRow}>
-              {proposal.deadline_days !== null && (
-                <View style={s.termCol}>
-                  <Text style={s.fieldLabel}>PRAZO DE ENTREGA</Text>
-                  <Text style={s.termValue}>
-                    {proposal.deadline_days} {proposal.deadline_days === 1 ? 'dia' : 'dias'}
-                  </Text>
-                </View>
-              )}
-              {proposal.payment_terms && (
-                <View style={s.termCol}>
-                  <Text style={s.fieldLabel}>FORMA DE PAGAMENTO</Text>
-                  <Text style={s.termValue}>{proposal.payment_terms}</Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Value */}
-          <View style={[s.valueBox, { backgroundColor: accent }]}>
-            <Text style={s.valueLabel}>VALOR TOTAL</Text>
-            <Text style={s.valueAmount}>{fmtBRL(proposal.value)}</Text>
-          </View>
-
-          {/* Signature */}
-          <View style={s.signatureSection}>
-            <View style={s.signatureCol}>
-              <View style={s.signatureLine} />
-              <Text style={s.signatureLabel}>De acordo — {displayName}</Text>
-            </View>
-            <View style={s.signatureCol}>
-              <View style={s.signatureLine} />
-              <Text style={s.signatureLabel}>De acordo — {proposal.clients?.name ?? 'Cliente'}</Text>
-            </View>
-            <View style={[s.signatureCol, { maxWidth: 100 }]}>
-              <View style={s.signatureLine} />
-              <Text style={s.signatureLabel}>Data</Text>
-            </View>
+          <View style={s.clientCol}>
+            <Text style={s.fieldLabel}>DE</Text>
+            <Text style={s.fieldValue}>{displayName}</Text>
+            {profile.phone         && <Text style={s.fieldSub}>{profile.phone}</Text>}
+            {profile.email_business && <Text style={s.fieldSub}>{profile.email_business}</Text>}
+            {profile.website       && <Text style={s.fieldSub}>{profile.website}</Text>}
+            {profile.address       && <Text style={s.fieldSub}>{profile.address}</Text>}
+            {docFormatted && (
+              <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
+            )}
           </View>
         </View>
 
-        {isFreePlan && (
-          <View style={s.footer} fixed>
-            <Text style={s.footerText}>Gerado com FreelanceFlow</Text>
+        {/* Legacy service_description (shown if no sections) */}
+        {proposal.service_description && sections.length === 0 && (
+          <View style={s.sectionBlock}>
+            <Text style={s.sectionTitle}>ESCOPO DO SERVIÇO</Text>
+            <Text style={s.bodyText}>{proposal.service_description}</Text>
           </View>
         )}
-      </Page>
+
+        {/* Dynamic sections */}
+        {sections.map(sec => renderSection(sec))}
+
+        {/* Payment terms / deadline */}
+        {(proposal.deadline_days !== null || proposal.payment_terms) && (
+          <View style={{ flexDirection: 'row', gap: 24, marginBottom: 18, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f3f4f6' }}>
+            {proposal.deadline_days !== null && (
+              <View style={{ flex: 1 }}>
+                <Text style={s.fieldLabel}>PRAZO DE ENTREGA</Text>
+                <Text style={{ fontSize: 10, color: '#374151' }}>
+                  {proposal.deadline_days} {proposal.deadline_days === 1 ? 'dia' : 'dias'}
+                </Text>
+              </View>
+            )}
+            {proposal.payment_terms && (
+              <View style={{ flex: 2 }}>
+                <Text style={s.fieldLabel}>FORMA DE PAGAMENTO</Text>
+                <Text style={{ fontSize: 10, color: '#374151' }}>{proposal.payment_terms}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Value total box */}
+        <View style={[s.valueBox, { backgroundColor: accent }]}>
+          <Text style={s.valueLabel}>VALOR TOTAL</Text>
+          <Text style={s.valueAmount}>{fmtBRL(proposal.value)}</Text>
+        </View>
+      </View>
+    </Page>
+  )
+
+  // ── Acceptance page ────────────────────────────────────────────────────────
+  const AcceptancePage = (
+    <Page size="A4" style={s.contentPage}>
+      {FixedHeader}
+      {FixedFooter}
+
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <Text style={[s.acceptTitle, { borderLeftWidth: 3, borderLeftColor: accent, paddingLeft: 12 }]}>
+          Aceite
+        </Text>
+        <Text style={s.acceptSub}>
+          Ao assinar abaixo, o contratante declara ter lido e concordado com todos os termos e condições desta proposta comercial.
+        </Text>
+
+        <View style={s.signRow}>
+          <View style={s.signCol}>
+            <View style={s.signLine} />
+            <Text style={s.signName}>{displayName}</Text>
+            <Text style={s.signRole}>Prestador de serviços</Text>
+          </View>
+          <View style={s.signCol}>
+            <View style={s.signLine} />
+            <Text style={s.signName}>{proposal.clients?.name ?? 'Cliente'}</Text>
+            <Text style={s.signRole}>Contratante</Text>
+          </View>
+          <View style={[s.signCol, { maxWidth: 110 }]}>
+            <View style={s.signLine} />
+            <Text style={s.signName}>Data</Text>
+            <Text style={s.signRole}>{today}</Text>
+          </View>
+        </View>
+      </View>
+    </Page>
+  )
+
+  return (
+    <Document>
+      {CoverPage}
+      {ContentPage}
+      {AcceptancePage}
     </Document>
   )
 }
