@@ -28,21 +28,21 @@ export default function DashboardCharts({
   doughnutColors,
 }: DashboardChartsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-2.5">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 
       {/* Propostas por mês */}
-      <div className="bg-white rounded-[10px] border border-gray-100 px-4 py-[14px]">
-        <h2 className="text-[12px] font-medium text-gray-500 mb-3">Propostas por mês</h2>
-        <div style={{ height: 140 }}>
+      <div className="bg-white rounded-[10px] border border-gray-100 px-5 py-5">
+        <h2 className="text-sm font-medium text-gray-600 mb-4">Propostas por mês</h2>
+        <div style={{ height: 160 }}>
           <ProposalBarChart labels={barLabels} data={barData} />
         </div>
       </div>
 
       {/* Valor em negociação */}
-      <div className="bg-white rounded-[10px] border border-gray-100 px-4 py-[14px]">
-        <h2 className="text-[12px] font-medium text-gray-500 mb-3">Valor em negociação</h2>
-        <div className="flex gap-4 items-center" style={{ height: 140 }}>
-          <div className="shrink-0" style={{ width: 140, height: 140 }}>
+      <div className="bg-white rounded-[10px] border border-gray-100 px-5 py-5">
+        <h2 className="text-sm font-medium text-gray-600 mb-4">Valor em negociação</h2>
+        <div className="flex gap-6 items-center" style={{ height: 160 }}>
+          <div className="shrink-0" style={{ width: 160, height: 160 }}>
             <ValueDoughnutChart
               labels={doughnutLabels}
               data={doughnutData}
@@ -50,15 +50,15 @@ export default function DashboardCharts({
             />
           </div>
           {/* Mini legenda */}
-          <ul className="flex flex-col gap-1.5 min-w-0">
+          <ul className="flex flex-col gap-2 min-w-0">
             {doughnutLabels.map((label, i) => (
               doughnutData[i] > 0 && (
-                <li key={label} className="flex items-center gap-1.5 min-w-0">
+                <li key={label} className="flex items-center gap-2 min-w-0">
                   <span
-                    className="w-2 h-2 rounded-full shrink-0"
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: doughnutColors[i] }}
                   />
-                  <span className="text-[11px] text-gray-500 truncate">{label}</span>
+                  <span className="text-xs text-gray-500 truncate">{label}</span>
                 </li>
               )
             ))}

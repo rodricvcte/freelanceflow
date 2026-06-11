@@ -162,14 +162,14 @@ export default async function DashboardPage() {
   const card = 'bg-white rounded-[10px] border border-gray-100'
 
   return (
-    <div className="p-5 max-w-[1200px]">
+    <div className="p-6 md:p-8 max-w-[1200px]">
 
       <Suspense fallback={null}>
         <UpgradedBanner />
       </Suspense>
 
       {/* ── Header ────────────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4 mb-4">
+      <div className="flex items-start justify-between gap-4 mb-7">
         <div>
           <h1 className="text-[18px] font-medium text-gray-900 leading-snug">
             Olá, {firstName}!
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
 
       {/* Upgrade alert */}
       {showUpgradeBanner && (
-        <div className="mb-4 flex items-center justify-between gap-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-[10px]">
+        <div className="mb-6 flex items-center justify-between gap-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-[10px]">
           <p className="text-sm text-amber-800">
             Você usou <strong>{usedThisMonth} de 5</strong> propostas este mês.
             Faça upgrade para Pro e envie propostas ilimitadas.
@@ -204,40 +204,40 @@ export default async function DashboardPage() {
       )}
 
       {/* ── Métricas (4 cards) ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-2.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
 
         {/* Valor aprovado */}
-        <div className="bg-gray-50 rounded-[8px] border border-gray-100 px-[14px] py-3">
-          <p className="text-[11px] font-medium text-gray-400 mb-1.5">Valor aprovado</p>
-          <p className="text-lg font-bold leading-tight tabular-nums text-[#1D9E75]">
+        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
+          <p className="text-xs font-medium text-gray-400 mb-2">Valor aprovado</p>
+          <p className="text-2xl font-bold leading-tight tabular-nums text-[#1D9E75]">
             {fmtBRL(totalApprovedValue)}
           </p>
-          <p className="text-[11px] text-gray-400 mt-1">
+          <p className="text-xs text-gray-400 mt-2">
             {approvedCount} aprovada{approvedCount !== 1 ? 's' : ''}
           </p>
         </div>
 
         {/* Em aberto */}
-        <div className="bg-gray-50 rounded-[8px] border border-gray-100 px-[14px] py-3">
-          <p className="text-[11px] font-medium text-gray-400 mb-1.5">Em aberto</p>
-          <p className="text-lg font-bold text-gray-900 leading-tight">{openCount}</p>
-          <p className="text-[11px] text-gray-400 mt-1">enviadas + visualizadas</p>
+        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
+          <p className="text-xs font-medium text-gray-400 mb-2">Em aberto</p>
+          <p className="text-2xl font-bold text-gray-900 leading-tight">{openCount}</p>
+          <p className="text-xs text-gray-400 mt-2">enviadas + visualizadas</p>
         </div>
 
         {/* Taxa de aprovação */}
-        <div className="bg-gray-50 rounded-[8px] border border-gray-100 px-[14px] py-3">
-          <p className="text-[11px] font-medium text-gray-400 mb-1.5">Taxa de aprovação</p>
-          <p className="text-lg font-bold text-gray-900 leading-tight">
+        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
+          <p className="text-xs font-medium text-gray-400 mb-2">Taxa de aprovação</p>
+          <p className="text-2xl font-bold text-gray-900 leading-tight">
             {approvalRate !== null ? `${approvalRate}%` : '—'}
           </p>
-          <p className="text-[11px] text-gray-400 mt-1">últimos 30 dias</p>
+          <p className="text-xs text-gray-400 mt-2">últimos 30 dias</p>
         </div>
 
         {/* Este mês */}
-        <div className="bg-gray-50 rounded-[8px] border border-gray-100 px-[14px] py-3">
-          <p className="text-[11px] font-medium text-gray-400 mb-1.5">Este mês</p>
-          <p className="text-lg font-bold text-gray-900 leading-tight">{usedThisMonth}</p>
-          <p className="text-[11px] text-gray-400 mt-1">
+        <div className="bg-white rounded-[10px] border border-gray-100 p-5">
+          <p className="text-xs font-medium text-gray-400 mb-2">Este mês</p>
+          <p className="text-2xl font-bold text-gray-900 leading-tight">{usedThisMonth}</p>
+          <p className="text-xs text-gray-400 mt-2">
             {isPro ? 'plano pro: ilimitado' : `free: ${usedThisMonth}/5`}
           </p>
         </div>
@@ -254,13 +254,13 @@ export default async function DashboardPage() {
       />
 
       {/* ── Linha 3: Recentes + [Por status + Atenção] ───────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-2.5">
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
 
         {/* Propostas recentes */}
         <div className={card}>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50">
-            <h2 className="text-[12px] font-medium text-gray-500">Propostas recentes</h2>
-            <Link href="/propostas" className="text-[11px] text-[#1D9E75] font-medium hover:underline shrink-0">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+            <h2 className="text-sm font-medium text-gray-600">Propostas recentes</h2>
+            <Link href="/propostas" className="text-xs text-[#1D9E75] font-medium hover:underline shrink-0">
               Ver todas →
             </Link>
           </div>
@@ -281,33 +281,33 @@ export default async function DashboardPage() {
                   <li key={p.id}>
                     <Link
                       href={`/propostas/${p.id}`}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium text-gray-900 truncate leading-snug">
+                        <p className="text-sm font-medium text-gray-900 truncate leading-snug">
                           {trunc(p.title, 40)}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
                           {p.proposal_number && (
-                            <span className="font-mono text-[11px] text-gray-400 shrink-0">
+                            <span className="font-mono text-xs text-gray-400 shrink-0">
                               {p.proposal_number}
                             </span>
                           )}
                           {name && p.proposal_number && (
-                            <span className="text-gray-300 text-[11px] shrink-0">·</span>
+                            <span className="text-gray-300 text-xs shrink-0">·</span>
                           )}
                           {name && (
-                            <span className="text-[11px] text-gray-400 truncate">{name}</span>
+                            <span className="text-xs text-gray-400 truncate">{name}</span>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2.5 shrink-0">
                         {p.value !== null && (
-                          <span className="text-[12px] font-semibold text-gray-700 tabular-nums">
+                          <span className="text-sm font-semibold text-gray-700 tabular-nums">
                             {fmtBRL(p.value)}
                           </span>
                         )}
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
                           {cfg.label}
                         </span>
                       </div>
@@ -320,12 +320,12 @@ export default async function DashboardPage() {
         </div>
 
         {/* Coluna direita: Por status + Atenção */}
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-4">
 
           {/* Por status */}
           <div className={card}>
-            <div className="px-4 py-3 border-b border-gray-50">
-              <h2 className="text-[12px] font-medium text-gray-500">Por status</h2>
+            <div className="px-4 py-3.5 border-b border-gray-50">
+              <h2 className="text-sm font-medium text-gray-600">Por status</h2>
             </div>
             <ul className="divide-y divide-gray-50">
               {STATUS_ORDER.map(key => {
@@ -335,12 +335,12 @@ export default async function DashboardPage() {
                   <li key={key}>
                     <Link
                       href={`/propostas?status=${key}`}
-                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
                     >
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
                         {cfg.label}
                       </span>
-                      <span className={`text-[12px] font-semibold tabular-nums ${count > 0 ? 'text-gray-900' : 'text-gray-300'}`}>
+                      <span className={`text-sm font-semibold tabular-nums ${count > 0 ? 'text-gray-900' : 'text-gray-300'}`}>
                         {count}
                       </span>
                     </Link>
@@ -352,28 +352,28 @@ export default async function DashboardPage() {
 
           {/* Atenção necessária */}
           <div className={card}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50">
-              <h2 className="text-[12px] font-medium text-gray-500">Atenção necessária</h2>
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-50">
+              <h2 className="text-sm font-medium text-gray-600">Atenção necessária</h2>
               {totalAttention > 0 && (
-                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-amber-400 text-white text-[11px] font-bold flex items-center justify-center">
                   {totalAttention}
                 </span>
               )}
             </div>
 
             {totalAttention === 0 ? (
-              <div className="px-4 py-5 text-center">
-                <p className="text-[12px] text-gray-400">Tudo em dia</p>
+              <div className="px-4 py-6 text-center">
+                <p className="text-sm text-gray-400">Tudo em dia</p>
               </div>
             ) : (
               <ul className="divide-y divide-gray-50">
                 {sentNoView.map(p => (
                   <li key={p.id}>
-                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-amber-50/60 transition-colors">
+                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-4 py-3.5 hover:bg-amber-50/60 transition-colors">
                       <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-400 shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-medium text-gray-800 truncate">{trunc(p.title, 36)}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">
+                        <p className="text-xs font-medium text-gray-800 truncate">{trunc(p.title, 36)}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
                           Enviada há {daysSince(p.sent_at ?? p.created_at)} dias sem visualização
                         </p>
                       </div>
@@ -382,11 +382,11 @@ export default async function DashboardPage() {
                 ))}
                 {viewedNoResponse.map(p => (
                   <li key={p.id}>
-                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-blue-50/60 transition-colors">
+                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-4 py-3.5 hover:bg-blue-50/60 transition-colors">
                       <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-400 shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-medium text-gray-800 truncate">{trunc(p.title, 36)}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">
+                        <p className="text-xs font-medium text-gray-800 truncate">{trunc(p.title, 36)}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
                           Visualizada há {daysSince(p.sent_at ?? p.created_at)} dias sem resposta
                         </p>
                       </div>
