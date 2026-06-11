@@ -24,12 +24,14 @@ type Props = {
 
 export default function ProposalActions({ proposalId, status, initialPdfUrl, duplicate }: Props) {
   const router = useRouter()
-  const [duplicating, setDuplicating] = useState(false) // brief flash before navigation
+  const [duplicating, setDuplicating] = useState(false)
+  const [sending, setSending]         = useState(false)
   const [showCancel, setShowCancel]   = useState(false)
   const [cancelling, setCancelling]   = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
 
-  const canCancel = status !== 'aprovada' && status !== 'cancelada'
+  const isDraft    = status === 'rascunho'
+  const canCancel  = status !== 'aprovada' && status !== 'cancelada'
 
   function handleDuplicate() {
     setDuplicating(true)
@@ -47,6 +49,21 @@ export default function ProposalActions({ proposalId, status, initialPdfUrl, dup
       router.push('/propostas/new?mode=duplicate')
     } catch {
       setDuplicating(false)
+    }
+  }
+
+  async function handleSend() {
+    setSending(true)
+    try {
+      const res = await fetch(`/api/proposals/${proposalId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'enviada' }),
+      })
+      if (!res.ok) throw new Error()
+      router.refresh()
+    } catch {
+      setSending(false)
     }
   }
 
@@ -69,19 +86,21 @@ export default function ProposalActions({ proposalId, status, initialPdfUrl, dup
     }
   }
 
+  const secondaryCls = 'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50'
+
   return (
     <>
-      <div className="flex flex-col gap-4">
+      {/* ── Barra de ações: uma linha, space-between ── */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
 
-        {/* ── Ações principais ── */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Esquerda: ações principais */}
+        <div className="flex items-center gap-2 flex-wrap">
 
-          {status === 'rascunho' && (
+          {isDraft && (
             <Link
               href={`/propostas/${proposalId}/editar`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
+              className={secondaryCls}
             >
-              {/* Tabler: pencil */}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
                 <path d="M13.5 6.5l4 4" />
@@ -90,15 +109,10 @@ export default function ProposalActions({ proposalId, status, initialPdfUrl, dup
             </Link>
           )}
 
-          <button
-            onClick={handleDuplicate}
-            disabled={duplicating}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
+          <button onClick={handleDuplicate} disabled={duplicating} className={secondaryCls}>
             {duplicating ? (
               <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
             ) : (
-              /* Tabler: copy */
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="8" y="8" width="12" height="12" rx="2" />
                 <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2" />
@@ -108,13 +122,7 @@ export default function ProposalActions({ proposalId, status, initialPdfUrl, dup
           </button>
 
           {initialPdfUrl && (
-            <a
-              href={initialPdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {/* Tabler: download */}
+            <a href={initialPdfUrl} target="_blank" rel="noopener noreferrer" className={secondaryCls}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
                 <path d="M7 11l5 5l5 -5" />
@@ -123,23 +131,38 @@ export default function ProposalActions({ proposalId, status, initialPdfUrl, dup
               Baixar PDF
             </a>
           )}
+
+          {isDraft && (
+            <button
+              onClick={handleSend}
+              disabled={sending}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#1D9E75] rounded-lg hover:bg-[#188f68] transition-colors disabled:opacity-50"
+            >
+              {sending ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 14l11 -11" />
+                  <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+                </svg>
+              )}
+              {sending ? 'Enviando…' : 'Enviar proposta'}
+            </button>
+          )}
         </div>
 
-        {/* ── Ação destrutiva ── */}
+        {/* Direita: cancelar */}
         {canCancel && (
-          <div>
-            <button
-              onClick={() => setShowCancel(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-red-400 hover:text-red-600 transition-colors"
-            >
-              {/* Tabler: ban */}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M5.7 5.7l12.6 12.6" />
-              </svg>
-              Cancelar proposta
-            </button>
-          </div>
+          <button
+            onClick={() => setShowCancel(true)}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-red-400 hover:text-red-600 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M5.7 5.7l12.6 12.6" />
+            </svg>
+            Cancelar proposta
+          </button>
         )}
       </div>
 
