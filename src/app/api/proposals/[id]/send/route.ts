@@ -31,7 +31,7 @@ export async function POST(
   // Fetch proposal + profile
   const { data: proposal } = await supabase
     .from('proposals')
-    .select('id, title, token, status, pdf_url, total_value, valid_until, proposal_number, snapshot_profile')
+    .select('id, title, token, status, pdf_url, value, valid_until, proposal_number, snapshot_profile')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
@@ -77,7 +77,7 @@ export async function POST(
     freelancerLogoUrl: logoUrl,
     accentColor,
     proposalTitle: (proposal.title as string) ?? 'Proposta Comercial',
-    proposalValue: (proposal.total_value as number | null) ?? null,
+    proposalValue: (proposal.value as number | null) ?? null,
     proposalValidUntil: (proposal.valid_until as string | null) ?? null,
     customMessage: body.custom_message?.trim() || null,
     approveUrl: `${APP_URL}/p/${token}/accept?via=email`,

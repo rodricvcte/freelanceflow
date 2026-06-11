@@ -239,7 +239,7 @@ export default async function ProposalDetailPage({
   const [proposalRes, eventsRes, followUpsRes, profileRes] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, title, service_description, value, total_value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
+      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
