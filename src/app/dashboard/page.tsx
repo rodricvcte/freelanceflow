@@ -220,76 +220,72 @@ export default async function DashboardPage() {
 
       </div>
 
-      {/* ── 3. Duas colunas ─────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      {/* ── 3. Propostas recentes + Por status ──────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-6 mb-6 items-start">
 
-        {/* Atenção necessária */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm self-start">
+        {/* Propostas recentes */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <h2 className="text-[13px] font-medium text-gray-500">Atenção necessária</h2>
-            {totalAttention > 0 && (
-              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center">
-                {totalAttention}
-              </span>
-            )}
+            <h2 className="text-[13px] font-medium text-gray-500">Propostas recentes</h2>
+            <Link href="/propostas" className="text-xs text-[#1D9E75] font-medium hover:underline shrink-0">
+              Ver todas →
+            </Link>
           </div>
 
-          {totalAttention === 0 ? (
+          {recentProposals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center px-5">
-              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <p className="text-sm font-medium text-gray-700">Tudo em dia!</p>
-              <p className="text-xs text-gray-400 mt-1">Nenhuma proposta precisa de atenção</p>
+              <p className="text-sm text-gray-500">Nenhuma proposta ainda</p>
+              <Link href="/propostas/new" className="mt-3 text-xs font-medium text-[#1D9E75] hover:underline">
+                Criar primeira proposta →
+              </Link>
             </div>
           ) : (
             <ul className="divide-y divide-gray-50">
-              {sentNoView.map(p => (
-                <li key={p.id}>
-                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-amber-50/70 transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Enviada há {daysSince(p.sent_at ?? p.created_at)} dias sem visualização
-                        {clientName(p) ? ` · ${clientName(p)}` : ''}
-                      </p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-              {viewedNoResponse.map(p => (
-                <li key={p.id}>
-                  <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-blue-50/70 transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Visualizada há {daysSince(p.sent_at ?? p.created_at)} dias sem resposta
-                        {clientName(p) ? ` · ${clientName(p)}` : ''}
-                      </p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
+              {recentProposals.map(p => {
+                const cfg  = STATUS_CONFIG[p.status as StatusKey] ?? STATUS_CONFIG.rascunho
+                const name = clientName(p)
+                return (
+                  <li key={p.id}>
+                    <Link href={`/propostas/${p.id}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {p.title.length > 40 ? p.title.slice(0, 40) + '…' : p.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                          {name && (
+                            <span className="text-xs text-gray-400 truncate">{name}</span>
+                          )}
+                          {p.proposal_number && (
+                            <>
+                              {name && <span className="text-gray-300 text-xs shrink-0">·</span>}
+                              <span className="font-mono text-[11px] text-[#1D9E75] font-semibold shrink-0">
+                                {p.proposal_number}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {p.value !== null && (
+                          <span className="text-sm font-semibold text-gray-700 tabular-nums">
+                            {fmtBRL(p.value)}
+                          </span>
+                        )}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                          {cfg.label}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </div>
 
         {/* Por status */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-          <div className="px-5 py-4 border-b border-gray-50">
+          <div className="px-4 py-4 border-b border-gray-50">
             <h2 className="text-[13px] font-medium text-gray-500">Por status</h2>
           </div>
           <ul className="divide-y divide-gray-50">
@@ -300,9 +296,9 @@ export default async function DashboardPage() {
                 <li key={key}>
                   <Link
                     href={`/propostas?status=${key}`}
-                    className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
                   >
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
                       {cfg.label}
                     </span>
                     <span className={`text-sm font-bold tabular-nums ${count > 0 ? 'text-gray-900' : 'text-gray-300'}`}>
@@ -317,62 +313,66 @@ export default async function DashboardPage() {
 
       </div>
 
-      {/* ── 4. Propostas recentes ───────────────────────────────────────────────── */}
+      {/* ── 4. Atenção necessária (full width) ──────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-          <h2 className="text-[13px] font-medium text-gray-500">Propostas recentes</h2>
-          <Link href="/propostas" className="text-xs text-[#1D9E75] font-medium hover:underline shrink-0">
-            Ver todas →
-          </Link>
+          <h2 className="text-[13px] font-medium text-gray-500">Atenção necessária</h2>
+          {totalAttention > 0 && (
+            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center">
+              {totalAttention}
+            </span>
+          )}
         </div>
 
-        {recentProposals.length === 0 ? (
+        {totalAttention === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-center px-5">
-            <p className="text-sm text-gray-500">Nenhuma proposta ainda</p>
-            <Link href="/propostas/new" className="mt-3 text-xs font-medium text-[#1D9E75] hover:underline">
-              Criar primeira proposta →
-            </Link>
+            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-gray-700">Tudo em dia!</p>
+            <p className="text-xs text-gray-400 mt-1">Nenhuma proposta precisa de atenção</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-50">
-            {recentProposals.map(p => {
-              const cfg  = STATUS_CONFIG[p.status as StatusKey] ?? STATUS_CONFIG.rascunho
-              const name = clientName(p)
-              return (
-                <li key={p.id}>
-                  <Link href={`/propostas/${p.id}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {p.title.length > 40 ? p.title.slice(0, 40) + '…' : p.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5 min-w-0">
-                        {name && (
-                          <span className="text-xs text-gray-400 truncate">{name}</span>
-                        )}
-                        {p.proposal_number && (
-                          <>
-                            {name && <span className="text-gray-300 text-xs shrink-0">·</span>}
-                            <span className="font-mono text-[11px] text-[#1D9E75] font-semibold shrink-0">
-                              {p.proposal_number}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      {p.value !== null && (
-                        <span className="text-sm font-semibold text-gray-700 tabular-nums">
-                          {fmtBRL(p.value)}
-                        </span>
-                      )}
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bgCls} ${cfg.textCls}`}>
-                        {cfg.label}
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              )
-            })}
+            {sentNoView.map(p => (
+              <li key={p.id}>
+                <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-amber-50/70 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Enviada há {daysSince(p.sent_at ?? p.created_at)} dias sem visualização
+                      {clientName(p) ? ` · ${clientName(p)}` : ''}
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            ))}
+            {viewedNoResponse.map(p => (
+              <li key={p.id}>
+                <Link href={`/propostas/${p.id}`} className="flex items-start gap-3 px-5 py-3.5 hover:bg-blue-50/70 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Visualizada há {daysSince(p.sent_at ?? p.created_at)} dias sem resposta
+                      {clientName(p) ? ` · ${clientName(p)}` : ''}
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            ))}
           </ul>
         )}
       </div>
