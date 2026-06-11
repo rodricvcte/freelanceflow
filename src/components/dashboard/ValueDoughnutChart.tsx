@@ -1,6 +1,6 @@
 'use client'
 
-import { Doughnut } from 'react-chartjs-2'
+import { Pie } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
   ArcElement,
@@ -27,10 +27,9 @@ export default function ValueDoughnutChart({ labels, data, colors }: Props) {
     )
   }
 
-  const options: ChartOptions<'doughnut'> = {
+  const options: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%',
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -43,7 +42,7 @@ export default function ValueDoughnutChart({ labels, data, colors }: Props) {
   }
 
   return (
-    <Doughnut
+    <Pie
       data={{
         labels,
         datasets: [{
