@@ -28,8 +28,10 @@ type ProposalRow = {
   pdf_url: string | null
   token: string
   proposal_number: string | null
+  version: number
   created_at: string
   sections: Section[]
+  client_id: string | null
   clients: { id: string; name: string; email: string | null; phone: string | null } | null
 }
 
@@ -278,7 +280,7 @@ export default async function ProposalDetailPage({
   const [proposalRes, eventsRes, followUpsRes, profileRes] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
+      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, version, client_id, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -311,8 +313,14 @@ export default async function ProposalDetailPage({
   const freelancerName = profile?.business_name ?? profile?.full_name ?? 'Freelancer'
   const proposalAny = proposalRes.data as Record<string, unknown>
 
-  const statusCfg = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
-  const ref       = proposal.proposal_number ?? '#' + proposal.token.substring(0, 8).toUpperCase()
+  const statusCfg  = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
+  const version    = proposal.version ?? 1
+  const baseNumber = proposal.proposal_number
+    ? proposal.proposal_number.replace(/-v\d+$/, '')
+    : null
+  const ref = baseNumber
+    ? `${baseNumber}-v${version}`
+    : '#' + proposal.token.substring(0, 8).toUpperCase()
 
   const clientsRaw = (proposalRes.data as Record<string, unknown>).clients
   const client = Array.isArray(clientsRaw)
@@ -394,6 +402,7 @@ export default async function ProposalDetailPage({
             payment_terms:       proposal.payment_terms,
             deadline_days:       proposal.deadline_days,
             valid_until:         proposal.valid_until,
+            client_id:           proposal.client_id ?? client?.id ?? null,
             sections:            proposal.sections ?? [],
           }}
         />

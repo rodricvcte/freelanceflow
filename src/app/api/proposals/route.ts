@@ -59,6 +59,7 @@ export async function POST(request: Request) {
       client_id:           client_id || null,
       sections:            Array.isArray(sections) ? sections : [],
       status:              'rascunho',
+      version:             1,
     })
     .select()
     .single()

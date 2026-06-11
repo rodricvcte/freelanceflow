@@ -11,6 +11,7 @@ type DuplicateData = {
   payment_terms: string | null
   deadline_days: number | null
   valid_until: string | null
+  client_id: string | null
   sections: unknown[]
 }
 
@@ -59,6 +60,7 @@ export default function ProposalActions({ proposalId, token, status, initialPdfU
           payment_terms:       duplicate.payment_terms,
           deadline_days:       duplicate.deadline_days,
           valid_until:         duplicate.valid_until,
+          client_id:           duplicate.client_id,
           sections:            duplicate.sections,
         }),
       })

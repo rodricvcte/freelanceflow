@@ -438,6 +438,7 @@ export default function EditarPropostaPage() {
   const [blocked, setBlocked]   = useState(false)
   const [submitting, setSub]    = useState(false)
   const [error, setError]       = useState<string | null>(null)
+  const [proposalRef, setProposalRef] = useState<{ number: string | null; version: number }>({ number: null, version: 1 })
 
   useEffect(() => {
     Promise.all([
@@ -464,6 +465,7 @@ export default function EditarPropostaPage() {
       })
       setSections(Array.isArray(proposal.sections) ? proposal.sections : [])
       setClients(Array.isArray(clientList) ? clientList : [])
+      setProposalRef({ number: proposal.proposal_number ?? null, version: proposal.version ?? 1 })
       setLoading(false)
     }).catch(() => { setError('Erro ao carregar proposta'); setLoading(false) })
   }, [id])
@@ -556,7 +558,17 @@ export default function EditarPropostaPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Editar Proposta</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Salvar incrementa a versão e regenera o PDF automaticamente</p>
+          {proposalRef.number ? (
+            <p className="text-sm text-gray-500 mt-0.5">
+              <span className="font-mono text-[#1D9E75] font-semibold">
+                {proposalRef.number.replace(/-v\d+$/, '')}-v{proposalRef.version}
+              </span>
+              {' '}·{' '}
+              Salvar gerará <span className="font-medium">v{proposalRef.version + 1}</span>
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500 mt-0.5">Salvar incrementa a versão e regenera o PDF automaticamente</p>
+          )}
         </div>
       </div>
 
