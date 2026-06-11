@@ -77,7 +77,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profileRes, proposalsRes, subRes] = await Promise.all([
+  const [profileRes, proposalsRes, subRes, followUpsRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('full_name, business_name')
@@ -93,11 +93,29 @@ export default async function DashboardPage() {
       .select('plan, status')
       .eq('user_id', user.id)
       .maybeSingle(),
+    supabase
+      .from('follow_ups')
+      .select('id, type, trigger_rule, scheduled_for, proposals(id, title)')
+      .eq('user_id', user.id)
+      .is('sent_at', null)
+      .order('scheduled_for', { ascending: true, nullsFirst: false }),
   ])
 
   const profile   = profileRes.data
   const proposals = (proposalsRes.data ?? []) as ProposalRow[]
   const sub       = subRes.data
+  type FupRow = {
+    id: string
+    type: 'email' | 'whatsapp'
+    trigger_rule: string | null
+    scheduled_for: string | null
+    proposals: { id: string; title: string } | { id: string; title: string }[] | null
+  }
+  const followUpsRaw = (followUpsRes.data ?? []) as unknown as FupRow[]
+  const followUps = followUpsRaw.map(f => ({
+    ...f,
+    proposals: Array.isArray(f.proposals) ? (f.proposals[0] ?? null) : f.proposals,
+  })) as { id: string; type: 'email' | 'whatsapp'; trigger_rule: string | null; scheduled_for: string | null; proposals: { id: string; title: string } | null }[]
 
   const firstName = profile?.business_name?.split(' ')[0]
     ?? profile?.full_name?.split(' ')[0]
@@ -154,7 +172,14 @@ export default async function DashboardPage() {
   const viewedNoResponse = proposals.filter(p =>
     p.status === 'visualizada' && daysSince(p.sent_at ?? p.created_at) >= 2
   )
-  const totalAttention = sentNoView.length + viewedNoResponse.length
+
+  // IDs já cobertos pelas regras de tempo para não duplicar
+  const attentionIds = new Set([...sentNoView, ...viewedNoResponse].map(p => p.id))
+
+  // Follow-ups pendentes de propostas que ainda não aparecem pelas regras acima
+  const pendingFups = followUps.filter(f => f.proposals && !attentionIds.has(f.proposals.id))
+
+  const totalAttention = sentNoView.length + viewedNoResponse.length + pendingFups.length
 
   // ── Recent proposals ─────────────────────────────────────────────────────────
   const recentProposals = proposals.slice(0, 5)
@@ -397,6 +422,24 @@ export default async function DashboardPage() {
                   </Link>
                 </li>
               ))}
+              {pendingFups.map(f => {
+                const p = f.proposals!
+                const label = f.type === 'whatsapp' ? 'WhatsApp' : 'Email'
+                const overdue = f.scheduled_for && new Date(f.scheduled_for) < now
+                return (
+                  <li key={f.id}>
+                    <Link href={`/propostas/${p.id}`} className="flex items-start gap-2.5 px-4 py-3 hover:bg-gray-50 transition-colors">
+                      <span className={`mt-1.5 w-[6px] h-[6px] rounded-full shrink-0 ${overdue ? 'bg-red-400' : 'bg-[#1D9E75]'}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-medium text-gray-800 truncate leading-snug">{trunc(p.title, 32)}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+                          Follow-up ({label}) pendente{overdue ? ' · atrasado' : ''}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </div>
