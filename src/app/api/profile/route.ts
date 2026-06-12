@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data, error } = await queryClient
     .from('profiles')
-    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok')
+    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok, signature_style')
     .eq('id', userId)
     .maybeSingle()
 
@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
     'instagram', 'linkedin', 'facebook', 'youtube', 'tiktok',
   ] as const
   type Field = typeof allowed[number]
-  const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj', string | null>> = {}
+  const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj' | 'signature_style', string | null>> = {}
 
   for (const key of allowed) {
     if (key in body) {
@@ -54,6 +54,12 @@ export async function PATCH(request: Request) {
     updates.document_type = body.document_type === 'cpf' || body.document_type === 'cnpj'
       ? body.document_type
       : null
+  }
+
+  if ('signature_style' in body) {
+    updates.signature_style = ['none', 'simple', 'double'].includes(body.signature_style)
+      ? body.signature_style
+      : 'double'
   }
 
   if ('cpf_cnpj' in body) {

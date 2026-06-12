@@ -29,7 +29,7 @@ export async function generateAndSaveProposalPDF(
       ? Promise.resolve({ data: null })
       : supabase
           .from('profiles')
-          .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj, instagram, linkedin, facebook, youtube, tiktok')
+          .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj, instagram, linkedin, facebook, youtube, tiktok, signature_style')
           .eq('id', authData.user.id)
           .single(),
     supabase
@@ -65,6 +65,7 @@ export async function generateAndSaveProposalPDF(
     phone: null, email_business: null, address: null, website: null,
     document_type: null, cpf_cnpj: null,
     instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
+    signature_style: null,
   }
 
   const buffer = await renderToBuffer(
