@@ -77,7 +77,7 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 
 // ─── Tab: Perfil ─────────────────────────────────────────────────────────────
 
-function ProfileTab({ initial }: { initial: Profile }) {
+function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
   const [form, setForm] = useState({
     full_name:      initial.full_name      ?? '',
     business_name:  initial.business_name  ?? '',
@@ -279,27 +279,42 @@ function ProfileTab({ initial }: { initial: Profile }) {
 
       {/* Cor da proposta */}
       <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-900 mb-1">Cor da proposta</h3>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-sm font-semibold text-gray-900">Cor da proposta</h3>
+          {!isPro && (
+            <a href="/configuracoes?tab=plano" className="flex items-center gap-1 text-xs text-amber-600 font-medium hover:underline">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Disponível no Pro
+            </a>
+          )}
+        </div>
         <p className="text-xs text-gray-500 mb-4">Cor do cabeçalho e destaques no PDF gerado.</p>
-        <div className="flex items-center gap-3">
+        <div className={`flex items-center gap-3 ${!isPro ? 'opacity-50 pointer-events-none select-none' : ''}`}>
           <input
             type="color"
             value={form.accent_color}
             onChange={e => set('accent_color', e.target.value)}
-            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white"
+            disabled={!isPro}
+            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white disabled:cursor-not-allowed"
           />
           <div
             className="w-8 h-8 rounded-lg border border-gray-100 shadow-sm"
-            style={{ backgroundColor: form.accent_color }}
+            style={{ backgroundColor: isPro ? form.accent_color : '#1D9E75' }}
           />
-          <span className="text-sm font-mono text-gray-700">{form.accent_color.toUpperCase()}</span>
-          <button
-            type="button"
-            onClick={() => set('accent_color', '#1D9E75')}
-            className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors"
-          >
-            Resetar
-          </button>
+          <span className="text-sm font-mono text-gray-700">
+            {isPro ? form.accent_color.toUpperCase() : '#1D9E75'}
+          </span>
+          {isPro && (
+            <button
+              type="button"
+              onClick={() => set('accent_color', '#1D9E75')}
+              className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors"
+            >
+              Resetar
+            </button>
+          )}
         </div>
       </div>
 
@@ -737,7 +752,12 @@ function ConfiguracoesInner() {
         </div>
       ) : (
         <>
-          {tab === 'perfil'        && profile && <ProfileTab initial={profile} />}
+          {tab === 'perfil'        && profile && (
+            <ProfileTab
+              initial={profile}
+              isPro={!!sub && sub.plan !== 'free' && (sub.status === 'active' || sub.status === 'trialing')}
+            />
+          )}
           {tab === 'plano'         && sub     && <PlanTab sub={sub} />}
           {tab === 'notificacoes'             && <NotificationsTab />}
         </>

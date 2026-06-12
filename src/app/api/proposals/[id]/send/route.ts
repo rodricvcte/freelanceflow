@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 import { buildProposalEmailHtml } from '@/lib/email-templates/proposal'
+import { isPro } from '@/lib/plan'
 
 export const runtime = 'nodejs'
 
@@ -69,6 +70,10 @@ export async function POST(
     ? `${proposal.proposal_number}.pdf`
     : `proposta-${id.slice(0, 8)}.pdf`
 
+  // Only include tracking pixel for Pro users
+  const userIsPro = await isPro(user.id, supabase)
+  const trackingPixelUrl = userIsPro ? `${APP_URL}/api/track/email/${token}` : null
+
   const html = buildProposalEmailHtml({
     clientName,
     freelancerName,
@@ -81,7 +86,7 @@ export async function POST(
     approveUrl: `${APP_URL}/p/${token}/accept?via=email`,
     declineUrl: `${APP_URL}/p/${token}/decline?via=email`,
     viewUrl: `${APP_URL}/api/track/view/${token}`,
-    trackingPixelUrl: `${APP_URL}/api/track/email/${token}`,
+    trackingPixelUrl,
   })
 
   const resend = new Resend(process.env.RESEND_API_KEY)

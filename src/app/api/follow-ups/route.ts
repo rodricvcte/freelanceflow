@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { canUseFollowUps } from '@/lib/plan'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
@@ -26,6 +27,14 @@ export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const allowed = await canUseFollowUps(user.id, supabase)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Follow-ups disponíveis apenas no plano Pro.', code: 'PLAN_LIMIT_REACHED' },
+      { status: 403 }
+    )
+  }
 
   const body = await request.json()
   const { proposal_id, type = 'email', scheduled_for } = body

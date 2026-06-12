@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
+import UpgradeModal from '@/components/UpgradeModal'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -207,16 +208,22 @@ function GroupSection({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FollowUpsPage() {
-  const [items, setItems]       = useState<FollowUp[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [tab, setTab]           = useState<'pending' | 'done'>('pending')
-  const [completing, setComp]   = useState<string | null>(null)
+  const [items, setItems]         = useState<FollowUp[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [tab, setTab]             = useState<'pending' | 'done'>('pending')
+  const [completing, setComp]     = useState<string | null>(null)
+  const [isPro, setIsPro]         = useState(true)
+  const [showUpgrade, setUpgrade] = useState(false)
 
   useEffect(() => {
-    fetch('/api/follow-ups')
-      .then(r => r.json())
-      .then(d => { setItems(Array.isArray(d) ? d : []); setLoading(false) })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/follow-ups').then(r => r.json()).catch(() => []),
+      fetch('/api/subscriptions').then(r => r.json()).catch(() => ({})),
+    ]).then(([fups, sub]) => {
+      setItems(Array.isArray(fups) ? fups : [])
+      setIsPro(sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing'))
+      setLoading(false)
+    })
   }, [])
 
   async function markDone(id: string) {
@@ -243,6 +250,37 @@ export default function FollowUpsPage() {
   const groups = useMemo(() => groupPending(pending), [pending])
 
   const pendingCount = pending.length
+
+  if (!loading && !isPro) {
+    return (
+      <div className="p-6 md:p-8 max-w-2xl">
+        <UpgradeModal open={showUpgrade} onClose={() => setUpgrade(false)} feature="Gerencie todos os seus follow-ups em um só lugar" />
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Follow-ups</h1>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-10 shadow-sm text-center">
+          <div className="w-14 h-14 bg-[#1D9E75]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Follow-ups disponíveis no Pro</h2>
+          <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+            Agende lembretes por email ou WhatsApp, rastreie quais propostas precisam de atenção e nunca perca uma oportunidade.
+          </p>
+          <button
+            onClick={() => setUpgrade(true)}
+            className="px-6 py-3 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors"
+          >
+            Fazer upgrade para Pro
+          </button>
+          <p className="text-xs text-gray-400 mt-4">
+            <Link href="/configuracoes?tab=plano" className="hover:underline">Ver todos os planos →</Link>
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 md:p-8 max-w-2xl">

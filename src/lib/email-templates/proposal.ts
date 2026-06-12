@@ -10,7 +10,7 @@ export type ProposalEmailData = {
   approveUrl: string
   declineUrl: string
   viewUrl: string
-  trackingPixelUrl: string
+  trackingPixelUrl: string | null
 }
 
 function fmtBRL(v: number | null) {
@@ -119,8 +119,7 @@ export function buildProposalEmailHtml(d: ProposalEmailData): string {
     </td></tr>
   </table>
 
-  <!-- Tracking pixel -->
-  <img src="${d.trackingPixelUrl}" width="1" height="1" alt="" style="display:none;width:1px;height:1px" />
+  ${d.trackingPixelUrl ? `<img src="${d.trackingPixelUrl}" width="1" height="1" alt="" style="display:none;width:1px;height:1px" />` : ''}
 </body>
 </html>`
 }

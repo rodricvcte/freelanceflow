@@ -302,7 +302,7 @@ export default async function ProposalDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) notFound()
 
-  const [proposalRes, eventsRes, followUpsRes, profileRes] = await Promise.all([
+  const [proposalRes, eventsRes, followUpsRes, profileRes, subRes] = await Promise.all([
     supabase
       .from('proposals')
       .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, version, client_id, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
@@ -326,6 +326,11 @@ export default async function ProposalDetailPage({
       .select('full_name, business_name')
       .eq('id', user.id)
       .single(),
+    supabase
+      .from('subscriptions')
+      .select('plan, status')
+      .eq('user_id', user.id)
+      .maybeSingle(),
   ])
 
   if (!proposalRes.data) notFound()
@@ -336,6 +341,9 @@ export default async function ProposalDetailPage({
   const sections      = Array.isArray(proposal.sections) ? proposal.sections : []
   const profile       = profileRes.data
   const freelancerName = profile?.business_name ?? profile?.full_name ?? 'Freelancer'
+  const sub = subRes.data
+  const userIsPro = (process.env.DISABLE_PLAN_LIMITS === 'true') ||
+    (!!sub && sub.plan !== 'free' && (sub.status === 'active' || sub.status === 'trialing'))
   const proposalAny   = proposalRes.data as Record<string, unknown>
 
   const statusCfg = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
@@ -518,47 +526,69 @@ export default async function ProposalDetailPage({
         <div className="flex flex-col gap-4">
 
           {/* Linha do tempo */}
-          <div className={card}>
-            <div className="px-4 py-3.5 border-b border-gray-50">
-              <h3 className="text-sm font-medium text-gray-600">Linha do tempo</h3>
+          {userIsPro ? (
+            <div className={card}>
+              <div className="px-4 py-3.5 border-b border-gray-50">
+                <h3 className="text-sm font-medium text-gray-600">Linha do tempo</h3>
+              </div>
+              <div className="px-4 py-4">
+                {events.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-2">Nenhum evento registrado</p>
+                ) : (
+                  <ol>
+                    {events.map((ev, i) => {
+                      const cfg    = EVENT_CONFIG[ev.event_type] ?? { label: ev.event_type, dot: 'bg-gray-300', line: 'bg-gray-100' }
+                      const isLast = i === events.length - 1
+                      return (
+                        <li key={ev.id} className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${cfg.dot}`} />
+                            {!isLast && <span className={`w-px flex-1 my-1 ${cfg.line}`} />}
+                          </div>
+                          <div className="pb-3 flex-1 min-w-0">
+                            <p className="text-[13px] font-medium text-gray-800">{cfg.label}</p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">{fmtDateTime(ev.created_at)}</p>
+                          </div>
+                        </li>
+                      )
+                    })}
+                    {/* Aguardando — último item */}
+                    <li className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <span className="w-2.5 h-2.5 rounded-full border-2 border-gray-300 bg-white shrink-0 mt-1" />
+                      </div>
+                      <div className="pb-1 flex-1 min-w-0">
+                        <p className="text-[13px] text-gray-400">Aguardando…</p>
+                      </div>
+                    </li>
+                  </ol>
+                )}
+              </div>
             </div>
-            <div className="px-4 py-4">
-              {events.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-2">Nenhum evento registrado</p>
-              ) : (
-                <ol>
-                  {events.map((ev, i) => {
-                    const cfg    = EVENT_CONFIG[ev.event_type] ?? { label: ev.event_type, dot: 'bg-gray-300', line: 'bg-gray-100' }
-                    const isLast = i === events.length - 1
-                    return (
-                      <li key={ev.id} className="flex gap-3">
-                        <div className="flex flex-col items-center">
-                          <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${cfg.dot}`} />
-                          {!isLast && <span className={`w-px flex-1 my-1 ${cfg.line}`} />}
-                        </div>
-                        <div className="pb-3 flex-1 min-w-0">
-                          <p className="text-[13px] font-medium text-gray-800">{cfg.label}</p>
-                          <p className="text-[11px] text-gray-400 mt-0.5">{fmtDateTime(ev.created_at)}</p>
-                        </div>
-                      </li>
-                    )
-                  })}
-                  {/* Aguardando — último item */}
-                  <li className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <span className="w-2.5 h-2.5 rounded-full border-2 border-gray-300 bg-white shrink-0 mt-1" />
-                    </div>
-                    <div className="pb-1 flex-1 min-w-0">
-                      <p className="text-[13px] text-gray-400">Aguardando…</p>
-                    </div>
-                  </li>
-                </ol>
-              )}
+          ) : (
+            <div className={`${card} px-4 py-4`}>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-sm font-medium text-gray-600">Rastreamento</h3>
+              </div>
+              <div className="flex items-start gap-3 mt-1">
+                <div className="w-8 h-8 rounded-full bg-[#1D9E75]/10 flex items-center justify-center shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-700">Disponível no plano Pro</p>
+                  <p className="text-xs text-gray-400 mt-0.5 mb-2">Saiba quando seu cliente visualizou a proposta.</p>
+                  <a href="/configuracoes?tab=plano" className="text-xs font-semibold text-[#1D9E75] hover:underline">
+                    Ver planos →
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Follow-ups */}
-          <FollowUpSidebar proposalId={proposal.id} initialFollowUps={followUps} />
+          <FollowUpSidebar proposalId={proposal.id} initialFollowUps={followUps} userIsPro={userIsPro} />
 
         </div>
       </div>

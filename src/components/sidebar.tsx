@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import UpgradeModal from '@/components/UpgradeModal'
 
 const nav = [
   {
@@ -43,6 +44,15 @@ const nav = [
     ),
   },
   {
+    label: 'Modelos',
+    href: '/modelos',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
     label: 'Configurações',
     href: '/configuracoes',
     icon: (
@@ -59,8 +69,9 @@ const ADMIN_EMAIL = 'rodrigosc19@gmail.com'
 type UserInfo = { name: string; isPro: boolean; email: string }
 
 export default function Sidebar() {
-  const [open, setOpen]         = useState(false)
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  const [open, setOpen]               = useState(false)
+  const [userInfo, setUserInfo]       = useState<UserInfo | null>(null)
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const pathname = usePathname()
   const router   = useRouter()
 
@@ -94,6 +105,8 @@ export default function Sidebar() {
 
   return (
     <>
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
+
       {/* Hamburger — mobile */}
       <button
         onClick={() => setOpen(true)}
@@ -193,6 +206,19 @@ export default function Sidebar() {
             </Link>
           ) : (
             <p className="text-xs text-gray-400 text-center py-1">FreelanceFlow v0.1</p>
+          )}
+
+          {/* Upgrade banner — free users only */}
+          {userInfo && !userInfo.isPro && (
+            <div className="mt-1 mb-1 px-2 py-2 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between gap-2">
+              <p className="text-[11px] text-amber-700 leading-tight">Plano Free</p>
+              <button
+                onClick={() => setShowUpgrade(true)}
+                className="shrink-0 text-[11px] font-semibold text-white bg-[#1D9E75] px-2 py-0.5 rounded-full hover:bg-[#188f68] transition-colors"
+              >
+                Upgrade
+              </button>
+            </div>
           )}
 
           <div className="border-t border-gray-100 my-1" />

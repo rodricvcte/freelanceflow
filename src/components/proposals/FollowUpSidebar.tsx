@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 
 type FollowUpRow = {
@@ -44,9 +45,11 @@ function IconWhatsApp() {
 export default function FollowUpSidebar({
   proposalId,
   initialFollowUps,
+  userIsPro = true,
 }: {
   proposalId: string
   initialFollowUps: FollowUpRow[]
+  userIsPro?: boolean
 }) {
   const [followUps, setFollowUps]   = useState<FollowUpRow[]>(initialFollowUps)
   const [showModal, setShowModal]   = useState(false)
@@ -105,6 +108,31 @@ export default function FollowUpSidebar({
     } finally {
       setCompleting(null)
     }
+  }
+
+  if (!userIsPro) {
+    return (
+      <div className="bg-white rounded-[10px] border border-gray-100">
+        <div className="px-4 py-3.5 border-b border-gray-50">
+          <h3 className="text-sm font-medium text-gray-600">Follow-ups</h3>
+        </div>
+        <div className="px-4 py-5 text-center">
+          <div className="w-8 h-8 rounded-full bg-[#1D9E75]/10 flex items-center justify-center mx-auto mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <p className="text-xs font-medium text-gray-700 mb-1">Follow-ups disponíveis no Pro</p>
+          <p className="text-xs text-gray-400 mb-3">Agende lembretes e rastreie interações.</p>
+          <Link
+            href="/configuracoes?tab=plano"
+            className="inline-block text-xs font-semibold text-[#1D9E75] border border-[#1D9E75]/30 px-3 py-1.5 rounded-lg hover:bg-[#1D9E75]/5 transition-colors"
+          >
+            Ver planos
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (

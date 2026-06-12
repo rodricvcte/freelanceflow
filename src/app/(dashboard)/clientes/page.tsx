@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
+import UpgradeModal from '@/components/UpgradeModal'
 
 type Client = {
   id: string
@@ -23,15 +24,21 @@ function fmtBRL(v: number) {
 }
 
 export default function ClientesPage() {
-  const [clients, setClients] = useState<Client[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch]   = useState('')
+  const [clients, setClients]         = useState<Client[]>([])
+  const [loading, setLoading]         = useState(true)
+  const [search, setSearch]           = useState('')
+  const [isPro, setIsPro]             = useState(true) // assume pro until loaded
+  const [showUpgrade, setShowUpgrade] = useState(false)
 
   useEffect(() => {
-    fetch('/api/clients')
-      .then(r => r.json())
-      .then(d => { setClients(Array.isArray(d) ? d : []); setLoading(false) })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/clients').then(r => r.json()).catch(() => []),
+      fetch('/api/subscriptions').then(r => r.json()).catch(() => ({})),
+    ]).then(([clientData, sub]) => {
+      setClients(Array.isArray(clientData) ? clientData : [])
+      setIsPro(sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing'))
+      setLoading(false)
+    })
   }, [])
 
   const filtered = useMemo(() => {
@@ -43,23 +50,46 @@ export default function ClientesPage() {
     )
   }, [clients, search])
 
+  const canAdd = isPro || clients.length < 5
+
   return (
     <div className="p-6 md:p-8 max-w-6xl">
+      <UpgradeModal
+        open={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        feature="Adicione clientes ilimitados no plano Pro"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{clients.length} no total</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {clients.length} no total
+            {!isPro && ` · limite: 5 no plano Free`}
+          </p>
         </div>
-        <Link
-          href="/clientes/new"
-          className="flex items-center gap-2 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Novo Cliente
-        </Link>
+        {canAdd ? (
+          <Link
+            href="/clientes/new"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Novo Cliente
+          </Link>
+        ) : (
+          <button
+            onClick={() => setShowUpgrade(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Limite atingido (5/5)
+          </button>
+        )}
       </div>
 
       {/* Search */}
