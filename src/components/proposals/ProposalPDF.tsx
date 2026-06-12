@@ -589,7 +589,10 @@ export function ProposalPDFDocument({
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         {/* eslint-disable-next-line jsx-a11y/alt-text */}
         {profile.logo_url && <Image src={profile.logo_url} style={s.headerLogo} />}
-        <Text style={s.headerName}>{displayName}</Text>
+        <View>
+          <Text style={s.headerName}>{displayName}</Text>
+          <Text style={s.headerSub}>{ref}</Text>
+        </View>
       </View>
       <View style={s.headerRight}>
         {profile.phone          && <Text style={s.headerSub}>{profile.phone}</Text>}
@@ -614,22 +617,6 @@ export function ProposalPDFDocument({
       <View style={s.content}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.clientCard}>
-          <View style={s.clientCol}>
-            <Text style={s.fieldLabel}>FORNECEDOR</Text>
-            <Text style={s.fieldValue}>{displayName}</Text>
-            {docFormatted && (
-              <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
-            )}
-            {profile.address        && <Text style={s.fieldSub}>{profile.address}</Text>}
-            {profile.email_business && <Text style={s.fieldSub}>{profile.email_business}</Text>}
-            {profile.phone          && <Text style={s.fieldSub}>{profile.phone}</Text>}
-            {profile.website        && <Text style={s.fieldSub}>{profile.website}</Text>}
-            {profile.instagram      && <Text style={s.fieldSub}>Instagram: {profile.instagram}</Text>}
-            {profile.linkedin       && <Text style={s.fieldSub}>LinkedIn: {profile.linkedin}</Text>}
-            {profile.facebook       && <Text style={s.fieldSub}>Facebook: {profile.facebook}</Text>}
-            {profile.youtube        && <Text style={s.fieldSub}>YouTube: {profile.youtube}</Text>}
-            {profile.tiktok         && <Text style={s.fieldSub}>TikTok: {profile.tiktok}</Text>}
-          </View>
           {proposal.clients && (
             <View style={s.clientCol}>
               <Text style={s.fieldLabel}>CLIENTE</Text>
@@ -637,6 +624,14 @@ export function ProposalPDFDocument({
               {proposal.clients.email && <Text style={s.fieldSub}>{proposal.clients.email}</Text>}
             </View>
           )}
+          <View style={s.clientCol}>
+            <Text style={s.fieldLabel}>FORNECEDOR</Text>
+            <Text style={s.fieldValue}>{displayName}</Text>
+            {docFormatted && (
+              <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
+            )}
+            {profile.address && <Text style={s.fieldSub}>{profile.address}</Text>}
+          </View>
         </View>
 
         {/* Legacy service_description */}

@@ -296,7 +296,9 @@ function ProposalsPageInner() {
                       <div className="flex items-center gap-1.5">
                         {p.pdf_url && (
                           <a
-                            href={`/api/proposals/${p.id}/pdf`}
+                            href={p.pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
                             className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
                           >

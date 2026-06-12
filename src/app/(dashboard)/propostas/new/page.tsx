@@ -621,9 +621,8 @@ function NewProposalInner() {
         await fetch(`/api/proposals/${data.id}/pdf`, { method: 'POST' }).catch(() => {})
       }
 
-      // After saving a duplicate, go to editor; otherwise go to list
       if (isDuplicate) {
-        router.push(`/propostas/${data.id}/editar`)
+        router.push(`/propostas/${data.id}`)
       } else {
         router.push('/propostas')
       }

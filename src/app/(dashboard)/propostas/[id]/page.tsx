@@ -113,7 +113,7 @@ function SectionCard({ section }: { section: Section }) {
     </div>
   )
 
-  const body = 'px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700'
+  const body = 'px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words'
   const wrap = 'bg-white rounded-[10px] border border-gray-100'
 
   if (section.type === 'text') {
@@ -485,7 +485,7 @@ export default async function ProposalDetailPage({
                 <span className="w-[3px] h-[18px] bg-[#1D9E75] rounded-sm shrink-0" />
                 <h3 className="text-[13px] font-medium text-gray-900">Descrição do serviço</h3>
               </div>
-              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700">
+              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words">
                 <p className="whitespace-pre-wrap">{proposal.service_description}</p>
               </div>
             </div>
@@ -503,7 +503,7 @@ export default async function ProposalDetailPage({
                 <span className="w-[3px] h-[18px] bg-[#1D9E75] rounded-sm shrink-0" />
                 <h3 className="text-[13px] font-medium text-gray-900">Condições de pagamento</h3>
               </div>
-              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700">
+              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words">
                 <p className="whitespace-pre-wrap">{proposal.payment_terms}</p>
               </div>
             </div>
