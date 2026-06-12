@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     type: 'magiclink',
     email: targetUser.email,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/dashboard`,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/impersonate-callback`,
     },
   })
 

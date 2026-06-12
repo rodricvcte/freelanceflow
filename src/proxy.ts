@@ -40,7 +40,8 @@ export async function proxy(request: NextRequest) {
 
   const isAuthRoute    = pathname.startsWith('/login') || pathname.startsWith('/cadastro')
   const isApiRoute     = pathname.startsWith('/api/')
-  const isOnboarding   = pathname === '/onboarding'
+  const isOnboarding        = pathname === '/onboarding'
+  const isImpersonateCallback = pathname === '/impersonate-callback'
   const isAdminRoute   = pathname.startsWith('/admin')
 
   // Block /admin for non-admin users
@@ -64,7 +65,7 @@ export async function proxy(request: NextRequest) {
 
   // Gate: authenticated users without freelancer_code must complete onboarding.
   // Only check page routes (not API) to avoid overhead; skip /onboarding itself.
-  if (user && !isPublicRoute && !isAuthRoute && !isApiRoute && !isOnboarding) {
+  if (user && !isPublicRoute && !isAuthRoute && !isApiRoute && !isOnboarding && !isImpersonateCallback) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('freelancer_code')
