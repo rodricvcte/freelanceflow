@@ -8,25 +8,22 @@ import Image from 'next/image'
 
 type DocType = 'cpf' | 'cnpj'
 
-type SigStyle = 'none' | 'simple' | 'double'
-
 type Profile = {
-  full_name:       string | null
-  business_name:   string | null
-  phone:           string | null
-  logo_url:        string | null
-  accent_color:    string
-  email_business:  string | null
-  address:         string | null
-  document_type:   DocType | null
-  cpf_cnpj:        string | null
-  website:         string | null
-  instagram:       string | null
-  linkedin:        string | null
-  facebook:        string | null
-  youtube:         string | null
-  tiktok:          string | null
-  signature_style: SigStyle | null
+  full_name:      string | null
+  business_name:  string | null
+  phone:          string | null
+  logo_url:       string | null
+  accent_color:   string
+  email_business: string | null
+  address:        string | null
+  document_type:  DocType | null
+  cpf_cnpj:       string | null
+  website:        string | null
+  instagram:      string | null
+  linkedin:       string | null
+  facebook:       string | null
+  youtube:        string | null
+  tiktok:         string | null
 }
 
 type SubInfo = {
@@ -92,12 +89,11 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
     logo_url:       initial.logo_url       ?? '',
     document_type:  (initial.document_type ?? 'cpf') as DocType,
     cpf_cnpj:       applyDocMask(initial.cpf_cnpj, initial.document_type),
-    instagram:       initial.instagram       ?? '',
-    linkedin:        initial.linkedin        ?? '',
-    facebook:        initial.facebook        ?? '',
-    youtube:         initial.youtube         ?? '',
-    tiktok:          initial.tiktok          ?? '',
-    signature_style: (initial.signature_style ?? 'double') as SigStyle,
+    instagram:      initial.instagram      ?? '',
+    linkedin:       initial.linkedin       ?? '',
+    facebook:       initial.facebook       ?? '',
+    youtube:        initial.youtube        ?? '',
+    tiktok:         initial.tiktok         ?? '',
   })
 
   const [logoPreview,  setPreview]      = useState<string | null>(initial.logo_url)
@@ -439,73 +435,6 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
             )}
           </div>
         )}
-      </div>
-
-      {/* Assinatura no PDF */}
-      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-900 mb-1">Assinatura no PDF</h3>
-        <p className="text-xs text-gray-500 mb-4">Escolha como o campo de aceite aparece ao final da proposta.</p>
-        <div className="grid grid-cols-3 gap-3">
-          {([
-            {
-              value: 'none' as SigStyle,
-              label: 'Nenhuma',
-              desc: 'Sem campo de aceite',
-              preview: (
-                <div className="w-full h-14 bg-gray-50 rounded-md border border-gray-200 flex items-center justify-center mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              ),
-            },
-            {
-              value: 'simple' as SigStyle,
-              label: 'Simples',
-              desc: 'Somente o cliente',
-              preview: (
-                <div className="w-full h-14 bg-gray-50 rounded-md border border-gray-200 flex flex-col justify-end px-3 pb-2.5 mb-2">
-                  <div className="w-full h-px bg-gray-300 mb-1" />
-                  <div className="w-2/3 h-1.5 bg-gray-200 rounded-sm" />
-                </div>
-              ),
-            },
-            {
-              value: 'double' as SigStyle,
-              label: 'Dupla',
-              desc: 'Você e o cliente',
-              preview: (
-                <div className="w-full h-14 bg-gray-50 rounded-md border border-gray-200 flex flex-col justify-end px-3 pb-2.5 mb-2">
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <div className="w-full h-px bg-gray-300 mb-1" />
-                      <div className="w-4/5 h-1.5 bg-gray-200 rounded-sm" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="w-full h-px bg-gray-300 mb-1" />
-                      <div className="w-4/5 h-1.5 bg-gray-200 rounded-sm" />
-                    </div>
-                  </div>
-                </div>
-              ),
-            },
-          ]).map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => set('signature_style', opt.value)}
-              className={`rounded-xl p-3 text-left border-2 transition-colors ${
-                form.signature_style === opt.value
-                  ? 'border-[#1D9E75] bg-[#f0fdf8]'
-                  : 'border-gray-100 hover:border-gray-200'
-              }`}
-            >
-              {opt.preview}
-              <p className={`text-xs font-semibold ${form.signature_style === opt.value ? 'text-[#1D9E75]' : 'text-gray-800'}`}>{opt.label}</p>
-              <p className="text-[11px] text-gray-400 mt-0.5">{opt.desc}</p>
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Redes sociais */}

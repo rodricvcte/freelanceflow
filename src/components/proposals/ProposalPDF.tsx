@@ -64,7 +64,6 @@ export type ProfileForPDF = {
   facebook: string | null
   youtube: string | null
   tiktok: string | null
-  signature_style: string | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -673,34 +672,30 @@ export function ProposalPDFDocument({
         </View>
 
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {(profile.signature_style ?? 'double') !== 'none' && (
-          <View wrap={false as any} style={{ paddingTop: 20, borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
-            <Text style={[s.acceptTitle, { borderLeftWidth: 3, borderLeftColor: accent, paddingLeft: 10 }]}>
-              Aceite
-            </Text>
-            <Text style={s.acceptSub}>
-              Ao assinar abaixo, o contratante declara ter lido e concordado com todos os termos e condições desta proposta comercial. Esta proposta tem validade conforme indicado acima. Os preços, condições e escopo aqui descritos são exclusivos para o projeto especificado e podem ser revisados caso o escopo seja alterado.
-            </Text>
-            <View style={s.signRow}>
-              {(profile.signature_style ?? 'double') === 'double' && (
-                <View style={s.signCol}>
-                  <View style={s.signLine} />
-                  <Text style={s.signName}>{displayName}</Text>
-                  <Text style={s.signRole}>Prestador de serviços</Text>
-                </View>
-              )}
-              <View style={s.signCol}>
-                <View style={s.signLine} />
-                <Text style={s.signName}>{proposal.clients?.name ?? 'Cliente'}</Text>
-                <Text style={s.signRole}>Contratante</Text>
-              </View>
-              <View style={[s.signCol, { maxWidth: 110 }]}>
-                <View style={{ height: 28, marginBottom: 5 }} />
-                <Text style={s.signName}>Data: ___/___/______</Text>
-              </View>
+        <View wrap={false as any} style={{ paddingTop: 20, borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
+          <Text style={[s.acceptTitle, { borderLeftWidth: 3, borderLeftColor: accent, paddingLeft: 10 }]}>
+            Aceite
+          </Text>
+          <Text style={s.acceptSub}>
+            Ao assinar abaixo, o contratante declara ter lido e concordado com todos os termos e condições desta proposta comercial. Esta proposta tem validade conforme indicado acima. Os preços, condições e escopo aqui descritos são exclusivos para o projeto especificado e podem ser revisados caso o escopo seja alterado.
+          </Text>
+          <View style={s.signRow}>
+            <View style={s.signCol}>
+              <View style={s.signLine} />
+              <Text style={s.signName}>{displayName}</Text>
+              <Text style={s.signRole}>Prestador de serviços</Text>
+            </View>
+            <View style={s.signCol}>
+              <View style={s.signLine} />
+              <Text style={s.signName}>{proposal.clients?.name ?? 'Cliente'}</Text>
+              <Text style={s.signRole}>Contratante</Text>
+            </View>
+            <View style={[s.signCol, { maxWidth: 110 }]}>
+              <View style={{ height: 28, marginBottom: 5 }} />
+              <Text style={s.signName}>Data: ___/___/______</Text>
             </View>
           </View>
-        )}
+        </View>
       </View>
     </Page>
   )
