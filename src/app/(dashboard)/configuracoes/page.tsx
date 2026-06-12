@@ -102,6 +102,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
   const [msg,          setMsg]         = useState<{ text: string; ok: boolean } | null>(null)
   const [colorMode,    setColorMode]    = useState<'custom' | 'brand'>('custom')
   const [brandLoading, setBrandLoading] = useState(false)
+  const [brandLogo,    setBrandLogo]    = useState<string | null>(null)
   const [brandFetched, setBrandFetched] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -166,7 +167,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
     if (!form.website) return
     setBrandLoading(true)
     try {
-      const res  = await fetch('/api/profile/extract-colors', {
+      const res  = await fetch('/api/profile/fetch-brand', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ url: form.website }),
@@ -174,7 +175,9 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Não foi possível extrair a cor do site')
       setBrandFetched(true)
-      set('accent_color', data.color)
+      if (data.accent_color) set('accent_color', data.accent_color)
+      else setMsg({ text: 'Cor principal não encontrada neste site', ok: false })
+      setBrandLogo(data.logo_url ?? null)
     } catch (e: unknown) {
       setMsg({ text: e instanceof Error ? e.message : 'Não foi possível extrair a cor do site', ok: false })
       setColorMode('custom')
@@ -390,21 +393,45 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
                 Buscando identidade visual…
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg border border-gray-100 shadow-sm shrink-0"
-                  style={{ backgroundColor: form.accent_color }}
-                />
-                <span className="text-sm font-mono text-gray-700">{form.accent_color.toUpperCase()}</span>
-                <button
-                  type="button"
-                  onClick={handleFetchBrand}
-                  disabled={brandLoading}
-                  className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors disabled:opacity-50"
-                >
-                  Reimportar
-                </button>
-              </div>
+              <>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-lg border border-gray-100 shadow-sm shrink-0"
+                    style={{ backgroundColor: form.accent_color }}
+                  />
+                  <span className="text-sm font-mono text-gray-700">{form.accent_color.toUpperCase()}</span>
+                  <button
+                    type="button"
+                    onClick={handleFetchBrand}
+                    disabled={brandLoading}
+                    className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors disabled:opacity-50"
+                  >
+                    Reimportar
+                  </button>
+                </div>
+
+                {brandLogo && (
+                  <div className="flex items-center gap-3 pt-3 border-t border-gray-50">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={brandLogo}
+                      alt="Logo detectado"
+                      className="w-10 h-10 object-contain rounded border border-gray-100 bg-white p-0.5 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-700">Logo detectado</p>
+                      <p className="text-xs text-gray-400">Encontrado no site</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { set('logo_url', brandLogo); setPreview(brandLogo); setBrandLogo(null) }}
+                      className="text-xs font-medium text-[#1D9E75] hover:underline shrink-0"
+                    >
+                      Usar como logo
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
