@@ -549,7 +549,7 @@ export function ProposalPDFDocument({
           <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', letterSpacing: 3, marginBottom: 14, fontFamily: 'Helvetica' }}>
             PROPOSTA COMERCIAL
           </Text>
-          <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#ffffff', maxWidth: 380, lineHeight: 1.25, marginBottom: 10, textAlign: 'center' }}>
+          <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#ffffff', lineHeight: 1.25, marginBottom: 10, textAlign: 'center' }}>
             {proposal.title}
           </Text>
           <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontFamily: 'Helvetica' }}>
@@ -683,6 +683,7 @@ export function ProposalPDFDocument({
           <View style={s.signRow}>
             <View style={s.signCol}>
               {profile.signature_data ? (
+                // eslint-disable-next-line jsx-a11y/alt-text
                 <Image
                   src={profile.signature_data}
                   style={{ height: 28, objectFit: 'contain', marginBottom: 0 }}

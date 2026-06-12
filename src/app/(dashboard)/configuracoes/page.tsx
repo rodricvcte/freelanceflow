@@ -197,6 +197,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setMsg({ text: 'Perfil salvo com sucesso!', ok: true })
+      window.dispatchEvent(new Event('ff:profile-updated'))
     } catch (e: unknown) {
       setMsg({ text: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
@@ -393,6 +394,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
           <div className="flex items-center gap-3 pt-4 mt-4 border-t border-gray-50">
             <div className="flex-1 min-w-0">
               <p className="text-[11px] text-gray-400 mb-1.5">Prévia no PDF:</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={form.signature_data} alt="Assinatura" className="h-9 object-contain" />
             </div>
             <button
@@ -453,7 +455,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
           <div className={`flex items-center gap-3 ${!isPro ? 'opacity-50 pointer-events-none select-none' : ''}`}>
             <input
               type="color"
-              value={form.accent_color}
+              value={isPro ? form.accent_color : '#1D9E75'}
               onChange={e => set('accent_color', e.target.value)}
               disabled={!isPro}
               className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white disabled:cursor-not-allowed"
@@ -711,15 +713,22 @@ function PlanTab({ sub }: { sub: SubInfo }) {
           </div>
         )}
 
-        {/* Pro: unlimited + manage button */}
+        {/* Pro: features list + manage button */}
         {(isPro || isCanceled) && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500 flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              {isCanceled ? 'Acesso Pro até o fim do período' : 'Propostas ilimitadas'}
-            </p>
+          <div className="space-y-3">
+            <ul className="space-y-1.5">
+              {PRO_FEATURES.map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            {isCanceled && (
+              <p className="text-xs text-gray-400">Acesso Pro disponível até o fim do período contratado.</p>
+            )}
             {sub.stripe_customer_id && (
               <button
                 onClick={handlePortal}

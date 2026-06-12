@@ -43,7 +43,7 @@ export async function POST() {
   const priceId   = active.items.data[0]?.price.id ?? null
   const periodEnd = stripeTimestampToISO((active as unknown as { current_period_end?: number }).current_period_end ?? null)
 
-  await service.from('subscriptions').upsert({
+  const { error: upsertError } = await service.from('subscriptions').upsert({
     user_id: user.id,
     plan: 'pro',
     status: active.status,
@@ -52,6 +52,11 @@ export async function POST() {
     stripe_price_id: priceId,
     current_period_end: periodEnd,
   }, { onConflict: 'user_id' })
+
+  if (upsertError) {
+    console.error('Sync upsert error:', upsertError.message)
+    return NextResponse.json({ plan: 'free', status: 'active', synced: false })
+  }
 
   return NextResponse.json({ plan: 'pro', status: active.status, synced: true })
 }

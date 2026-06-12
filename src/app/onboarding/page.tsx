@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 
 // ─── Masks ────────────────────────────────────────────────────────────────────
 
@@ -36,18 +35,13 @@ const EMPTY = {
   document_type: 'cpf' as DocType,
   cpf_cnpj: '',
   website: '',
-  accent_color: '#1D9E75',
-  logo_url: '',
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function OnboardingPage() {
   const router   = useRouter()
-  const fileRef  = useRef<HTMLInputElement>(null)
   const [form, setForm]           = useState(EMPTY)
-  const [logoPreview, setPreview] = useState<string | null>(null)
-  const [uploading, setUp]        = useState(false)
   const [submitting, setSub]      = useState(false)
   const [error, setError]         = useState<string | null>(null)
   const [termsAccepted, setTerms] = useState(false)
@@ -72,26 +66,6 @@ export default function OnboardingPage() {
   function handleDocTypeChange(t: DocType) {
     set('document_type', t)
     set('cpf_cnpj', '') // clear mask on type switch
-  }
-
-  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setPreview(URL.createObjectURL(file))
-    setUp(true)
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/profile/logo', { method: 'POST', body: fd })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      set('logo_url', data.url)
-      setPreview(data.url)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erro no upload da logo')
-    } finally {
-      setUp(false)
-    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -131,30 +105,6 @@ export default function OnboardingPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Logo upload */}
-          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">Logo</h2>
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
-                {logoPreview ? (
-                  <Image src={logoPreview} alt="Logo" width={64} height={64} className="w-full h-full object-contain" unoptimized />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                )}
-              </div>
-              <div>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
-                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
-                  {uploading ? 'Enviando...' : 'Escolher logo'}
-                </button>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG ou SVG · Máx. 2 MB</p>
-              </div>
-            </div>
-          </div>
-
           {/* Dados pessoais */}
           <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm space-y-4">
             <h2 className="text-sm font-semibold text-gray-900">Dados pessoais</h2>
@@ -222,21 +172,6 @@ export default function OnboardingPage() {
                 placeholder={form.document_type === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
                 maxLength={form.document_type === 'cpf' ? 14 : 18}
                 className={inputCls} />
-            </div>
-          </div>
-
-          {/* Cor da proposta */}
-          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-900 mb-1">Cor da proposta</h2>
-            <p className="text-xs text-gray-500 mb-4">Aparece no cabeçalho do PDF gerado.</p>
-            <div className="flex items-center gap-3">
-              <input type="color" value={form.accent_color} onChange={e => set('accent_color', e.target.value)}
-                className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white" />
-              <span className="text-sm font-mono text-gray-700">{form.accent_color.toUpperCase()}</span>
-              <button type="button" onClick={() => set('accent_color', '#1D9E75')}
-                className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors">
-                Resetar
-              </button>
             </div>
           </div>
 

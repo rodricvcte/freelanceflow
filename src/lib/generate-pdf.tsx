@@ -24,6 +24,8 @@ export async function generateAndSaveProposalPDF(
   // Use snapshot saved at creation time; fall back to current profile for old proposals
   const snapshotProfile = (raw as Record<string, unknown>).snapshot_profile as ProfileForPDF | null
 
+  const service = createServiceClient()
+
   const [{ data: profileRaw }, { data: sub }, { data: sigRow }] = await Promise.all([
     snapshotProfile
       ? Promise.resolve({ data: null })
@@ -37,8 +39,9 @@ export async function generateAndSaveProposalPDF(
       .select('plan, status')
       .eq('user_id', authData.user.id)
       .maybeSingle(),
-    // Always fetch signature_data from the current profile — snapshot doesn't carry it
-    supabase
+    // Always fetch signature_data from the current profile — snapshot doesn't carry it.
+    // Use service client to bypass RLS so signature works for all plan types.
+    service
       .from('profiles')
       .select('signature_data')
       .eq('id', authData.user.id)
@@ -82,7 +85,6 @@ export async function generateAndSaveProposalPDF(
     <ProposalPDFDocument proposal={proposal} profile={profile} isFreePlan={isFreePlan} /> as any
   )
 
-  const service = createServiceClient()
   const filePath = `${authData.user.id}/${proposalId}.pdf`
 
   await service.storage.createBucket(BUCKET, { public: true }).catch(() => {})

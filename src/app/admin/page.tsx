@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import ImpersonateButton from './ImpersonateButton'
@@ -22,6 +23,12 @@ export default async function AdminPage() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || user.email !== ADMIN_EMAIL) redirect('/dashboard')
+
+  // Auto-clear any stale impersonation session when admin visits the panel
+  const cookieStore = await cookies()
+  if (cookieStore.get('ff_view_as_id')?.value) {
+    redirect('/api/admin/stop-impersonate')
+  }
 
   const service = createServiceClient()
 

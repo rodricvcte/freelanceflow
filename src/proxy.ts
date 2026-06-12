@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const ADMIN_EMAIL   = 'rodrigosc19@gmail.com'
-const publicRoutes  = ['/', '/login', '/cadastro']
+const publicRoutes  = ['/', '/login', '/cadastro', '/auth/callback']
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -40,8 +40,6 @@ export async function proxy(request: NextRequest) {
 
   const isAuthRoute    = pathname.startsWith('/login') || pathname.startsWith('/cadastro')
   const isApiRoute     = pathname.startsWith('/api/')
-  const isOnboarding        = pathname === '/onboarding'
-  const isImpersonateCallback = pathname === '/impersonate-callback'
   const isAdminRoute   = pathname.startsWith('/admin')
 
   // Block /admin for non-admin users
@@ -61,22 +59,6 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
-  }
-
-  // Gate: authenticated users without freelancer_code must complete onboarding.
-  // Only check page routes (not API) to avoid overhead; skip /onboarding itself.
-  if (user && !isPublicRoute && !isAuthRoute && !isApiRoute && !isOnboarding && !isImpersonateCallback) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('freelancer_code')
-      .eq('id', user.id)
-      .maybeSingle()
-
-    if (!profile?.freelancer_code) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/onboarding'
-      return NextResponse.redirect(url)
-    }
   }
 
   return supabaseResponse
