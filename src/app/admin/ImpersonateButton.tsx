@@ -14,8 +14,12 @@ export default function ImpersonateButton({ userId, email }: { userId: string; e
         body: JSON.stringify({ target_user_id: userId }),
       })
       const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
+
+      if (data.success) {
+        // Session cookies were set server-side in the response above.
+        // A hard navigation to /dashboard makes the browser send the new cookies
+        // so the server renders the page as the target user from the very first request.
+        window.location.href = '/dashboard'
       } else {
         alert(data.error ?? 'Erro ao iniciar impersonation')
         setLoading(false)

@@ -3,32 +3,26 @@
 import { useEffect } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 
+// Emergency fallback: reached only if the server-side OTP exchange in
+// /api/admin/impersonate fails and we somehow end up here with a hash.
 export default function ImpersonateCallbackPage() {
   useEffect(() => {
     const supabase = createClient()
 
-    // Register listener before getSession so we don't miss the event
+    // Wait for the SIGNED_IN event that fires after createBrowserClient
+    // processes the #access_token hash — then hard-reload /dashboard so
+    // the server re-renders with the freshly written session cookies.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        subscription.unsubscribe()
-        // Hard reload so the server re-renders with the new session cookies
-        window.location.replace('/dashboard')
-      }
-    })
-
-    // In case the hash was already processed before the listener registered
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+      if (event === 'SIGNED_IN') {
         subscription.unsubscribe()
         window.location.replace('/dashboard')
       }
     })
 
-    // Fallback: redirect anyway after 3s if nothing fired
     const timeout = setTimeout(() => {
       subscription.unsubscribe()
       window.location.replace('/dashboard')
-    }, 3000)
+    }, 4000)
 
     return () => {
       subscription.unsubscribe()
