@@ -390,24 +390,24 @@ function RenderItems({ sec, accent }: { sec: ItemsSection; accent: string }) {
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
-          <Text style={[s.tableCellHeader, { flex: 3 }]}>DESCRIÇÃO</Text>
+          <Text style={[s.tableCellHeader, { flex: 4.5 }]}>DESCRIÇÃO</Text>
           <Text style={[s.tableCellHeader, { flex: 1 }]}>QTD</Text>
-          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>VLR UNIT.</Text>
-          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>TOTAL</Text>
+          <Text style={[s.tableCellHeader, { flex: 2, textAlign: 'right' }]}>VLR UNIT.</Text>
+          <Text style={[s.tableCellHeader, { flex: 2.5, textAlign: 'right' }]}>TOTAL</Text>
         </View>
         {sec.rows.map((row, i) => (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <View key={i} wrap={false as any} style={s.tableRow}>
-            <Text style={[s.tableCell, { flex: 3 }]}>{row.description}</Text>
+            <Text style={[s.tableCell, { flex: 4.5 }]}>{row.description}</Text>
             <Text style={[s.tableCell, { flex: 1 }]}>{row.quantity}</Text>
-            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{row.unit_price}</Text>
-            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(rowTotals[i])}</Text>
+            <Text style={[s.tableCell, { flex: 2, textAlign: 'right' }]}>{row.unit_price}</Text>
+            <Text style={[s.tableCell, { flex: 2.5, textAlign: 'right' }]}>{fmtBRL(rowTotals[i])}</Text>
           </View>
         ))}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableRowTotal}>
-          <Text style={[s.tableCellBold, { flex: 5.5 }]}>TOTAL GERAL</Text>
-          <Text style={[s.tableCellBold, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
+          <Text style={[s.tableCellBold, { flex: 7.5 }]}>TOTAL GERAL</Text>
+          <Text style={[s.tableCellBold, { flex: 2.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
         </View>
       </View>
     </View>
@@ -424,24 +424,24 @@ function RenderHours({ sec, accent }: { sec: HoursSection; accent: string }) {
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
-          <Text style={[s.tableCellHeader, { flex: 2 }]}>PERFIL</Text>
-          <Text style={[s.tableCellHeader, { flex: 1 }]}>HORAS</Text>
-          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>VLR/HORA</Text>
-          <Text style={[s.tableCellHeader, { flex: 1.5, textAlign: 'right' }]}>TOTAL</Text>
+          <Text style={[s.tableCellHeader, { flex: 3.5 }]}>PERFIL</Text>
+          <Text style={[s.tableCellHeader, { flex: 1.5 }]}>HORAS</Text>
+          <Text style={[s.tableCellHeader, { flex: 2.5, textAlign: 'right' }]}>VLR/HORA</Text>
+          <Text style={[s.tableCellHeader, { flex: 2.5, textAlign: 'right' }]}>TOTAL</Text>
         </View>
         {sec.rows.map((row, i) => (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <View key={i} wrap={false as any} style={s.tableRow}>
-            <Text style={[s.tableCell, { flex: 2 }]}>{row.profile}</Text>
-            <Text style={[s.tableCell, { flex: 1 }]}>{row.hours}</Text>
-            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{row.rate}</Text>
-            <Text style={[s.tableCell, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(rowTotals[i])}</Text>
+            <Text style={[s.tableCell, { flex: 3.5 }]}>{row.profile}</Text>
+            <Text style={[s.tableCell, { flex: 1.5 }]}>{row.hours}</Text>
+            <Text style={[s.tableCell, { flex: 2.5, textAlign: 'right' }]}>{row.rate}</Text>
+            <Text style={[s.tableCell, { flex: 2.5, textAlign: 'right' }]}>{fmtBRL(rowTotals[i])}</Text>
           </View>
         ))}
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableRowTotal}>
-          <Text style={[s.tableCellBold, { flex: 4.5 }]}>TOTAL GERAL</Text>
-          <Text style={[s.tableCellBold, { flex: 1.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
+          <Text style={[s.tableCellBold, { flex: 7.5 }]}>TOTAL GERAL</Text>
+          <Text style={[s.tableCellBold, { flex: 2.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
         </View>
       </View>
     </View>

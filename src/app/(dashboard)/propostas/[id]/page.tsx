@@ -161,35 +161,35 @@ function SectionCard({ section }: { section: Section }) {
       <div className={`${wrap} overflow-x-auto`}>
         {header(s.title)}
         <div className={body + ' p-0'}>
-          <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
+          <table className="w-full text-[13px] min-w-[560px]" style={{ tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '50%' }} />
-              <col style={{ width: '13%' }} />
+              <col style={{ width: '45%' }} />
+              <col style={{ width: '10%' }} />
               <col style={{ width: '20%' }} />
-              <col style={{ width: '17%' }} />
+              <col style={{ width: '25%' }} />
             </colgroup>
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Descrição</th>
-                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Qtd</th>
-                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Valor unit.</th>
-                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Descrição</th>
+                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Qtd</th>
+                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Valor unit.</th>
+                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Total</th>
               </tr>
             </thead>
             <tbody>
               {s.rows.map((row, i) => (
                 <tr key={i} className={i % 2 !== 0 ? 'bg-gray-50/60' : ''}>
-                  <td className="px-4 py-2.5 text-gray-700 break-words [word-break:break-word]">{row.description}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-600">{row.quantity}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">{fmtRowBRL(row.unit_price)}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums font-medium">{fmtBRL(rowTotals[i])}</td>
+                  <td className="px-4 py-2.5 text-gray-700 whitespace-nowrap overflow-hidden">{row.description}</td>
+                  <td className="px-4 py-2.5 text-center text-gray-600 whitespace-nowrap">{row.quantity}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums whitespace-nowrap">{fmtRowBRL(row.unit_price)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums font-medium whitespace-nowrap">{fmtBRL(rowTotals[i])}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="border-t border-gray-200 bg-gray-50">
-                <td colSpan={3} className="px-4 py-2.5 text-xs font-bold text-gray-500 uppercase tracking-wide">Total geral</td>
-                <td className="px-4 py-2.5 text-right text-sm font-bold text-gray-900 tabular-nums">{fmtBRL(grandTotal)}</td>
+                <td colSpan={3} className="px-4 py-2.5 text-xs font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap">Total geral</td>
+                <td className="px-4 py-2.5 text-right text-sm font-bold text-gray-900 tabular-nums whitespace-nowrap">{fmtBRL(grandTotal)}</td>
               </tr>
             </tfoot>
           </table>
@@ -206,35 +206,35 @@ function SectionCard({ section }: { section: Section }) {
       <div className={`${wrap} overflow-x-auto`}>
         {header(s.title)}
         <div className={body + ' p-0'}>
-          <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
+          <table className="w-full text-[13px] min-w-[480px]" style={{ tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '50%' }} />
-              <col style={{ width: '13%' }} />
-              <col style={{ width: '20%' }} />
-              <col style={{ width: '17%' }} />
+              <col style={{ width: '35%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '25%' }} />
+              <col style={{ width: '25%' }} />
             </colgroup>
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Perfil</th>
-                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Horas</th>
-                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Valor/hora</th>
-                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Perfil</th>
+                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Horas</th>
+                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Valor/hora</th>
+                <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">Total</th>
               </tr>
             </thead>
             <tbody>
               {s.rows.map((row, i) => (
                 <tr key={i} className={i % 2 !== 0 ? 'bg-gray-50/60' : ''}>
-                  <td className="px-4 py-2.5 text-gray-700 break-words [word-break:break-word]">{row.profile}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-600">{row.hours}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">{fmtRowBRL(row.rate)}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums font-medium">{fmtBRL(rowTotals[i])}</td>
+                  <td className="px-4 py-2.5 text-gray-700 whitespace-nowrap overflow-hidden">{row.profile}</td>
+                  <td className="px-4 py-2.5 text-center text-gray-600 whitespace-nowrap">{row.hours}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums whitespace-nowrap">{fmtRowBRL(row.rate)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums font-medium whitespace-nowrap">{fmtBRL(rowTotals[i])}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="border-t border-gray-200 bg-gray-50">
-                <td colSpan={3} className="px-4 py-2.5 text-xs font-bold text-gray-500 uppercase tracking-wide">Total geral</td>
-                <td className="px-4 py-2.5 text-right text-sm font-bold text-gray-900 tabular-nums">{fmtBRL(grandTotal)}</td>
+                <td colSpan={3} className="px-4 py-2.5 text-xs font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap">Total geral</td>
+                <td className="px-4 py-2.5 text-right text-sm font-bold text-gray-900 tabular-nums whitespace-nowrap">{fmtBRL(grandTotal)}</td>
               </tr>
             </tfoot>
           </table>
