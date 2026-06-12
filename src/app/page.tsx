@@ -87,6 +87,113 @@ function Check({ ok }: { ok: boolean }) {
   )
 }
 
+/* ─── App mockup (SVG dashboard screenshot) ─── */
+function AppMockup() {
+  const font = 'ui-sans-serif,system-ui,sans-serif'
+  return (
+    <div className="relative mt-14 max-w-5xl mx-auto">
+      <div className="rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.13)] border border-gray-200">
+        <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" className="w-full block" aria-hidden="true">
+          {/* bg */}
+          <rect width="1200" height="700" fill="white" />
+
+          {/* ── browser chrome ── */}
+          <rect width="1200" height="36" fill="#f3f4f6" />
+          <circle cx="16" cy="18" r="5.5" fill="#fc5c65" />
+          <circle cx="33" cy="18" r="5.5" fill="#ffce54" />
+          <circle cx="50" cy="18" r="5.5" fill="#26de81" />
+          <rect x="76" y="10" width="680" height="16" rx="8" fill="#e5e7eb" />
+          <text x="416" y="22" textAnchor="middle" fontSize="9" fill="#9ca3af" fontFamily={font}>app.freelanceflow.com.br/propostas</text>
+
+          {/* ── sidebar ── */}
+          <rect x="0" y="36" width="200" height="664" fill="#146249" />
+          <text x="20" y="72" fontSize="13" fontWeight="700" fill="white" fontFamily={font}>FreelanceFlow</text>
+          <rect x="10" y="90"  width="180" height="32" rx="6" fill="white" fillOpacity="0.1" />
+          <text x="30" y="111" fontSize="12" fill="white" fillOpacity="0.65" fontFamily={font}>Dashboard</text>
+          <rect x="10" y="130" width="180" height="32" rx="6" fill="white" fillOpacity="0.18" />
+          <text x="30" y="151" fontSize="12" fontWeight="600" fill="white" fontFamily={font}>Propostas</text>
+          <text x="30" y="189" fontSize="12" fill="white" fillOpacity="0.6" fontFamily={font}>Clientes</text>
+          <text x="30" y="224" fontSize="12" fill="white" fillOpacity="0.6" fontFamily={font}>Follow-ups</text>
+
+          {/* ── main area ── */}
+          <rect x="200" y="36" width="1000" height="664" fill="#f9fafb" />
+
+          {/* top bar */}
+          <rect x="200" y="36" width="1000" height="56" fill="white" />
+          <line x1="200" y1="92" x2="1200" y2="92" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="228" y="71" fontSize="18" fontWeight="700" fill="#111827" fontFamily={font}>Propostas</text>
+          <rect x="1054" y="47" width="128" height="32" rx="7" fill="#1D9E75" />
+          <text x="1118" y="68" textAnchor="middle" fontSize="11" fontWeight="600" fill="white" fontFamily={font}>+ Nova proposta</text>
+
+          {/* ── metric cards ── */}
+          <rect x="228" y="108" width="220" height="76" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="248" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Total enviadas</text>
+          <text x="248" y="163" fontSize="26" fontWeight="700" fill="#111827" fontFamily={font}>12</text>
+
+          <rect x="464" y="108" width="220" height="76" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="484" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Aprovadas</text>
+          <text x="484" y="163" fontSize="26" fontWeight="700" fill="#1D9E75" fontFamily={font}>7</text>
+
+          <rect x="700" y="108" width="220" height="76" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="720" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Aguardando</text>
+          <text x="720" y="163" fontSize="26" fontWeight="700" fill="#d97706" fontFamily={font}>3</text>
+
+          <rect x="936" y="108" width="236" height="76" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="956" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Receita aprovada</text>
+          <text x="956" y="163" fontSize="22" fontWeight="700" fill="#111827" fontFamily={font}>R$ 48.700</text>
+
+          {/* ── proposals table ── */}
+          <rect x="228" y="200" width="944" height="464" rx="10" fill="white" />
+          <rect x="228" y="200" width="944" height="40" rx="10" fill="#f9fafb" />
+          <rect x="228" y="224" width="944" height="16" fill="#f9fafb" />
+          <text x="252" y="226" fontSize="10" fontWeight="600" fill="#9ca3af" fontFamily={font}>PROPOSTA</text>
+          <text x="640" y="226" fontSize="10" fontWeight="600" fill="#9ca3af" fontFamily={font}>CLIENTE</text>
+          <text x="824" y="226" fontSize="10" fontWeight="600" fill="#9ca3af" fontFamily={font}>VALOR</text>
+          <text x="984" y="226" fontSize="10" fontWeight="600" fill="#9ca3af" fontFamily={font}>STATUS</text>
+
+          {/* row 1 */}
+          <line x1="228" y1="240" x2="1172" y2="240" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="252" y="267" fontSize="13" fontWeight="500" fill="#111827" fontFamily={font}>Website Corporativo — Agência XYZ</text>
+          <text x="252" y="285" fontSize="11" fill="#9ca3af" fontFamily={font}>#001 · Visualizada 3x · Aprovada ontem</text>
+          <text x="640" y="273" fontSize="13" fill="#374151" fontFamily={font}>Agência XYZ</text>
+          <text x="824" y="273" fontSize="13" fontWeight="600" fill="#111827" fontFamily={font}>R$ 8.500</text>
+          <rect x="972" y="261" width="72" height="22" rx="11" fill="#dcfce7" />
+          <text x="1008" y="276" textAnchor="middle" fontSize="11" fontWeight="600" fill="#16a34a" fontFamily={font}>Aprovado</text>
+
+          {/* row 2 */}
+          <line x1="228" y1="304" x2="1172" y2="304" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="252" y="331" fontSize="13" fontWeight="500" fill="#111827" fontFamily={font}>App Mobile — Plataforma Fintech</text>
+          <text x="252" y="349" fontSize="11" fill="#9ca3af" fontFamily={font}>#002 · Visualizada 1x · Enviada há 2 dias</text>
+          <text x="640" y="337" fontSize="13" fill="#374151" fontFamily={font}>Fintech Capital</text>
+          <text x="824" y="337" fontSize="13" fontWeight="600" fill="#111827" fontFamily={font}>R$ 15.000</text>
+          <rect x="960" y="325" width="88" height="22" rx="11" fill="#fef3c7" />
+          <text x="1004" y="340" textAnchor="middle" fontSize="11" fontWeight="600" fill="#d97706" fontFamily={font}>Aguardando</text>
+
+          {/* row 3 */}
+          <line x1="228" y1="368" x2="1172" y2="368" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="252" y="395" fontSize="13" fontWeight="500" fill="#111827" fontFamily={font}>Sistema ERP — Módulo Financeiro</text>
+          <text x="252" y="413" fontSize="11" fill="#9ca3af" fontFamily={font}>#003 · Não visualizada ainda · Enviada hoje</text>
+          <text x="640" y="401" fontSize="13" fill="#374151" fontFamily={font}>Indústria ABC</text>
+          <text x="824" y="401" fontSize="13" fontWeight="600" fill="#111827" fontFamily={font}>R$ 22.000</text>
+          <rect x="975" y="389" width="62" height="22" rx="11" fill="#dbeafe" />
+          <text x="1006" y="404" textAnchor="middle" fontSize="11" fontWeight="600" fill="#2563eb" fontFamily={font}>Enviada</text>
+
+          {/* row 4 */}
+          <line x1="228" y1="432" x2="1172" y2="432" stroke="#f3f4f6" strokeWidth="1" />
+          <text x="252" y="459" fontSize="13" fontWeight="500" fill="#111827" fontFamily={font}>Identidade Visual + Brand Guidelines</text>
+          <text x="252" y="477" fontSize="11" fill="#9ca3af" fontFamily={font}>#004 · Rascunho</text>
+          <text x="640" y="465" fontSize="13" fill="#374151" fontFamily={font}>Startup Verde</text>
+          <text x="824" y="465" fontSize="13" fontWeight="600" fill="#111827" fontFamily={font}>R$ 3.200</text>
+          <rect x="974" y="453" width="66" height="22" rx="11" fill="#f3f4f6" />
+          <text x="1007" y="468" textAnchor="middle" fontSize="11" fontWeight="600" fill="#6b7280" fontFamily={font}>Rascunho</text>
+        </svg>
+      </div>
+      {/* bottom fade into next section */}
+      <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+    </div>
+  )
+}
+
 /* ─── Page ─── */
 export default function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -179,7 +286,7 @@ export default function LandingPage() {
       </header>
 
       {/* ━━━ HERO ━━━ */}
-      <section className="pt-32 pb-24 px-4 sm:px-6">
+      <section className="pt-32 pb-0 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#1D9E75]/10 text-[#1D9E75] mb-6">
             Para freelancers brasileiros
@@ -209,6 +316,7 @@ export default function LandingPage() {
             Grátis para sempre · 5 propostas/mês no plano Free
           </p>
         </div>
+        <AppMockup />
       </section>
 
       {/* ━━━ COMO FUNCIONA ━━━ */}
