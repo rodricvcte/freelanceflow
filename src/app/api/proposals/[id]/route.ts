@@ -143,7 +143,9 @@ export async function PUT(
   let pdfUrl: string | null = data.pdf_url
   try {
     pdfUrl = await generateAndSaveProposalPDF(id, supabase)
-  } catch { /* non-fatal */ }
+  } catch (e) {
+    console.error('[PDF] Falha ao regenerar PDF da proposta', id, e)
+  }
 
   return NextResponse.json({ ...data, pdf_url: pdfUrl })
 }

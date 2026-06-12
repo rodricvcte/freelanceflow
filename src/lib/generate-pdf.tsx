@@ -85,7 +85,10 @@ export async function generateAndSaveProposalPDF(
 
   const { data: { publicUrl } } = service.storage.from(BUCKET).getPublicUrl(filePath)
 
-  await supabase.from('proposals').update({ pdf_url: publicUrl }).eq('id', proposalId)
+  // Append version to bust CDN cache — same file path is overwritten on each save
+  const versionedUrl = `${publicUrl}?v=${Date.now()}`
 
-  return publicUrl
+  await supabase.from('proposals').update({ pdf_url: versionedUrl }).eq('id', proposalId)
+
+  return versionedUrl
 }
