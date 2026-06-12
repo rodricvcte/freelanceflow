@@ -96,10 +96,14 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
     tiktok:         initial.tiktok         ?? '',
   })
 
-  const [logoPreview, setPreview] = useState<string | null>(initial.logo_url)
-  const [saving,    setSaving]    = useState(false)
-  const [uploading, setUp]        = useState(false)
-  const [msg,       setMsg]       = useState<{ text: string; ok: boolean } | null>(null)
+  const [logoPreview,  setPreview]      = useState<string | null>(initial.logo_url)
+  const [saving,       setSaving]      = useState(false)
+  const [uploading,    setUp]          = useState(false)
+  const [msg,          setMsg]         = useState<{ text: string; ok: boolean } | null>(null)
+  const [colorMode,    setColorMode]   = useState<'custom' | 'brand'>('custom')
+  const [brandLoading, setBrandLoading] = useState(false)
+  const [brandLogo,    setBrandLogo]   = useState<string | null>(null)
+  const [brandFetched, setBrandFetched] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function set<K extends keyof typeof form>(k: K, v: typeof form[K]) {
@@ -156,6 +160,32 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
       setMsg({ text: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleFetchBrand() {
+    if (!form.website) return
+    setBrandLoading(true)
+    try {
+      const res  = await fetch('/api/profile/fetch-brand', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ url: form.website }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Falha ao importar identidade')
+      setBrandFetched(true)
+      if (data.accent_color) {
+        set('accent_color', data.accent_color)
+      } else {
+        setMsg({ text: 'Cor principal não encontrada neste site', ok: false })
+      }
+      setBrandLogo(data.logo_url ?? null)
+    } catch (e: unknown) {
+      setMsg({ text: e instanceof Error ? e.message : 'Falha ao importar identidade visual', ok: false })
+      setColorMode('custom')
+    } finally {
+      setBrandLoading(false)
     }
   }
 
@@ -291,31 +321,123 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
           )}
         </div>
         <p className="text-xs text-gray-500 mb-4">Cor do cabeçalho e destaques no PDF gerado.</p>
-        <div className={`flex items-center gap-3 ${!isPro ? 'opacity-50 pointer-events-none select-none' : ''}`}>
-          <input
-            type="color"
-            value={form.accent_color}
-            onChange={e => set('accent_color', e.target.value)}
-            disabled={!isPro}
-            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white disabled:cursor-not-allowed"
-          />
-          <div
-            className="w-8 h-8 rounded-lg border border-gray-100 shadow-sm"
-            style={{ backgroundColor: isPro ? form.accent_color : '#1D9E75' }}
-          />
-          <span className="text-sm font-mono text-gray-700">
-            {isPro ? form.accent_color.toUpperCase() : '#1D9E75'}
-          </span>
-          {isPro && (
+
+        {/* Mode toggle — Pro only */}
+        {isPro && (
+          <div className="flex gap-0.5 p-0.5 bg-gray-100 rounded-lg mb-4 w-fit text-xs">
             <button
               type="button"
-              onClick={() => set('accent_color', '#1D9E75')}
-              className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors"
+              onClick={() => setColorMode('custom')}
+              className={`px-3 py-1.5 font-medium rounded-md transition-colors ${
+                colorMode === 'custom' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
             >
-              Resetar
+              Personalizada
             </button>
-          )}
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                setColorMode('brand')
+                if (!brandFetched && form.website) handleFetchBrand()
+              }}
+              className={`px-3 py-1.5 font-medium rounded-md transition-colors ${
+                colorMode === 'brand' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Identidade do site
+            </button>
+          </div>
+        )}
+
+        {/* Custom color picker */}
+        {(!isPro || colorMode === 'custom') && (
+          <div className={`flex items-center gap-3 ${!isPro ? 'opacity-50 pointer-events-none select-none' : ''}`}>
+            <input
+              type="color"
+              value={form.accent_color}
+              onChange={e => set('accent_color', e.target.value)}
+              disabled={!isPro}
+              className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 bg-white disabled:cursor-not-allowed"
+            />
+            <div
+              className="w-8 h-8 rounded-lg border border-gray-100 shadow-sm"
+              style={{ backgroundColor: isPro ? form.accent_color : '#1D9E75' }}
+            />
+            <span className="text-sm font-mono text-gray-700">
+              {isPro ? form.accent_color.toUpperCase() : '#1D9E75'}
+            </span>
+            {isPro && (
+              <button
+                type="button"
+                onClick={() => set('accent_color', '#1D9E75')}
+                className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors"
+              >
+                Resetar
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Brand identity mode */}
+        {isPro && colorMode === 'brand' && (
+          <div className="space-y-3">
+            {!form.website ? (
+              <p className="text-xs text-gray-500">
+                Configure o campo{' '}
+                <strong className="font-medium text-gray-700">Site / portfólio</strong>{' '}
+                nos dados pessoais para importar a identidade visual.
+              </p>
+            ) : brandLoading ? (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <svg className="animate-spin h-3.5 w-3.5 text-[#1D9E75]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Buscando identidade visual…
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-lg border border-gray-100 shadow-sm shrink-0"
+                    style={{ backgroundColor: form.accent_color }}
+                  />
+                  <span className="text-sm font-mono text-gray-700">{form.accent_color.toUpperCase()}</span>
+                  <button
+                    type="button"
+                    onClick={handleFetchBrand}
+                    disabled={brandLoading}
+                    className="text-xs text-gray-400 hover:text-[#1D9E75] transition-colors disabled:opacity-50"
+                  >
+                    Reimportar
+                  </button>
+                </div>
+
+                {brandLogo && (
+                  <div className="flex items-center gap-3 pt-3 border-t border-gray-50">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={brandLogo}
+                      alt="Logo detectado"
+                      className="w-10 h-10 object-contain rounded border border-gray-100 bg-white p-0.5 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-700">Logo detectado</p>
+                      <p className="text-xs text-gray-400">Encontrado no site</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { set('logo_url', brandLogo); setPreview(brandLogo); setBrandLogo(null) }}
+                      className="text-xs font-medium text-[#1D9E75] hover:underline shrink-0"
+                    >
+                      Usar como logo
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Redes sociais */}
