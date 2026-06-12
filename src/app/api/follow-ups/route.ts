@@ -1,13 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-service'
 import { canUseFollowUps } from '@/lib/plan'
+import { getViewAs } from '@/lib/view-as'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data, error } = await supabase
+  const viewAs      = await getViewAs(user)
+  const queryClient = viewAs ? createServiceClient() : supabase
+  const userId      = viewAs?.id ?? user.id
+
+  const { data, error } = await queryClient
     .from('follow_ups')
     .select(`
       id, type, trigger_rule, scheduled_for, sent_at, created_at,
@@ -16,7 +22,7 @@ export async function GET() {
         clients ( id, name )
       )
     `)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .order('scheduled_for', { ascending: true, nullsFirst: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -1,15 +1,21 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-service'
+import { getViewAs } from '@/lib/view-as'
 
 export async function GET() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data, error } = await supabase
+  const viewAs      = await getViewAs(user)
+  const queryClient = viewAs ? createServiceClient() : supabase
+  const userId      = viewAs?.id ?? user.id
+
+  const { data, error } = await queryClient
     .from('profiles')
     .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok')
-    .eq('id', user.id)
+    .eq('id', userId)
     .maybeSingle()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

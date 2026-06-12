@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { unstable_noStore as noStore } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-service'
+import { getViewAs } from '@/lib/view-as'
 import UpgradedBanner from '@/components/UpgradedBanner'
 import BarChartCard  from '@/components/dashboard/BarChartCard'
 import DoughnutCard  from '@/components/dashboard/DoughnutCard'
@@ -77,26 +79,30 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const viewAs      = await getViewAs(user)
+  const queryClient = viewAs ? createServiceClient() : supabase
+  const userId      = viewAs?.id ?? user.id
+
   const [profileRes, proposalsRes, subRes, followUpsRes] = await Promise.all([
-    supabase
+    queryClient
       .from('profiles')
       .select('full_name, business_name')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single(),
-    supabase
+    queryClient
       .from('proposals')
       .select('id, title, value, status, created_at, sent_at, proposal_number, clients(name)')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false }),
-    supabase
+    queryClient
       .from('subscriptions')
       .select('plan, status')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .maybeSingle(),
-    supabase
+    queryClient
       .from('follow_ups')
       .select('id, type, trigger_rule, scheduled_for, proposals(id, title)')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .is('sent_at', null)
       .order('scheduled_for', { ascending: true, nullsFirst: false }),
   ])

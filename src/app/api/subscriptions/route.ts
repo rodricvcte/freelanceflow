@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { unstable_noStore as noStore } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-service'
 import { canCreateProposal } from '@/lib/plan'
+import { getViewAs } from '@/lib/view-as'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,13 +13,17 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: sub } = await supabase
+  const viewAs      = await getViewAs(user)
+  const queryClient = viewAs ? createServiceClient() : supabase
+  const userId      = viewAs?.id ?? user.id
+
+  const { data: sub } = await queryClient
     .from('subscriptions')
     .select('plan, status, current_period_end, stripe_customer_id, stripe_subscription_id, stripe_price_id')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .maybeSingle()
 
-  const { used, limit } = await canCreateProposal(user.id, supabase)
+  const { used, limit } = await canCreateProposal(userId, queryClient)
 
   return NextResponse.json({
     plan:                   sub?.plan                   ?? 'free',
