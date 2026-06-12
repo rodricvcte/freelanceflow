@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     line_items: [{ price: price_id, quantity: 1 }],
     success_url: `${APP_URL}/dashboard?upgraded=true`,
     cancel_url:  `${APP_URL}/configuracoes?tab=plano`,
+    allow_promotion_codes: true,
     metadata: { supabase_user_id: user.id },
     subscription_data: {
       metadata: { supabase_user_id: user.id },
