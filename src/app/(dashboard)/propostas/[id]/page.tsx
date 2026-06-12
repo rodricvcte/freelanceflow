@@ -106,18 +106,22 @@ function parseNum(v: string | undefined | null): number {
 // ─── Section card ─────────────────────────────────────────────────────────────
 
 function SectionCard({ section }: { section: Section }) {
-  const header = (title: string) => (
-    <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-gray-50">
-      <span className="w-[3px] h-[18px] bg-[#1D9E75] rounded-sm shrink-0" />
-      <h3 className="text-[13px] font-medium text-gray-900">{title}</h3>
-    </div>
-  )
+  const header = (title: string) => {
+    if (!title?.trim()) return null
+    return (
+      <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-gray-50">
+        <span className="w-[3px] h-[18px] bg-[#1D9E75] rounded-sm shrink-0" />
+        <h3 className="text-[13px] font-medium text-gray-900">{title}</h3>
+      </div>
+    )
+  }
 
-  const body = 'px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words'
-  const wrap = 'bg-white rounded-[10px] border border-gray-100'
+  const body = 'px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words [word-break:break-word] min-w-0'
+  const wrap = 'bg-white rounded-[10px] border border-gray-100 min-w-0'
 
   if (section.type === 'text') {
     const s = section as TextSection
+    if (!s.title?.trim() && !s.content?.trim()) return null
     return (
       <div className={wrap}>
         {header(s.title)}
@@ -130,15 +134,17 @@ function SectionCard({ section }: { section: Section }) {
 
   if (section.type === 'scope') {
     const s = section as ScopeSection
+    const hasContent = s.items.some(i => i.trim())
+    if (!s.title?.trim() && !hasContent) return null
     return (
       <div className={wrap}>
         {header(s.title)}
         <div className={body}>
           <ul className="space-y-1.5">
-            {s.items.map((item, i) => (
+            {s.items.filter(i => i.trim()).map((item, i) => (
               <li key={i} className="flex gap-2.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#1D9E75] shrink-0 mt-[7px]" />
-                <span>{item}</span>
+                <span className="break-words [word-break:break-word] min-w-0">{item}</span>
               </li>
             ))}
           </ul>
@@ -155,11 +161,17 @@ function SectionCard({ section }: { section: Section }) {
       <div className={`${wrap} overflow-x-auto`}>
         {header(s.title)}
         <div className={body + ' p-0'}>
-          <table className="w-full text-[13px] min-w-[480px]">
+          <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: '50%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '17%' }} />
+            </colgroup>
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Descrição</th>
-                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide w-16">Qtd</th>
+                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Qtd</th>
                 <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Valor unit.</th>
                 <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
               </tr>
@@ -167,7 +179,7 @@ function SectionCard({ section }: { section: Section }) {
             <tbody>
               {s.rows.map((row, i) => (
                 <tr key={i} className={i % 2 !== 0 ? 'bg-gray-50/60' : ''}>
-                  <td className="px-4 py-2.5 text-gray-700">{row.description}</td>
+                  <td className="px-4 py-2.5 text-gray-700 break-words [word-break:break-word]">{row.description}</td>
                   <td className="px-4 py-2.5 text-center text-gray-600">{row.quantity}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums">{fmtRowBRL(row.unit_price)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums font-medium">{fmtBRL(rowTotals[i])}</td>
@@ -194,11 +206,17 @@ function SectionCard({ section }: { section: Section }) {
       <div className={`${wrap} overflow-x-auto`}>
         {header(s.title)}
         <div className={body + ' p-0'}>
-          <table className="w-full text-[13px] min-w-[480px]">
+          <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: '50%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '17%' }} />
+            </colgroup>
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Perfil</th>
-                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">Horas</th>
+                <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Horas</th>
                 <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Valor/hora</th>
                 <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
               </tr>
@@ -206,7 +224,7 @@ function SectionCard({ section }: { section: Section }) {
             <tbody>
               {s.rows.map((row, i) => (
                 <tr key={i} className={i % 2 !== 0 ? 'bg-gray-50/60' : ''}>
-                  <td className="px-4 py-2.5 text-gray-700">{row.profile}</td>
+                  <td className="px-4 py-2.5 text-gray-700 break-words [word-break:break-word]">{row.profile}</td>
                   <td className="px-4 py-2.5 text-center text-gray-600">{row.hours}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums">{fmtRowBRL(row.rate)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums font-medium">{fmtBRL(rowTotals[i])}</td>
@@ -256,15 +274,17 @@ function SectionCard({ section }: { section: Section }) {
 
   if (section.type === 'clauses') {
     const s = section as ClausesSection
+    const hasContent = s.items.some(i => i.trim())
+    if (!s.title?.trim() && !hasContent) return null
     return (
       <div className={wrap}>
         {header(s.title)}
         <div className={body}>
           <ol className="space-y-2">
-            {s.items.map((item, i) => (
+            {s.items.filter(i => i.trim()).map((item, i) => (
               <li key={i} className="flex gap-2.5">
                 <span className="shrink-0 font-semibold text-gray-400 tabular-nums w-5 text-right mt-0.5">{i + 1}.</span>
-                <span>{item}</span>
+                <span className="break-words [word-break:break-word] min-w-0">{item}</span>
               </li>
             ))}
           </ol>
@@ -466,7 +486,10 @@ export default async function ProposalDetailPage({
             {proposal.deadline_days !== null ? `${proposal.deadline_days} dias` : '—'}
           </p>
           {proposal.payment_terms && (
-            <p className="text-xs text-gray-400 mt-0.5 truncate">{proposal.payment_terms}</p>
+            <>
+              <p className="text-xs font-medium text-gray-400 mt-2 mb-0.5">Condições de pgto</p>
+              <p className="text-xs text-gray-700 break-words [word-break:break-word]">{proposal.payment_terms}</p>
+            </>
           )}
         </div>
 
@@ -485,7 +508,7 @@ export default async function ProposalDetailPage({
                 <span className="w-[3px] h-[18px] bg-[#1D9E75] rounded-sm shrink-0" />
                 <h3 className="text-[13px] font-medium text-gray-900">Descrição do serviço</h3>
               </div>
-              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words">
+              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words [word-break:break-word] min-w-0">
                 <p className="whitespace-pre-wrap">{proposal.service_description}</p>
               </div>
             </div>
@@ -497,13 +520,13 @@ export default async function ProposalDetailPage({
           ))}
 
           {/* Condições de pagamento */}
-          {proposal.payment_terms && sections.length > 0 && (
+          {proposal.payment_terms && (
             <div className={card}>
               <div className="flex items-center gap-3 px-4 pt-3.5 pb-3 border-b border-gray-50">
                 <span className="w-[3px] h-[18px] bg-[#1D9E75] rounded-sm shrink-0" />
                 <h3 className="text-[13px] font-medium text-gray-900">Condições de pagamento</h3>
               </div>
-              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words">
+              <div className="px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words [word-break:break-word] min-w-0">
                 <p className="whitespace-pre-wrap">{proposal.payment_terms}</p>
               </div>
             </div>
