@@ -24,7 +24,7 @@ export async function generateAndSaveProposalPDF(
   // Use snapshot saved at creation time; fall back to current profile for old proposals
   const snapshotProfile = (raw as Record<string, unknown>).snapshot_profile as ProfileForPDF | null
 
-  const [{ data: profileRaw }, { data: sub }] = await Promise.all([
+  const [{ data: profileRaw }, { data: sub }, { data: sigRow }] = await Promise.all([
     snapshotProfile
       ? Promise.resolve({ data: null })
       : supabase
@@ -37,6 +37,12 @@ export async function generateAndSaveProposalPDF(
       .select('plan, status')
       .eq('user_id', authData.user.id)
       .maybeSingle(),
+    // Always fetch signature_data from the current profile — snapshot doesn't carry it
+    supabase
+      .from('profiles')
+      .select('signature_data')
+      .eq('id', authData.user.id)
+      .single(),
   ])
 
   const isFreePlan = !sub || sub.plan === 'free' || sub.status !== 'active'
@@ -60,12 +66,15 @@ export async function generateAndSaveProposalPDF(
     clients:             clientsNorm,
   }
 
-  const profile: ProfileForPDF = snapshotProfile ?? profileRaw ?? {
-    full_name: null, business_name: null, accent_color: null, logo_url: null,
-    phone: null, email_business: null, address: null, website: null,
-    document_type: null, cpf_cnpj: null,
-    instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
-    signature_data: null,
+  const profile: ProfileForPDF = {
+    ...(snapshotProfile ?? profileRaw ?? {
+      full_name: null, business_name: null, accent_color: null, logo_url: null,
+      phone: null, email_business: null, address: null, website: null,
+      document_type: null, cpf_cnpj: null,
+      instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
+      signature_data: null,
+    }),
+    signature_data: sigRow?.signature_data ?? null,
   }
 
   const buffer = await renderToBuffer(
