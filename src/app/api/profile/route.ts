@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data, error } = await queryClient
     .from('profiles')
-    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok')
+    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok, signature_data')
     .eq('id', userId)
     .maybeSingle()
 
@@ -40,6 +40,7 @@ export async function PATCH(request: Request) {
     'full_name', 'business_name', 'phone', 'accent_color', 'logo_url',
     'email_business', 'address', 'website',
     'instagram', 'linkedin', 'facebook', 'youtube', 'tiktok',
+    'signature_data',
   ] as const
   type Field = typeof allowed[number]
   const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj', string | null>> = {}

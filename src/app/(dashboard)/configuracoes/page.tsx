@@ -24,7 +24,14 @@ type Profile = {
   facebook:       string | null
   youtube:        string | null
   tiktok:         string | null
+  signature_data: string | null
 }
+
+const SIG_FONTS = [
+  { family: 'Dancing Script', weight: '600', canvasSize: 42 },
+  { family: 'Pacifico',       weight: '400', canvasSize: 34 },
+  { family: 'Caveat',         weight: '700', canvasSize: 48 },
+] as const
 
 type SubInfo = {
   plan:                   string
@@ -89,11 +96,12 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
     logo_url:       initial.logo_url       ?? '',
     document_type:  (initial.document_type ?? 'cpf') as DocType,
     cpf_cnpj:       applyDocMask(initial.cpf_cnpj, initial.document_type),
-    instagram:      initial.instagram      ?? '',
-    linkedin:       initial.linkedin       ?? '',
-    facebook:       initial.facebook       ?? '',
-    youtube:        initial.youtube        ?? '',
-    tiktok:         initial.tiktok         ?? '',
+    instagram:       initial.instagram       ?? '',
+    linkedin:        initial.linkedin        ?? '',
+    facebook:        initial.facebook        ?? '',
+    youtube:         initial.youtube         ?? '',
+    tiktok:          initial.tiktok          ?? '',
+    signature_data:  initial.signature_data  ?? '',
   })
 
   const [logoPreview,  setPreview]      = useState<string | null>(initial.logo_url)
@@ -104,7 +112,40 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
   const [brandLoading, setBrandLoading] = useState(false)
   const [brandLogo,    setBrandLogo]    = useState<string | null>(null)
   const [brandFetched, setBrandFetched] = useState(false)
+  const [selectedSig,  setSelectedSig]  = useState<number | null>(null)
+  const [sigLoading,   setSigLoading]   = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel  = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Pacifico&family=Caveat:wght@700&display=swap'
+    document.head.appendChild(link)
+    return () => { if (document.head.contains(link)) document.head.removeChild(link) }
+  }, [])
+
+  async function generateSignature(index: number) {
+    const name = form.full_name.trim()
+    if (!name) return
+    setSigLoading(true)
+    setSelectedSig(index)
+    try {
+      const { family, weight, canvasSize } = SIG_FONTS[index]
+      await document.fonts.load(`${weight} ${canvasSize}px "${family}"`)
+      const canvas  = document.createElement('canvas')
+      canvas.width  = 520
+      canvas.height = 110
+      const ctx     = canvas.getContext('2d')!
+      ctx.font          = `${weight} ${canvasSize}px "${family}"`
+      ctx.fillStyle     = '#111827'
+      ctx.textAlign     = 'center'
+      ctx.textBaseline  = 'middle'
+      ctx.fillText(name.split(/\s+/).slice(0, 2).join(' '), 260, 56)
+      set('signature_data', canvas.toDataURL('image/png'))
+    } finally {
+      setSigLoading(false)
+    }
+  }
 
   function set<K extends keyof typeof form>(k: K, v: typeof form[K]) {
     setForm(p => ({ ...p, [k]: v }))
@@ -302,6 +343,67 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
             className={inputCls}
           />
         </div>
+      </div>
+
+      {/* Assinatura no PDF */}
+      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">Sua assinatura no PDF</h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Clique em um estilo para gerar sua assinatura com base no seu nome.
+        </p>
+
+        {!form.full_name.trim() ? (
+          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+            Preencha o campo <strong className="font-semibold">Nome completo</strong> acima para gerar sua assinatura.
+          </p>
+        ) : (
+          <div className="grid grid-cols-3 gap-3">
+            {SIG_FONTS.map((f, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => generateSignature(i)}
+                disabled={sigLoading}
+                className={`rounded-xl border-2 px-3 h-16 flex items-center justify-center transition-all overflow-hidden disabled:opacity-60 ${
+                  selectedSig === i
+                    ? 'border-[#1D9E75] bg-[#f0fdf8]'
+                    : 'border-gray-100 hover:border-gray-200 bg-gray-50'
+                }`}
+              >
+                <span
+                  style={{
+                    fontFamily: `"${f.family}", cursive`,
+                    fontWeight: f.weight,
+                    fontSize:   '22px',
+                    color:      selectedSig === i ? '#1D9E75' : '#111827',
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
+                    maxWidth:   '100%',
+                    overflow:   'hidden',
+                  }}
+                >
+                  {form.full_name.trim().split(/\s+/).slice(0, 2).join(' ')}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {form.signature_data && (
+          <div className="flex items-center gap-3 pt-4 mt-4 border-t border-gray-50">
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] text-gray-400 mb-1.5">Prévia no PDF:</p>
+              <img src={form.signature_data} alt="Assinatura" className="h-9 object-contain" />
+            </div>
+            <button
+              type="button"
+              onClick={() => { set('signature_data', ''); setSelectedSig(null) }}
+              className="text-xs text-gray-400 hover:text-red-500 transition-colors shrink-0"
+            >
+              Remover
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Cor da proposta */}
