@@ -134,13 +134,13 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
       await document.fonts.load(`${weight} ${canvasSize}px "${family}"`)
       const canvas  = document.createElement('canvas')
       canvas.width  = 520
-      canvas.height = 110
+      canvas.height = 80
       const ctx     = canvas.getContext('2d')!
-      ctx.font          = `${weight} ${canvasSize}px "${family}"`
-      ctx.fillStyle     = '#111827'
-      ctx.textAlign     = 'center'
-      ctx.textBaseline  = 'middle'
-      ctx.fillText(name.split(/\s+/).slice(0, 2).join(' '), 260, 56)
+      ctx.font         = `${weight} ${canvasSize}px "${family}"`
+      ctx.fillStyle    = '#111827'
+      ctx.textAlign    = 'center'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText(name.split(/\s+/).slice(0, 2).join(' '), 260, 76)
       set('signature_data', canvas.toDataURL('image/png'))
     } finally {
       setSigLoading(false)

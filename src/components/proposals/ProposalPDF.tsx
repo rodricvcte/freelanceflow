@@ -685,23 +685,23 @@ export function ProposalPDFDocument({
               {profile.signature_data ? (
                 <Image
                   src={profile.signature_data}
-                  style={{ height: 36, maxWidth: 160, objectFit: 'contain', marginBottom: 2 }}
+                  style={{ height: 28, objectFit: 'contain', marginBottom: 0 }}
                 />
               ) : (
-                <View style={{ height: 36, marginBottom: 2 }} />
+                <View style={{ height: 28 }} />
               )}
               <View style={s.signLine} />
               <Text style={s.signName}>{displayName}</Text>
               <Text style={s.signRole}>Prestador de serviços</Text>
             </View>
             <View style={s.signCol}>
-              <View style={{ height: 36, marginBottom: 2 }} />
+              <View style={{ height: 28 }} />
               <View style={s.signLine} />
               <Text style={s.signName}>{proposal.clients?.name ?? 'Cliente'}</Text>
               <Text style={s.signRole}>Contratante</Text>
             </View>
             <View style={[s.signCol, { maxWidth: 110 }]}>
-              <View style={{ height: 36, marginBottom: 2 }} />
+              <View style={{ height: 28 }} />
               <View style={{ height: 28, marginBottom: 5 }} />
               <Text style={s.signName}>Data: ___/___/______</Text>
             </View>
