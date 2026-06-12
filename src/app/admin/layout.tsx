@@ -1,11 +1,7 @@
 import Sidebar from '@/components/sidebar'
 import ImpersonationBar from '@/components/ImpersonationBar'
 
-export default function DashboardGroupLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <ImpersonationBar />

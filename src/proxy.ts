@@ -1,7 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const publicRoutes = ['/', '/login', '/cadastro']
+const ADMIN_EMAIL   = 'rodrigosc19@gmail.com'
+const publicRoutes  = ['/', '/login', '/cadastro']
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -40,6 +41,14 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute    = pathname.startsWith('/login') || pathname.startsWith('/cadastro')
   const isApiRoute     = pathname.startsWith('/api/')
   const isOnboarding   = pathname === '/onboarding'
+  const isAdminRoute   = pathname.startsWith('/admin')
+
+  // Block /admin for non-admin users
+  if (isAdminRoute && user?.email !== ADMIN_EMAIL) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
 
   if (!user && !isPublicRoute && !isApiRoute) {
     const url = request.nextUrl.clone()
