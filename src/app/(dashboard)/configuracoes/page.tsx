@@ -757,7 +757,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
             <div>
               <span className="text-xs font-semibold text-[#1D9E75] uppercase tracking-wider">Plano Pro</span>
               <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl font-bold text-gray-900">R$39</span>
+                <span className="text-2xl font-bold text-gray-900">R$19</span>
                 <span className="text-sm text-gray-500">/mês</span>
               </div>
             </div>
@@ -782,7 +782,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
               className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors disabled:opacity-50"
             >
               {loadingBtn === PRICE_MONTHLY && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              Assinar Pro Mensal — R$39/mês
+              Assinar Pro Mensal — R$19/mês
             </button>
             <button
               onClick={() => handleCheckout(PRICE_YEARLY)}
@@ -790,7 +790,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
               className="flex items-center justify-center gap-2 w-full py-2.5 border border-[#1D9E75] text-[#1D9E75] text-sm font-semibold rounded-xl hover:bg-[#1D9E75]/5 transition-colors disabled:opacity-50"
             >
               {loadingBtn === PRICE_YEARLY && <div className="w-4 h-4 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" />}
-              Assinar Pro Anual — R$349/ano
+              Assinar Pro Anual — R$190/ano
               <span className="text-[10px] font-bold bg-[#1D9E75] text-white px-1.5 py-0.5 rounded-full">economize 2 meses</span>
             </button>
             <button

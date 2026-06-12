@@ -475,7 +475,7 @@ export default function LandingPage() {
               <h3 className="text-lg font-bold text-gray-900">Pro</h3>
               <p className="text-sm text-gray-500 mt-1">Para fechar mais trabalhos</p>
               <div className="mt-4 flex items-baseline gap-1 mb-6">
-                <span className="text-3xl font-bold text-gray-900">R$39</span>
+                <span className="text-3xl font-bold text-gray-900">R$19</span>
                 <span className="text-sm text-gray-400">/mês</span>
               </div>
               <Link

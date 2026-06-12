@@ -100,7 +100,7 @@ export default function UpgradeModal({ open, onClose, feature }: Props) {
           disabled={loading}
           className="w-full py-3 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors disabled:opacity-60 mb-2"
         >
-          {loading ? 'Aguarde...' : 'Assinar Pro — R$39/mês'}
+          {loading ? 'Aguarde...' : 'Assinar Pro — R$19/mês'}
         </button>
 
         <div className="flex gap-3 justify-center">
