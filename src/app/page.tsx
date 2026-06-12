@@ -123,6 +123,12 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-3">
             <Link
+              href="/login"
+              className="hidden sm:inline-flex items-center px-4 py-2 text-gray-600 text-sm font-medium hover:text-gray-900 transition-colors"
+            >
+              Já tenho conta
+            </Link>
+            <Link
               href="/cadastro"
               className="hidden sm:inline-flex items-center px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
             >
@@ -155,9 +161,16 @@ export default function LandingPage() {
               </button>
             ))}
             <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="inline-flex justify-center items-center px-4 py-2.5 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Já tenho conta
+            </Link>
+            <Link
               href="/cadastro"
               onClick={() => setMobileOpen(false)}
-              className="mt-2 inline-flex justify-center items-center px-4 py-2.5 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
+              className="inline-flex justify-center items-center px-4 py-2.5 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
             >
               Começar grátis
             </Link>
