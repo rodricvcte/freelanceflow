@@ -67,8 +67,8 @@ export async function generateAndSaveProposalPDF(
     instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buffer = await renderToBuffer(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <ProposalPDFDocument proposal={proposal} profile={profile} isFreePlan={isFreePlan} /> as any
   )
 

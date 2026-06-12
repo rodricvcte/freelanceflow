@@ -496,6 +496,7 @@ function RenderImage({ sec, accent }: { sec: ImageSection; accent: string }) {
     <View wrap={false as any} style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       <View style={{ alignItems: 'center' }}>
+        {/* eslint-disable-next-line jsx-a11y/alt-text */}
         <Image src={sec.url} style={s.sectionImage} />
       </View>
     </View>
@@ -538,6 +539,7 @@ export function ProposalPDFDocument({
       <View style={{ flex: 1, paddingHorizontal: 48, paddingTop: 60, justifyContent: 'space-between' }}>
         <View style={{ alignItems: 'center', marginBottom: 40 }}>
           {profile.logo_url && (
+            // eslint-disable-next-line jsx-a11y/alt-text
             <Image
               src={profile.logo_url}
               style={{ width: 110, height: 110, objectFit: 'contain', marginBottom: 20 }}
@@ -585,6 +587,7 @@ export function ProposalPDFDocument({
   const FixedHeader = (
     <View fixed style={s.pageHeader}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        {/* eslint-disable-next-line jsx-a11y/alt-text */}
         {profile.logo_url && <Image src={profile.logo_url} style={s.headerLogo} />}
         <Text style={s.headerName}>{displayName}</Text>
       </View>

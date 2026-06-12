@@ -595,6 +595,7 @@ function NotificationsTab() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem('ff_notif_prefs')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setPrefs({ ...NOTIF_DEFAULTS, ...JSON.parse(raw) })
     } catch { /* ignore */ }
   }, [])
@@ -686,6 +687,7 @@ function ConfiguracoesInner() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData()
 
     // Re-busca ao voltar à aba (ex: após checkout Stripe)
@@ -694,7 +696,7 @@ function ConfiguracoesInner() {
     }
     document.addEventListener('visibilitychange', onFocus)
     return () => document.removeEventListener('visibilitychange', onFocus)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'perfil',        label: 'Perfil' },

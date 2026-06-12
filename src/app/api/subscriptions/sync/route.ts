@@ -41,7 +41,7 @@ export async function POST() {
   }
 
   const priceId   = active.items.data[0]?.price.id ?? null
-  const periodEnd = stripeTimestampToISO((active as any).current_period_end ?? null)
+  const periodEnd = stripeTimestampToISO((active as unknown as { current_period_end?: number }).current_period_end ?? null)
 
   await service.from('subscriptions').upsert({
     user_id: user.id,

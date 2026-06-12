@@ -14,35 +14,30 @@ export default function UpgradedBanner() {
 
   useEffect(() => {
     if (searchParams.get('upgraded') !== 'true') return
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShow(true)
-    trySync()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
-  async function trySync() {
-    attemptRef.current += 1
-
-    try {
-      // Chama o endpoint que consulta o Stripe diretamente e atualiza o banco
-      const res  = await fetch('/api/subscriptions/sync', { method: 'POST', cache: 'no-store' })
-      const data = await res.json()
-
-      if (data.plan === 'pro') {
-        setState('confirmed')
-        timerRef.current = setTimeout(() => {
-          window.location.replace('/dashboard')
-        }, 2000)
-        return
+    async function trySync() {
+      attemptRef.current += 1
+      try {
+        const res  = await fetch('/api/subscriptions/sync', { method: 'POST', cache: 'no-store' })
+        const data = await res.json()
+        if (data.plan === 'pro') {
+          setState('confirmed')
+          timerRef.current = setTimeout(() => { window.location.replace('/dashboard') }, 2000)
+          return
+        }
+      } catch { /* rede — tenta de novo */ }
+      if (attemptRef.current < 10) {
+        timerRef.current = setTimeout(trySync, 3000)
+      } else {
+        setState('timeout')
       }
-    } catch { /* rede — tenta de novo */ }
-
-    // Tenta novamente a cada 3s, máximo 10 vezes (30s)
-    if (attemptRef.current < 10) {
-      timerRef.current = setTimeout(trySync, 3000)
-    } else {
-      setState('timeout')
     }
-  }
+
+    trySync()
+  }, [searchParams])
 
   useEffect(() => {
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }

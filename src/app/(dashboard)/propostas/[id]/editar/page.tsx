@@ -468,7 +468,7 @@ export default function EditarPropostaPage() {
       setProposalRef({ number: proposal.proposal_number ?? null, version: proposal.version ?? 1 })
       setLoading(false)
     }).catch(() => { setError('Erro ao carregar proposta'); setLoading(false) })
-  }, [id])
+  }, [id, router])
 
   function setField(k: keyof typeof EMPTY_FORM, v: string) {
     setForm(p => ({ ...p, [k]: v }))

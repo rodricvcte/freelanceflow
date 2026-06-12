@@ -63,8 +63,6 @@ export async function POST(
   const freelancerName = (snap?.business_name ?? snap?.full_name ?? profile?.business_name ?? profile?.full_name ?? 'Freelancer') as string
   const logoUrl = (snap?.logo_url ?? profile?.logo_url ?? null) as string | null
   const accentColor = (snap?.accent_color ?? profile?.accent_color ?? '#1D9E75') as string
-  const fromEmail = profile?.email_business ?? 'noreply@freelanceflow.app'
-
   const token = proposal.token as string
   const clientName = body.recipient_name?.trim() || 'Cliente'
   const filename = proposal.proposal_number

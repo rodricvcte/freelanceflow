@@ -31,6 +31,7 @@ export default function SendProposalModal({
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuccess(false)
       setError(null)
       setForm({

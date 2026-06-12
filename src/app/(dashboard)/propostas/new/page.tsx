@@ -511,6 +511,7 @@ function NewProposalInner() {
     const clientId = searchParams.get('client_id')
 
     if (mode === 'duplicate') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsDuplicate(true)
       try {
         const raw = sessionStorage.getItem('ff_duplicate_draft')

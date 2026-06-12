@@ -35,15 +35,15 @@ export default async function AdminPage() {
     service.from('subscriptions').select('user_id, plan, status'),
   ])
 
-  const now = Date.now()
-  const thirtyDays = 30 * 86_400_000
+  // eslint-disable-next-line react-hooks/purity
+  const cutoff = new Date(Date.now() - 30 * 86_400_000)
 
   const rows = users.map(u => {
     const profile  = profiles?.find(p => p.id === u.id)
     const sub      = subs?.find(s => s.user_id === u.id)
     const isPro    = sub?.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
     const lastLogin = u.last_sign_in_at ?? null
-    const isActive = lastLogin ? (now - new Date(lastLogin).getTime()) < thirtyDays : false
+    const isActive = lastLogin ? new Date(lastLogin) > cutoff : false
     const name     = profile?.business_name ?? profile?.full_name ?? '—'
     return { u, name, isPro, isActive, lastLogin }
   }).sort((a, b) => new Date(b.u.created_at).getTime() - new Date(a.u.created_at).getTime())
