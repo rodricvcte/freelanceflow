@@ -18,10 +18,14 @@ export async function GET(
     return NextResponse.redirect(new URL(`/p/${token}`, process.env.NEXT_PUBLIC_APP_URL!))
   }
 
-  if (!['aprovada', 'reprovada'].includes(proposal.status)) {
+  if (['expirada', 'cancelada'].includes(proposal.status)) {
+    return NextResponse.redirect(new URL(`/p/${token}`, process.env.NEXT_PUBLIC_APP_URL!))
+  }
+
+  if (!['aceita', 'recusada'].includes(proposal.status)) {
     await service
       .from('proposals')
-      .update({ status: 'reprovada', responded_at: new Date().toISOString() })
+      .update({ status: 'recusada', responded_at: new Date().toISOString() })
       .eq('id', proposal.id)
 
     await service
@@ -49,13 +53,13 @@ export async function POST(
 
   if (!proposal) return NextResponse.json({ error: 'Proposta não encontrada' }, { status: 404 })
 
-  if (['aprovada', 'reprovada'].includes(proposal.status)) {
-    return NextResponse.json({ error: 'Proposta já respondida' }, { status: 409 })
+  if (['aceita', 'recusada', 'expirada', 'cancelada'].includes(proposal.status)) {
+    return NextResponse.json({ error: 'Proposta não disponível para resposta' }, { status: 409 })
   }
 
   await service
     .from('proposals')
-    .update({ status: 'reprovada', responded_at: new Date().toISOString() })
+    .update({ status: 'recusada', responded_at: new Date().toISOString() })
     .eq('id', proposal.id)
 
   await service

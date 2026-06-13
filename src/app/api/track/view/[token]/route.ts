@@ -27,12 +27,11 @@ export async function GET(
     }
 
     if (trackingAllowed) {
-      if (proposal.status === 'enviada') {
-        await service
-          .from('proposals')
-          .update({ status: 'visualizada', viewed_at: new Date().toISOString() })
-          .eq('id', proposal.id)
-      }
+      // Always update viewed_at — keeps proposals UPDATE firing on every visit,
+      // which is the reliable trigger for the dashboard's Realtime subscription.
+      const updatePayload: Record<string, unknown> = { viewed_at: new Date().toISOString() }
+      if (proposal.status === 'enviada') updatePayload.status = 'visualizada'
+      await service.from('proposals').update(updatePayload).eq('id', proposal.id)
 
       await service
         .from('proposal_events')
@@ -40,5 +39,6 @@ export async function GET(
     }
   }
 
-  return NextResponse.redirect(new URL(`/p/${token}`, request.url), 302)
+  // ?_t=1 tells the public page that tracking already happened via this redirect
+  return NextResponse.redirect(new URL(`/p/${token}?_t=1`, request.url), 302)
 }

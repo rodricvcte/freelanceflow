@@ -9,22 +9,25 @@ import Image from 'next/image'
 type DocType = 'cpf' | 'cnpj'
 
 type Profile = {
-  full_name:      string | null
-  business_name:  string | null
-  phone:          string | null
-  logo_url:       string | null
-  accent_color:   string
-  email_business: string | null
-  address:        string | null
-  document_type:  DocType | null
-  cpf_cnpj:       string | null
-  website:        string | null
-  instagram:      string | null
-  linkedin:       string | null
-  facebook:       string | null
-  youtube:        string | null
-  tiktok:         string | null
-  signature_data: string | null
+  full_name:        string | null
+  business_name:    string | null
+  phone:            string | null
+  logo_url:         string | null
+  accent_color:     string
+  email_business:   string | null
+  address:          string | null
+  document_type:    DocType | null
+  cpf_cnpj:         string | null
+  website:          string | null
+  instagram:        string | null
+  linkedin:         string | null
+  facebook:         string | null
+  youtube:          string | null
+  tiktok:           string | null
+  signature_data:   string | null
+  followup_enabled:        boolean | null
+  followup_days:           number | null
+  followup_expiry_enabled: boolean | null
 }
 
 const SIG_FONTS = [
@@ -817,6 +820,146 @@ function PlanTab({ sub }: { sub: SubInfo }) {
   )
 }
 
+// ─── Tab: Follow-ups ─────────────────────────────────────────────────────────
+
+function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      className={`relative shrink-0 w-10 h-6 rounded-full transition-colors ${value ? 'bg-[#1D9E75]' : 'bg-gray-200'}`}
+      role="switch"
+      aria-checked={value}
+    >
+      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${value ? 'translate-x-4' : 'translate-x-0'}`} />
+    </button>
+  )
+}
+
+function FollowUpsTab({
+  initialEnabled,
+  initialDays,
+  initialExpiryEnabled,
+}: {
+  initialEnabled:        boolean
+  initialDays:           number
+  initialExpiryEnabled:  boolean
+}) {
+  const [enabled,       setEnabled]       = useState(initialEnabled)
+  const [days,          setDays]          = useState(String(initialDays))
+  const [expiryEnabled, setExpiryEnabled] = useState(initialExpiryEnabled)
+  const [saving,        setSaving]        = useState(false)
+  const [msg,           setMsg]           = useState<{ text: string; ok: boolean } | null>(null)
+
+  async function handleSave() {
+    setSaving(true)
+    setMsg(null)
+    try {
+      const res = await fetch('/api/profile', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          followup_enabled:        enabled,
+          followup_days:           parseInt(days, 10) || 2,
+          followup_expiry_enabled: expiryEnabled,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setMsg({ text: 'Configurações salvas!', ok: true })
+    } catch (e) {
+      setMsg({ text: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const inputCls = 'px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent w-24 text-center'
+
+  return (
+    <div className="space-y-4">
+      {msg && (
+        <div className={`p-3 rounded-lg text-sm ${msg.ok ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+          {msg.text}
+        </div>
+      )}
+
+      {/* ── Lembrete de resposta ─────────────────────────────── */}
+      <div className="bg-white border border-gray-100 rounded-xl shadow-sm divide-y divide-gray-50">
+        <div className="px-6 py-4">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Lembrete de resposta</p>
+        </div>
+
+        <div className="flex items-center justify-between px-6 py-4 gap-4">
+          <div>
+            <p className="text-sm font-medium text-gray-900">Follow-up automático</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Enviar e-mail ao cliente quando a proposta ficar sem resposta.
+            </p>
+          </div>
+          <Toggle value={enabled} onChange={setEnabled} />
+        </div>
+
+        <div className={`flex items-center justify-between px-6 py-4 gap-4 ${!enabled ? 'opacity-40 pointer-events-none' : ''}`}>
+          <div>
+            <p className="text-sm font-medium text-gray-900">Dias sem resposta</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Disparar o follow-up após quantos dias sem visualização ou resposta.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <input
+              type="number"
+              min={1}
+              max={30}
+              value={days}
+              onChange={e => setDays(e.target.value)}
+              className={inputCls}
+            />
+            <span className="text-sm text-gray-500">dias</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Aviso de expiração iminente ──────────────────────── */}
+      <div className="bg-white border border-gray-100 rounded-xl shadow-sm divide-y divide-gray-50">
+        <div className="px-6 py-4">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Aviso de expiração</p>
+        </div>
+
+        <div className="flex items-center justify-between px-6 py-4 gap-4">
+          <div>
+            <p className="text-sm font-medium text-gray-900">Avisar sobre expiração iminente</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Enviar e-mail ao cliente 1 dia antes da proposta expirar, se ainda não respondeu.
+            </p>
+          </div>
+          <Toggle value={expiryEnabled} onChange={setExpiryEnabled} />
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 text-xs text-blue-700 space-y-1">
+        <p className="font-semibold">Como funciona:</p>
+        <p>• <strong>Não visualizou:</strong> proposta em "enviada" há X dias → lembrete de visualização.</p>
+        <p>• <strong>Visualizou mas não respondeu:</strong> proposta em "visualizada" há X dias → lembrete de resposta.</p>
+        <p>• <strong>Expira amanhã:</strong> proposta sem resposta com vencimento no dia seguinte → alerta de urgência.</p>
+        <p>• Cada regra é disparada no máximo <strong>1 vez por proposta</strong>.</p>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="px-6 py-2.5 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors disabled:opacity-50"
+        >
+          {saving ? 'Salvando...' : 'Salvar configurações'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Tab: Notificações ────────────────────────────────────────────────────────
 
 type NotifKeys = 'email_viewed' | 'email_responded' | 'email_followup'
@@ -829,7 +972,7 @@ const NOTIF_DEFAULTS: Record<NotifKeys, boolean> = {
 
 const NOTIF_LABELS: Record<NotifKeys, { title: string; desc: string }> = {
   email_viewed:    { title: 'Proposta visualizada',      desc: 'Receber e-mail quando o cliente abrir o link da proposta.' },
-  email_responded: { title: 'Proposta aprovada/reprovada', desc: 'Receber e-mail quando o cliente aceitar ou recusar.' },
+  email_responded: { title: 'Proposta aceita/recusada', desc: 'Receber e-mail quando o cliente aceitar ou recusar.' },
   email_followup:  { title: 'Follow-up automático',      desc: 'Receber e-mail diário com os follow-ups agendados.' },
 }
 
@@ -900,7 +1043,7 @@ function NotificationsTab() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'perfil' | 'plano' | 'notificacoes'
+type Tab = 'perfil' | 'plano' | 'notificacoes' | 'followups'
 
 export default function ConfiguracoesPage() {
   return (
@@ -947,6 +1090,7 @@ function ConfiguracoesInner() {
     { id: 'perfil',        label: 'Perfil' },
     { id: 'plano',         label: 'Plano' },
     { id: 'notificacoes',  label: 'Notificações' },
+    { id: 'followups',     label: 'Follow-ups' },
   ]
 
   return (
@@ -990,6 +1134,13 @@ function ConfiguracoesInner() {
           )}
           {tab === 'plano'         && sub     && <PlanTab sub={sub} />}
           {tab === 'notificacoes'             && <NotificationsTab />}
+          {tab === 'followups'     && profile && (
+            <FollowUpsTab
+              initialEnabled={profile.followup_enabled ?? true}
+              initialDays={profile.followup_days ?? 2}
+              initialExpiryEnabled={profile.followup_expiry_enabled ?? true}
+            />
+          )}
         </>
       )}
     </div>

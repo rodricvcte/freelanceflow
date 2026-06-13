@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import ProposalActions from '@/components/proposals/ProposalActions'
 import FollowUpSidebar from '@/components/proposals/FollowUpSidebar'
+import VersionGroup from '@/components/proposals/VersionGroup'
+import ProposalTimeline from '@/components/proposals/ProposalTimeline'
+import type { TimelineEvent } from '@/components/proposals/ProposalTimeline'
 import type {
   Section,
   TextSection,
@@ -12,6 +15,9 @@ import type {
   InstallmentsSection,
   ClausesSection,
   ImageSection,
+  ContemplasSection,
+  TimelineSection,
+  CustomTableSection,
 } from '@/components/proposals/ProposalPDF'
 
 export const dynamic = 'force-dynamic'
@@ -37,12 +43,7 @@ type ProposalRow = {
   clients: { id: string; name: string; email: string | null; phone: string | null } | null
 }
 
-type EventRow = {
-  id: string
-  event_type: string
-  metadata: Record<string, unknown>
-  created_at: string
-}
+type EventRow = TimelineEvent
 
 type FollowUpRow = {
   id: string
@@ -58,19 +59,11 @@ const STATUS_CONFIG = {
   rascunho:    { label: 'Rascunho',    cls: 'bg-gray-100 text-gray-500'          },
   enviada:     { label: 'Enviada',     cls: 'bg-blue-100 text-blue-700'           },
   visualizada: { label: 'Visualizada', cls: 'bg-yellow-100 text-yellow-700'       },
-  aprovada:    { label: 'Aprovada',    cls: 'bg-[#1D9E75]/10 text-[#1D9E75]'     },
-  reprovada:   { label: 'Reprovada',   cls: 'bg-red-100 text-red-700'             },
+  aceita:    { label: 'Aceita',    cls: 'bg-[#1D9E75]/10 text-[#1D9E75]'     },
+  recusada:   { label: 'Recusada',   cls: 'bg-red-100 text-red-700'             },
   expirada:    { label: 'Expirada',    cls: 'bg-orange-100 text-orange-700'       },
   cancelada:   { label: 'Cancelada',   cls: 'bg-red-200 text-red-900'             },
 } as const
-
-const EVENT_CONFIG: Record<string, { label: string; dot: string; line: string }> = {
-  created:  { label: 'Proposta criada',          dot: 'bg-gray-400',   line: 'bg-gray-100' },
-  sent:     { label: 'Proposta enviada',         dot: 'bg-blue-400',   line: 'bg-blue-100' },
-  viewed:   { label: 'Visualizada pelo cliente', dot: 'bg-yellow-400', line: 'bg-yellow-100' },
-  accepted: { label: 'Proposta aceita',          dot: 'bg-[#1D9E75]',  line: 'bg-emerald-100' },
-  declined: { label: 'Proposta recusada',        dot: 'bg-red-400',    line: 'bg-red-100'  },
-}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -85,13 +78,6 @@ function fmtDate(iso: string | null) {
   return new Intl.DateTimeFormat('pt-BR').format(new Date(y, m - 1, d))
 }
 
-function fmtDateTime(iso: string) {
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  }).format(new Date(iso))
-}
-
 function fmtRowBRL(v: string | number | null | undefined) {
   const n = v === null || v === undefined ? null : typeof v === 'string' ? parseFloat(v) : v
   return fmtBRL(n !== null && !isNaN(n) ? n : null)
@@ -102,6 +88,8 @@ function parseNum(v: string | undefined | null): number {
   const n = parseFloat(String(v).replace(',', '.'))
   return isNaN(n) ? 0 : n
 }
+
+
 
 // ─── Section card ─────────────────────────────────────────────────────────────
 
@@ -115,6 +103,8 @@ function SectionCard({ section }: { section: Section }) {
       </div>
     )
   }
+  const note = (text: string | undefined | null) =>
+    text?.trim() ? <p className="px-4 py-2 text-xs text-gray-400 italic">{text}</p> : null
 
   const body = 'px-4 py-[14px] text-[13px] leading-[1.65] text-gray-700 break-words [word-break:break-word] min-w-0'
   const wrap = 'bg-white rounded-[10px] border border-gray-100 min-w-0'
@@ -160,6 +150,7 @@ function SectionCard({ section }: { section: Section }) {
     return (
       <div className={`${wrap} overflow-x-auto`}>
         {header(s.title)}
+        {note(s.note_before)}
         <div className={body + ' p-0'}>
           <table className="w-full text-[13px] min-w-[560px]" style={{ tableLayout: 'fixed' }}>
             <colgroup>
@@ -194,6 +185,7 @@ function SectionCard({ section }: { section: Section }) {
             </tfoot>
           </table>
         </div>
+        {note(s.note_after)}
       </div>
     )
   }
@@ -205,6 +197,7 @@ function SectionCard({ section }: { section: Section }) {
     return (
       <div className={`${wrap} overflow-x-auto`}>
         {header(s.title)}
+        {note(s.note_before)}
         <div className={body + ' p-0'}>
           <table className="w-full text-[13px] min-w-[480px]" style={{ tableLayout: 'fixed' }}>
             <colgroup>
@@ -239,6 +232,7 @@ function SectionCard({ section }: { section: Section }) {
             </tfoot>
           </table>
         </div>
+        {note(s.note_after)}
       </div>
     )
   }
@@ -248,6 +242,7 @@ function SectionCard({ section }: { section: Section }) {
     return (
       <div className={`${wrap} overflow-x-auto`}>
         {header(s.title)}
+        {note(s.note_before)}
         <div className={body + ' p-0'}>
           <table className="w-full text-[13px] min-w-[400px]">
             <thead className="bg-gray-50">
@@ -268,6 +263,7 @@ function SectionCard({ section }: { section: Section }) {
             </tbody>
           </table>
         </div>
+        {note(s.note_after)}
       </div>
     )
   }
@@ -299,10 +295,108 @@ function SectionCard({ section }: { section: Section }) {
     return (
       <div className={wrap}>
         {s.title && header(s.title)}
+        {note(s.note_before)}
         <div className={body}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={s.url} alt={s.title || 'Imagem'} className="w-full max-h-96 object-contain rounded-lg" />
         </div>
+        {note(s.note_after)}
+      </div>
+    )
+  }
+
+  if (section.type === 'contempla') {
+    const s = section as ContemplasSection
+    const filtered = s.items.filter(i => i.trim())
+    if (!s.title?.trim() && !filtered.length) return null
+    return (
+      <div className={wrap}>
+        {header(s.title)}
+        {note(s.note_before)}
+        <div className={body}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            {filtered.map((item, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#1D9E75] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="break-words [word-break:break-word] min-w-0">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        {note(s.note_after)}
+      </div>
+    )
+  }
+
+  if (section.type === 'timeline') {
+    const s = section as TimelineSection
+    const filtered = s.items.filter(i => i.title || i.description)
+    if (!filtered.length) return null
+    return (
+      <div className={wrap}>
+        {header(s.title)}
+        {note(s.note_before)}
+        <div className={body}>
+          <ol>
+            {filtered.map((item, i) => {
+              const isLast = i === filtered.length - 1
+              return (
+                <li key={i} className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#1D9E75] shrink-0 mt-1.5" />
+                    {!isLast && <span className="w-0.5 flex-1 bg-[#1D9E75]/20 my-1" />}
+                  </div>
+                  <div className={`${isLast ? 'pb-0' : 'pb-4'} flex-1 min-w-0`}>
+                    <p className="text-[13px] font-semibold text-[#1D9E75]">{item.title}</p>
+                    {item.description && (
+                      <p className="text-[12px] text-gray-500 mt-0.5">{item.description}</p>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+        {note(s.note_after)}
+      </div>
+    )
+  }
+
+  if (section.type === 'custom_table') {
+    const s = section as CustomTableSection
+    if (!s.columns.length) return null
+    return (
+      <div className={`${wrap} overflow-x-auto`}>
+        {header(s.title)}
+        {note(s.note_before)}
+        <div className={body + ' p-0'}>
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr>
+                {s.columns.map((col, ci) => (
+                  <th key={ci} className="px-4 py-2.5 text-xs font-semibold text-white uppercase tracking-wide text-center whitespace-nowrap border-l border-white/20 first:border-l-0"
+                    style={{ backgroundColor: '#1D9E75' }}>
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {s.rows.map((row, ri) => (
+                <tr key={ri} className={ri % 2 !== 0 ? 'bg-gray-50/60' : ''}>
+                  {s.columns.map((_, ci) => (
+                    <td key={ci} className="px-4 py-2.5 text-gray-700 border-l border-gray-100 first:border-l-0">
+                      {row[ci] ?? ''}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {note(s.note_after)}
       </div>
     )
   }
@@ -333,7 +427,7 @@ export default async function ProposalDetailPage({
       .from('proposal_events')
       .select('id, event_type, metadata, created_at')
       .eq('proposal_id', id)
-      .order('created_at', { ascending: true }),
+      .order('created_at', { ascending: false }),
     supabase
       .from('follow_ups')
       .select('id, type, trigger_rule, scheduled_for, created_at')
@@ -380,6 +474,21 @@ export default async function ProposalDetailPage({
     : clientsRaw as ProposalRow['clients']
 
   const card = 'bg-white rounded-[10px] border border-gray-100'
+  const viewCount = events.filter(e => e.event_type === 'viewed').length
+
+  // Other versions of the same proposal (same base number, excluding current)
+  const otherVersions = baseNumber
+    ? ((await supabase
+        .from('proposals')
+        .select('id, proposal_number, version, status, created_at')
+        .eq('user_id', user.id)
+        .like('proposal_number', `${baseNumber}-v%`)
+        .neq('id', id)
+        .order('version', { ascending: false })).data ?? [])
+    : []
+
+  const newerVersions = otherVersions.filter(v => (v.version ?? 1) > version)
+  const olderVersions = otherVersions.filter(v => (v.version ?? 1) < version)
 
   return (
     <div className="p-6 md:p-8 max-w-5xl">
@@ -405,6 +514,11 @@ export default async function ProposalDetailPage({
           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCfg.cls}`}>
             {statusCfg.label}
           </span>
+          {viewCount > 0 && (
+            <span className="text-xs text-gray-400">
+              · Vista <span className="font-medium text-gray-500">{viewCount}</span> {viewCount === 1 ? 'vez' : 'vezes'}
+            </span>
+          )}
           <span className="text-xs text-gray-400">{ref}</span>
           <span className="text-gray-300 text-xs">·</span>
           <span className="text-xs text-gray-400">Criada em {fmtDate(proposal.created_at)}</span>
@@ -418,10 +532,12 @@ export default async function ProposalDetailPage({
       </div>
 
       {/* ── Botões de ação ── */}
-      <div className="flex items-center justify-end mb-6">
+      <div className="flex items-center justify-start mb-6">
         <ProposalActions
           proposalId={proposal.id}
           status={proposal.status}
+          version={proposal.version ?? 1}
+          newerVersion={otherVersions[0]?.version && otherVersions[0].version > version ? otherVersions[0].version : null}
           initialPdfUrl={proposal.pdf_url}
           duplicate={{
             title:               proposal.title,
@@ -551,42 +667,15 @@ export default async function ProposalDetailPage({
           {/* Linha do tempo */}
           {userIsPro ? (
             <div className={card}>
-              <div className="px-4 py-3.5 border-b border-gray-50">
+              <div className="px-4 py-3.5 border-b border-gray-50 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-gray-600">Linha do tempo</h3>
+                <span className="text-[11px] font-medium text-gray-400 bg-gray-100 rounded px-1.5 py-0.5">v{version}</span>
               </div>
-              <div className="px-4 py-4">
-                {events.length === 0 ? (
-                  <p className="text-sm text-gray-400 text-center py-2">Nenhum evento registrado</p>
-                ) : (
-                  <ol>
-                    {events.map((ev, i) => {
-                      const cfg    = EVENT_CONFIG[ev.event_type] ?? { label: ev.event_type, dot: 'bg-gray-300', line: 'bg-gray-100' }
-                      const isLast = i === events.length - 1
-                      return (
-                        <li key={ev.id} className="flex gap-3">
-                          <div className="flex flex-col items-center">
-                            <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${cfg.dot}`} />
-                            {!isLast && <span className={`w-px flex-1 my-1 ${cfg.line}`} />}
-                          </div>
-                          <div className="pb-3 flex-1 min-w-0">
-                            <p className="text-[13px] font-medium text-gray-800">{cfg.label}</p>
-                            <p className="text-[11px] text-gray-400 mt-0.5">{fmtDateTime(ev.created_at)}</p>
-                          </div>
-                        </li>
-                      )
-                    })}
-                    {/* Aguardando — último item */}
-                    <li className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <span className="w-2.5 h-2.5 rounded-full border-2 border-gray-300 bg-white shrink-0 mt-1" />
-                      </div>
-                      <div className="pb-1 flex-1 min-w-0">
-                        <p className="text-[13px] text-gray-400">Aguardando…</p>
-                      </div>
-                    </li>
-                  </ol>
-                )}
-              </div>
+              <ProposalTimeline
+                proposalId={proposal.id}
+                initialEvents={events}
+                initialStatus={proposal.status}
+              />
             </div>
           ) : (
             <div className={`${card} px-4 py-4`}>
@@ -608,6 +697,29 @@ export default async function ProposalDetailPage({
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Versões */}
+          {otherVersions.length > 0 && (
+            <details className={`${card} group`} open>
+              <summary className="px-4 py-3.5 flex items-center justify-between cursor-pointer list-none">
+                <h3 className="text-sm font-medium text-gray-600">
+                  Versões
+                  <span className="ml-1.5 text-xs font-normal text-gray-400">({otherVersions.length})</span>
+                </h3>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div className="border-t border-gray-50 divide-y divide-gray-50">
+                {newerVersions.length > 0 && (
+                  <VersionGroup label="Posteriores" versions={newerVersions} statusMap={STATUS_CONFIG} />
+                )}
+                {olderVersions.length > 0 && (
+                  <VersionGroup label="Anteriores" versions={olderVersions} statusMap={STATUS_CONFIG} />
+                )}
+              </div>
+            </details>
           )}
 
           {/* Follow-ups */}

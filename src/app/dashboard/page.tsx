@@ -25,7 +25,7 @@ type ProposalRow = {
 }
 
 const STATUS_ORDER = [
-  'rascunho', 'enviada', 'visualizada', 'aprovada', 'reprovada', 'expirada', 'cancelada',
+  'rascunho', 'enviada', 'visualizada', 'aceita', 'recusada', 'expirada', 'cancelada',
 ] as const
 type StatusKey = (typeof STATUS_ORDER)[number]
 
@@ -33,14 +33,14 @@ const STATUS_CONFIG: Record<StatusKey, { label: string; textCls: string; bgCls: 
   rascunho:    { label: 'Rascunho',    textCls: 'text-gray-500',    bgCls: 'bg-gray-100'    },
   enviada:     { label: 'Enviada',     textCls: 'text-blue-700',    bgCls: 'bg-blue-100'    },
   visualizada: { label: 'Visualizada', textCls: 'text-yellow-700',  bgCls: 'bg-yellow-100'  },
-  aprovada:    { label: 'Aprovada',    textCls: 'text-emerald-700', bgCls: 'bg-emerald-100' },
-  reprovada:   { label: 'Reprovada',   textCls: 'text-red-700',     bgCls: 'bg-red-100'     },
+  aceita:    { label: 'Aceita',    textCls: 'text-emerald-700', bgCls: 'bg-emerald-100' },
+  recusada:   { label: 'Recusada',   textCls: 'text-red-700',     bgCls: 'bg-red-100'     },
   expirada:    { label: 'Expirada',    textCls: 'text-orange-700',  bgCls: 'bg-orange-100'  },
   cancelada:   { label: 'Cancelada',   textCls: 'text-red-900',     bgCls: 'bg-red-200'     },
 }
 
-const DOUGHNUT_STATUSES = ['aprovada', 'enviada', 'rascunho', 'reprovada'] as const
-const DOUGHNUT_LABELS   = ['Aprovada', 'Enviada', 'Rascunho', 'Reprovada']
+const DOUGHNUT_STATUSES = ['aceita', 'enviada', 'rascunho', 'recusada'] as const
+const DOUGHNUT_LABELS   = ['Aceita', 'Enviada', 'Rascunho', 'Recusada']
 const DOUGHNUT_COLORS   = ['#1D9E75', '#378ADD', '#B4B2A9', '#E24B4A']
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -139,19 +139,23 @@ export default async function DashboardPage() {
     return acc
   }, {})
 
-  const approvedCount      = counts['aprovada'] ?? 0
+  const approvedCount      = counts['aceita'] ?? 0
   const totalApprovedValue = proposals
-    .filter(p => p.status === 'aprovada')
+    .filter(p => p.status === 'aceita')
     .reduce((sum, p) => sum + (p.value ?? 0), 0)
 
   const openCount = (counts['enviada'] ?? 0) + (counts['visualizada'] ?? 0)
 
-  const recentClosed = proposals.filter(p =>
+  const recentResponded = proposals.filter(p =>
     new Date(p.created_at) >= ago30 &&
-    (p.status === 'aprovada' || p.status === 'reprovada')
+    (p.status === 'aceita' || p.status === 'recusada')
   )
-  const approvalRate = recentClosed.length > 0
-    ? Math.round(recentClosed.filter(p => p.status === 'aprovada').length / recentClosed.length * 100)
+  const recentSent = proposals.filter(p =>
+    new Date(p.created_at) >= ago30 &&
+    ['enviada', 'visualizada', 'aceita', 'recusada'].includes(p.status)
+  )
+  const responseRate = recentSent.length > 0
+    ? Math.round(recentResponded.length / recentSent.length * 100)
     : null
 
   const usedThisMonth     = proposals.filter(p => new Date(p.created_at) >= monthStart).length
@@ -248,7 +252,7 @@ export default async function DashboardPage() {
             {fmtBRL(totalApprovedValue)}
           </p>
           <p className="text-xs text-gray-400 mt-1.5">
-            {approvedCount} aprovada{approvedCount !== 1 ? 's' : ''}
+            {approvedCount} aceita{approvedCount !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -259,13 +263,13 @@ export default async function DashboardPage() {
           <p className="text-xs text-gray-400 mt-1.5">enviadas + visualizadas</p>
         </div>
 
-        {/* Taxa de aprovação */}
+        {/* Taxa de resposta */}
         <div className="rounded-[8px] px-[14px] py-3" style={{ background: 'var(--color-background-secondary)' }}>
-          <p className="text-xs font-medium text-gray-400 mb-1.5">Taxa de aprovação</p>
+          <p className="text-xs font-medium text-gray-400 mb-1.5">Taxa de resposta</p>
           <p className="text-2xl font-bold text-gray-900 leading-tight">
-            {approvalRate !== null ? `${approvalRate}%` : '—'}
+            {responseRate !== null ? `${responseRate}%` : '—'}
           </p>
-          <p className="text-xs text-gray-400 mt-1.5">últimos 30 dias</p>
+          <p className="text-xs text-gray-400 mt-1.5">propostas respondidas nos últimos 30 dias</p>
         </div>
 
         {/* Este mês */}

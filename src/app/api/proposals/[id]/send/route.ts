@@ -4,7 +4,6 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 import { buildProposalEmailHtml } from '@/lib/email-templates/proposal'
-import { isPro } from '@/lib/plan'
 
 export const runtime = 'nodejs'
 
@@ -41,38 +40,27 @@ export async function POST(
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, business_name, logo_url, accent_color, email_business')
+    .select('full_name, business_name, logo_url, accent_color, email_business, phone')
     .eq('id', user.id)
     .single()
 
-  // Generate PDF if missing
-  let pdfUrl = proposal.pdf_url as string | null
-  if (!pdfUrl) {
-    pdfUrl = await generateAndSaveProposalPDF(id, supabase)
-  }
-
-  // Fetch PDF bytes for attachment
-  let pdfBuffer: Buffer | null = null
-  if (pdfUrl) {
-    const upstream = await fetch(pdfUrl)
-    if (upstream.ok) {
-      pdfBuffer = Buffer.from(await upstream.arrayBuffer())
-    }
+  // Generate PDF if missing (saved to storage for public page download)
+  if (!proposal.pdf_url) {
+    await generateAndSaveProposalPDF(id, supabase)
   }
 
   const snap = proposal.snapshot_profile as Record<string, unknown> | null
-  const freelancerName = (snap?.business_name ?? snap?.full_name ?? profile?.business_name ?? profile?.full_name ?? 'Freelancer') as string
+  const freelancerName = (
+    (snap?.business_name as string | null | undefined) ||
+    (profile?.business_name as string | null | undefined) ||
+    (snap?.full_name as string | null | undefined) ||
+    (profile?.full_name as string | null | undefined) ||
+    'Freelancer'
+  )
   const logoUrl = (snap?.logo_url ?? profile?.logo_url ?? null) as string | null
   const accentColor = (snap?.accent_color ?? profile?.accent_color ?? '#1D9E75') as string
   const token = proposal.token as string
   const clientName = body.recipient_name?.trim() || 'Cliente'
-  const filename = proposal.proposal_number
-    ? `${proposal.proposal_number}.pdf`
-    : `proposta-${id.slice(0, 8)}.pdf`
-
-  // Only include tracking pixel for Pro users
-  const userIsPro = await isPro(user.id, supabase)
-  const trackingPixelUrl = userIsPro ? `${APP_URL}/api/track/email/${token}` : null
 
   const html = buildProposalEmailHtml({
     clientName,
@@ -80,26 +68,24 @@ export async function POST(
     freelancerLogoUrl: logoUrl,
     accentColor,
     proposalTitle: (proposal.title as string) ?? 'Proposta Comercial',
+    proposalNumber: (proposal.proposal_number as string | null) ?? null,
     proposalValue: (proposal.value as number | null) ?? null,
     proposalValidUntil: (proposal.valid_until as string | null) ?? null,
     customMessage: body.custom_message?.trim() || null,
-    approveUrl: `${APP_URL}/p/${token}/accept?via=email`,
-    declineUrl: `${APP_URL}/p/${token}/decline?via=email`,
+    freelancerEmail: (profile?.email_business ?? null) as string | null,
+    freelancerPhone: (profile?.phone ?? null) as string | null,
     viewUrl: `${APP_URL}/api/track/view/${token}`,
-    trackingPixelUrl,
   })
 
   const resend = new Resend(process.env.RESEND_API_KEY)
-  const subject = `Proposta Comercial — ${proposal.title ?? 'Proposta'} — ${freelancerName}`
+  const proposalCode = (proposal.proposal_number as string | null) ?? null
+  const subject = `Proposta Comercial — ${proposal.title ?? 'Proposta'} — ${freelancerName}${proposalCode ? ` · ${proposalCode}` : ''}`
 
   const { error: sendError } = await resend.emails.send({
     from: `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
     to: body.recipient_email.trim(),
     subject,
     html,
-    attachments: pdfBuffer
-      ? [{ filename, content: pdfBuffer.toString('base64') }]
-      : undefined,
   })
 
   if (sendError) {

@@ -15,6 +15,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FreelanceFlow — Propostas profissionais para freelancers",
   description: "Crie, envie e acompanhe propostas profissionais em minutos. PDF automático, aprovação por e-mail e rastreamento de visualização.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({

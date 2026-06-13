@@ -26,8 +26,8 @@ const STATUS_CONFIG = {
   rascunho:    { label: 'Rascunho',    className: 'bg-gray-100 text-gray-500' },
   enviada:     { label: 'Enviada',     className: 'bg-blue-100 text-blue-700' },
   visualizada: { label: 'Visualizada', className: 'bg-yellow-100 text-yellow-700' },
-  aprovada:    { label: 'Aprovada',    className: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
-  reprovada:   { label: 'Reprovada',   className: 'bg-red-100 text-red-700' },
+  aceita:    { label: 'Aceita',    className: 'bg-[#1D9E75]/10 text-[#1D9E75]' },
+  recusada:   { label: 'Recusada',   className: 'bg-red-100 text-red-700' },
   expirada:    { label: 'Expirada',    className: 'bg-orange-100 text-orange-700' },
   cancelada:   { label: 'Cancelada',   className: 'bg-red-200 text-red-900' },
 } as const
@@ -300,16 +300,23 @@ function ProposalsPageInner() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
                           >
-                            Ver PDF
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                              <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                              <path d="M9 17h1a1 1 0 0 0 1 -1v-2a1 1 0 0 0 -1 -1h-1v4" />
+                              <path d="M14 13h1.5a1.5 1.5 0 0 1 0 3h-1.5v-3" />
+                              <path d="M17 17v-4" />
+                            </svg>
+                            PDF
                           </a>
                         )}
                         <button
                           onClick={() => router.push(`/propostas/${p.id}`)}
                           className="px-2.5 py-1.5 text-xs font-medium text-[#1D9E75] border border-[#1D9E75]/30 rounded-lg hover:bg-[#1D9E75]/5 transition-colors whitespace-nowrap"
                         >
-                          Ver Detalhes
+                          Detalhes
                         </button>
                       </div>
                     </td>

@@ -63,7 +63,7 @@ export default async function ConfirmedPage({
         </div>
 
         <h1 className={`text-xl font-bold mb-2 ${accepted ? 'text-green-700' : 'text-gray-700'}`}>
-          {accepted ? 'Proposta aprovada!' : 'Proposta recusada.'}
+          {accepted ? 'Proposta aceita!' : 'Proposta recusada.'}
         </h1>
         <p className="text-sm text-gray-500 leading-relaxed">
           {accepted

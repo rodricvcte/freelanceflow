@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data, error } = await queryClient
     .from('profiles')
-    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok, signature_data')
+    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok, signature_data, followup_enabled, followup_days, followup_expiry_enabled')
     .eq('id', userId)
     .maybeSingle()
 
@@ -43,13 +43,20 @@ export async function PATCH(request: Request) {
     'signature_data',
   ] as const
   type Field = typeof allowed[number]
-  const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj', string | null>> = {}
+  const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj' | 'followup_enabled' | 'followup_days' | 'followup_expiry_enabled', unknown>> = {}
 
   for (const key of allowed) {
     if (key in body) {
       updates[key] = typeof body[key] === 'string' ? body[key].trim() || null : null
     }
   }
+
+  if ('followup_enabled' in body) updates.followup_enabled = Boolean(body.followup_enabled)
+  if ('followup_days' in body) {
+    const days = parseInt(body.followup_days, 10)
+    updates.followup_days = isNaN(days) || days < 1 ? 1 : days > 30 ? 30 : days
+  }
+  if ('followup_expiry_enabled' in body) updates.followup_expiry_enabled = Boolean(body.followup_expiry_enabled)
 
   if ('document_type' in body) {
     updates.document_type = body.document_type === 'cpf' || body.document_type === 'cnpj'

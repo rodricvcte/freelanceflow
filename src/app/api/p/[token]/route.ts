@@ -10,7 +10,7 @@ export async function GET(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, title, service_description, sections, value, payment_terms, deadline_days, valid_until, status, token, created_at, user_id, clients(name, email)')
+    .select('id, title, proposal_number, service_description, sections, value, payment_terms, deadline_days, valid_until, status, token, created_at, pdf_url, user_id, clients(name, email)')
     .eq('token', token)
     .single()
 
@@ -18,7 +18,7 @@ export async function GET(
 
   const { data: profile } = await service
     .from('profiles')
-    .select('full_name, business_name, logo_url, accent_color')
+    .select('full_name, business_name, logo_url, accent_color, email_business, phone')
     .eq('id', proposal.user_id)
     .single()
 
@@ -26,7 +26,9 @@ export async function GET(
     proposal: {
       id: proposal.id,
       title: proposal.title,
+      proposal_number: proposal.proposal_number ?? null,
       service_description: proposal.service_description,
+      sections: proposal.sections ?? [],
       value: proposal.value,
       payment_terms: proposal.payment_terms,
       deadline_days: proposal.deadline_days,
@@ -34,10 +36,11 @@ export async function GET(
       status: proposal.status,
       token: proposal.token,
       created_at: proposal.created_at,
+      pdf_url: (proposal.pdf_url as string | null) ?? null,
       clients: Array.isArray(proposal.clients)
         ? (proposal.clients[0] ?? null)
         : proposal.clients,
     },
-    profile: profile ?? { full_name: null, business_name: null, logo_url: null, accent_color: null },
+    profile: profile ?? { full_name: null, business_name: null, logo_url: null, accent_color: null, email_business: null, phone: null },
   })
 }

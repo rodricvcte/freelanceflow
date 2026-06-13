@@ -52,8 +52,8 @@ describe('getAttentionItems — regras de tempo', () => {
     expect(result[0].kind).toBe('stale_draft')
   })
 
-  it('ignora proposta aprovada', () => {
-    const p = { ...base, status: 'aprovada', sent_at: daysAgo(10) }
+  it('ignora proposta aceita', () => {
+    const p = { ...base, status: 'aceita', sent_at: daysAgo(10) }
     expect(getAttentionItems([p], [], NOW)).toHaveLength(0)
   })
 })

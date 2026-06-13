@@ -113,6 +113,8 @@ export async function POST(request: Request) {
     Object.assign(data, updates)
   }
 
+  await supabase.from('proposal_events').insert({ proposal_id: data.id, event_type: 'created', metadata: {} })
+
   let pdfUrl: string | null = data.pdf_url ?? null
   try {
     pdfUrl = await generateAndSaveProposalPDF(data.id, supabase)

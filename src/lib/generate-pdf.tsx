@@ -85,7 +85,8 @@ export async function generateAndSaveProposalPDF(
     <ProposalPDFDocument proposal={proposal} profile={profile} isFreePlan={isFreePlan} /> as any
   )
 
-  const filePath = `${authData.user.id}/${proposalId}.pdf`
+  const num = raw.proposal_number as string | null
+  const filePath = `${authData.user.id}/${num ?? proposalId}.pdf`
 
   await service.storage.createBucket(BUCKET, { public: true }).catch(() => {})
 

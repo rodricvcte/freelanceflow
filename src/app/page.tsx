@@ -131,7 +131,7 @@ function AppMockup() {
           <text x="248" y="163" fontSize="26" fontWeight="700" fill="#111827" fontFamily={font}>12</text>
 
           <rect x="464" y="108" width="220" height="76" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
-          <text x="484" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Aprovadas</text>
+          <text x="484" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Aceitas</text>
           <text x="484" y="163" fontSize="26" fontWeight="700" fill="#1D9E75" fontFamily={font}>7</text>
 
           <rect x="700" y="108" width="220" height="76" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
@@ -139,7 +139,7 @@ function AppMockup() {
           <text x="720" y="163" fontSize="26" fontWeight="700" fill="#d97706" fontFamily={font}>3</text>
 
           <rect x="936" y="108" width="236" height="76" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
-          <text x="956" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Receita aprovada</text>
+          <text x="956" y="132" fontSize="11" fill="#6b7280" fontFamily={font}>Receita aceita</text>
           <text x="956" y="163" fontSize="22" fontWeight="700" fill="#111827" fontFamily={font}>R$ 48.700</text>
 
           {/* ── proposals table ── */}
@@ -154,7 +154,7 @@ function AppMockup() {
           {/* row 1 */}
           <line x1="228" y1="240" x2="1172" y2="240" stroke="#f3f4f6" strokeWidth="1" />
           <text x="252" y="267" fontSize="13" fontWeight="500" fill="#111827" fontFamily={font}>Website Corporativo — Agência XYZ</text>
-          <text x="252" y="285" fontSize="11" fill="#9ca3af" fontFamily={font}>#001 · Visualizada 3x · Aprovada ontem</text>
+          <text x="252" y="285" fontSize="11" fill="#9ca3af" fontFamily={font}>#001 · Visualizada 3x · Aceita ontem</text>
           <text x="640" y="273" fontSize="13" fill="#374151" fontFamily={font}>Agência XYZ</text>
           <text x="824" y="273" fontSize="13" fontWeight="600" fill="#111827" fontFamily={font}>R$ 8.500</text>
           <rect x="972" y="261" width="72" height="22" rx="11" fill="#dcfce7" />

@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image, Svg, Path } from '@react-pdf/renderer'
 
 // ── Section types ──────────────────────────────────────────────────────────────
 
@@ -10,25 +10,35 @@ export type ScopeSection = {
 }
 export type ItemsRow = { description: string; quantity: string; unit_price: string }
 export type ItemsSection = {
-  id: string; type: 'items'; title: string; rows: ItemsRow[]
+  id: string; type: 'items'; title: string; note_before?: string; note_after?: string; rows: ItemsRow[]
 }
 export type HoursRow = { profile: string; hours: string; rate: string }
 export type HoursSection = {
-  id: string; type: 'hours'; title: string; rows: HoursRow[]
+  id: string; type: 'hours'; title: string; note_before?: string; note_after?: string; rows: HoursRow[]
 }
 export type InstallmentRow = { description: string; percentage: string; condition: string }
 export type InstallmentsSection = {
-  id: string; type: 'installments'; title: string; rows: InstallmentRow[]
+  id: string; type: 'installments'; title: string; note_before?: string; note_after?: string; rows: InstallmentRow[]
 }
 export type ClausesSection = {
   id: string; type: 'clauses'; title: string; items: string[]
 }
 export type ImageSection = {
-  id: string; type: 'image'; title: string; url: string
+  id: string; type: 'image'; title: string; note_before?: string; note_after?: string; url: string
+}
+export type ContemplasSection = {
+  id: string; type: 'contempla'; title: string; note_before?: string; note_after?: string; items: string[]
+}
+export type TimelineItem = { title: string; description: string }
+export type TimelineSection = {
+  id: string; type: 'timeline'; title: string; note_before?: string; note_after?: string; items: TimelineItem[]
+}
+export type CustomTableSection = {
+  id: string; type: 'custom_table'; title: string; note_before?: string; note_after?: string; columns: string[]; rows: string[][]
 }
 export type Section =
   | TextSection | ScopeSection | ItemsSection
-  | HoursSection | InstallmentsSection | ClausesSection | ImageSection
+  | HoursSection | InstallmentsSection | ClausesSection | ImageSection | ContemplasSection | TimelineSection | CustomTableSection
 
 // ── Proposal / Profile types ──────────────────────────────────────────────────
 
@@ -157,15 +167,16 @@ const s = StyleSheet.create({
     color: '#d1d5db',
   },
   content: {
-    flex: 1,
+    // no flex: 1 — fixed height breaks page-flow; let content determine its own height
   },
   clientCard: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     backgroundColor: '#f9fafb',
     borderRadius: 6,
     padding: 14,
     marginBottom: 20,
-    gap: 20,
   },
   clientCol: { flex: 1 },
   fieldLabel: {
@@ -187,6 +198,11 @@ const s = StyleSheet.create({
   },
   sectionBlock: {
     marginBottom: 18,
+  },
+  sectionNote: {
+    fontSize: 8.5,
+    color: '#6b7280',
+    lineHeight: 1.5,
   },
   sectionTitle: {
     fontSize: 11,
@@ -357,8 +373,7 @@ function SectionTitle({ title, accent }: { title: string; accent: string }) {
 
 function RenderText({ sec, accent }: { sec: TextSection; accent: string }) {
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <View wrap={false as any} style={s.sectionBlock}>
+    <View style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       <Text style={s.bodyText}>{sec.content}</Text>
     </View>
@@ -367,8 +382,7 @@ function RenderText({ sec, accent }: { sec: TextSection; accent: string }) {
 
 function RenderScope({ sec, accent }: { sec: ScopeSection; accent: string }) {
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <View wrap={false as any} style={s.sectionBlock}>
+    <View style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       {sec.items.filter(Boolean).map((item, i) => (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -385,9 +399,9 @@ function RenderItems({ sec, accent }: { sec: ItemsSection; accent: string }) {
   const rowTotals = sec.rows.map(r => parseNum(r.quantity) * parseNum(r.unit_price))
   const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <View wrap={false as any} style={s.sectionBlock}>
+    <View style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
+      {sec.note_before ? <Text style={[s.sectionNote, { marginBottom: 6, marginTop: -4 }]}>{sec.note_before}</Text> : null}
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
@@ -411,6 +425,7 @@ function RenderItems({ sec, accent }: { sec: ItemsSection; accent: string }) {
           <Text style={[s.tableCellBold, { flex: 2.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
         </View>
       </View>
+      {sec.note_after ? <Text style={[s.sectionNote, { marginTop: 6 }]}>{sec.note_after}</Text> : null}
     </View>
   )
 }
@@ -419,9 +434,9 @@ function RenderHours({ sec, accent }: { sec: HoursSection; accent: string }) {
   const rowTotals = sec.rows.map(r => parseNum(r.hours) * parseNum(r.rate))
   const grandTotal = rowTotals.reduce((a, b) => a + b, 0)
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <View wrap={false as any} style={s.sectionBlock}>
+    <View style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
+      {sec.note_before ? <Text style={[s.sectionNote, { marginBottom: 6, marginTop: -4 }]}>{sec.note_before}</Text> : null}
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
@@ -445,15 +460,16 @@ function RenderHours({ sec, accent }: { sec: HoursSection; accent: string }) {
           <Text style={[s.tableCellBold, { flex: 2.5, textAlign: 'right' }]}>{fmtBRL(grandTotal)}</Text>
         </View>
       </View>
+      {sec.note_after ? <Text style={[s.sectionNote, { marginTop: 6 }]}>{sec.note_after}</Text> : null}
     </View>
   )
 }
 
 function RenderInstallments({ sec, accent }: { sec: InstallmentsSection; accent: string }) {
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <View wrap={false as any} style={s.sectionBlock}>
+    <View style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
+      {sec.note_before ? <Text style={[s.sectionNote, { marginBottom: 6, marginTop: -4 }]}>{sec.note_before}</Text> : null}
       <View style={s.table}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.tableHeaderRow}>
@@ -470,14 +486,14 @@ function RenderInstallments({ sec, accent }: { sec: InstallmentsSection; accent:
           </View>
         ))}
       </View>
+      {sec.note_after ? <Text style={[s.sectionNote, { marginTop: 6 }]}>{sec.note_after}</Text> : null}
     </View>
   )
 }
 
 function RenderClauses({ sec, accent }: { sec: ClausesSection; accent: string }) {
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <View wrap={false as any} style={s.sectionBlock}>
+    <View style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
       {sec.items.filter(Boolean).map((item, i) => (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -496,10 +512,113 @@ function RenderImage({ sec, accent }: { sec: ImageSection; accent: string }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <View wrap={false as any} style={s.sectionBlock}>
       {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
+      {sec.note_before ? <Text style={[s.sectionNote, { marginBottom: 6, marginTop: -4 }]}>{sec.note_before}</Text> : null}
       <View style={{ alignItems: 'center' }}>
         {/* eslint-disable-next-line jsx-a11y/alt-text */}
         <Image src={sec.url} style={s.sectionImage} />
       </View>
+      {sec.note_after ? <Text style={[s.sectionNote, { marginTop: 6 }]}>{sec.note_after}</Text> : null}
+    </View>
+  )
+}
+
+function RenderContempla({ sec, accent }: { sec: ContemplasSection; accent: string }) {
+  const filtered = sec.items.filter(Boolean)
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <View wrap={false as any} style={s.sectionBlock}>
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
+      {sec.note_before ? <Text style={[s.sectionNote, { marginBottom: 6, marginTop: -4 }]}>{sec.note_before}</Text> : null}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+        {filtered.map((item, i) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View key={i} wrap={false as any} style={{ width: '50%', flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 3, paddingRight: 8 }}>
+            <Svg width="9" height="9" viewBox="0 0 10 10" style={{ marginRight: 4, marginTop: 1, flexShrink: 0 }}>
+              <Path d="M1.5 5.5L4 8L8.5 2" stroke={accent} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+            <Text style={{ fontSize: 9, color: '#374151', flex: 1, lineHeight: 1.45 }}>{item}</Text>
+          </View>
+        ))}
+      </View>
+      {sec.note_after ? <Text style={[s.sectionNote, { marginTop: 6 }]}>{sec.note_after}</Text> : null}
+    </View>
+  )
+}
+
+function RenderTimeline({ sec, accent }: { sec: TimelineSection; accent: string }) {
+  const filtered = sec.items.filter(item => item.title || item.description)
+  if (!filtered.length) return null
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
+      {sec.note_before ? <Text style={[s.sectionNote, { marginBottom: 8, marginTop: -4 }]}>{sec.note_before}</Text> : null}
+      {filtered.map((item, i) => {
+        const isLast = i === filtered.length - 1
+        return (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View key={i} wrap={false as any} style={{ flexDirection: 'row' }}>
+            {/* bullet + connector */}
+            <View style={{ width: 18, alignItems: 'center' }}>
+              <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: accent, marginTop: 1 }} />
+              {!isLast && (
+                <View style={{ width: 1.5, flex: 1, backgroundColor: accent, opacity: 0.25, marginTop: 2 }} />
+              )}
+            </View>
+            {/* content */}
+            <View style={{ flex: 1, paddingBottom: isLast ? 0 : 10, paddingLeft: 6 }}>
+              <Text style={{ fontSize: 9.5, fontFamily: 'Helvetica-Bold', color: accent, marginBottom: 2 }}>
+                {item.title}
+              </Text>
+              {item.description ? (
+                <Text style={{ fontSize: 9, color: '#6B7280', lineHeight: 1.45 }}>{item.description}</Text>
+              ) : null}
+            </View>
+          </View>
+        )
+      })}
+      {sec.note_after ? <Text style={[s.sectionNote, { marginTop: 6 }]}>{sec.note_after}</Text> : null}
+    </View>
+  )
+}
+
+function RenderCustomTable({ sec, accent }: { sec: CustomTableSection; accent: string }) {
+  if (!sec.columns.length) return null
+  return (
+    <View style={s.sectionBlock}>
+      {sec.title ? <SectionTitle title={sec.title} accent={accent} /> : null}
+      {sec.note_before ? <Text style={[s.sectionNote, { marginBottom: 6, marginTop: -4 }]}>{sec.note_before}</Text> : null}
+      <View style={{ borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 4, overflow: 'hidden' }}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <View wrap={false as any} style={{ flexDirection: 'row', backgroundColor: accent }}>
+          {sec.columns.map((col, ci) => (
+            <Text key={ci} style={{
+              flex: 1, fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#ffffff',
+              padding: 6, textAlign: 'center', letterSpacing: 0.4,
+            }}>
+              {col.toUpperCase()}
+            </Text>
+          ))}
+        </View>
+        {sec.rows.map((row, ri) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View key={ri} wrap={false as any} style={{
+            flexDirection: 'row',
+            backgroundColor: ri % 2 === 0 ? '#ffffff' : '#f9fafb',
+            borderTopWidth: 1, borderTopColor: '#f3f4f6',
+          }}>
+            {sec.columns.map((_, ci) => (
+              <Text key={ci} style={{
+                flex: 1, fontSize: 9, color: '#374151',
+                padding: 6, lineHeight: 1.4,
+                borderLeftWidth: ci > 0 ? 1 : 0, borderLeftColor: '#f3f4f6',
+              }}>
+                {row[ci] ?? ''}
+              </Text>
+            ))}
+          </View>
+        ))}
+      </View>
+      {sec.note_after ? <Text style={[s.sectionNote, { marginTop: 6 }]}>{sec.note_after}</Text> : null}
     </View>
   )
 }
@@ -513,6 +632,9 @@ function renderSection(sec: Section, accent: string) {
     case 'installments': return <RenderInstallments key={sec.id} sec={sec} accent={accent} />
     case 'clauses':      return <RenderClauses key={sec.id} sec={sec} accent={accent} />
     case 'image':        return <RenderImage key={sec.id} sec={sec} accent={accent} />
+    case 'contempla':    return <RenderContempla key={sec.id} sec={sec} accent={accent} />
+    case 'timeline':     return <RenderTimeline key={sec.id} sec={sec} accent={accent} />
+    case 'custom_table': return <RenderCustomTable key={sec.id} sec={sec} accent={accent} />
   }
 }
 
@@ -535,6 +657,14 @@ export function ProposalPDFDocument({
   const docFormatted = fmtDoc(profile.document_type, profile.cpf_cnpj)
   const sections     = proposal.sections ?? []
 
+  function coverTitleFontSize(title: string): number {
+    const len = title.length
+    if (len <= 32) return 28
+    if (len <= 52) return 22
+    if (len <= 72) return 17
+    return 14
+  }
+
   const CoverPage = (
     <Page size="A4" style={{ fontFamily: 'Helvetica', backgroundColor: accent }}>
       <View style={{ flex: 1, paddingHorizontal: 48, paddingTop: 60, justifyContent: 'space-between' }}>
@@ -543,13 +673,13 @@ export function ProposalPDFDocument({
             // eslint-disable-next-line jsx-a11y/alt-text
             <Image
               src={profile.logo_url}
-              style={{ width: 110, height: 110, objectFit: 'contain', marginBottom: 20 }}
+              style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20 }}
             />
           )}
           <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', letterSpacing: 3, marginBottom: 14, fontFamily: 'Helvetica' }}>
             PROPOSTA COMERCIAL
           </Text>
-          <Text style={{ fontSize: 28, fontFamily: 'Helvetica-Bold', color: '#ffffff', lineHeight: 1.25, marginBottom: 10, textAlign: 'center' }}>
+          <Text style={{ fontSize: coverTitleFontSize(proposal.title), fontFamily: 'Helvetica-Bold', color: '#ffffff', lineHeight: 1.3, marginBottom: 10, textAlign: 'center' }}>
             {proposal.title}
           </Text>
           <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontFamily: 'Helvetica' }}>
@@ -557,9 +687,9 @@ export function ProposalPDFDocument({
           </Text>
         </View>
         <View style={{ backgroundColor: 'rgba(0,0,0,0.2)', marginHorizontal: -48, paddingHorizontal: 48, paddingVertical: 24 }}>
-          <View style={{ flexDirection: 'row', gap: 40 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             {proposal.clients && (
-              <View style={{ flex: 1 }}>
+              <View>
                 <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>CLIENTE</Text>
                 <Text style={{ fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>
                   {proposal.clients.name}
@@ -569,12 +699,12 @@ export function ProposalPDFDocument({
                 )}
               </View>
             )}
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>PROPOSTA</Text>
-              <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>{ref}</Text>
-              <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)' }}>Emitida em {today}</Text>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>PROPOSTA</Text>
+              <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3, textAlign: 'right' }}>{ref}</Text>
+              <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', textAlign: 'right' }}>Emitida em {today}</Text>
               {proposal.valid_until && (
-                <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>
+                <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', marginTop: 1, textAlign: 'right' }}>
                   Válida até {fmtDate(proposal.valid_until)}
                 </Text>
               )}
@@ -619,19 +749,19 @@ export function ProposalPDFDocument({
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.clientCard}>
           {proposal.clients && (
-            <View style={s.clientCol}>
+            <View>
               <Text style={s.fieldLabel}>CLIENTE</Text>
               <Text style={s.fieldValue}>{proposal.clients.name}</Text>
               {proposal.clients.email && <Text style={s.fieldSub}>{proposal.clients.email}</Text>}
             </View>
           )}
-          <View style={s.clientCol}>
-            <Text style={s.fieldLabel}>FORNECEDOR</Text>
-            <Text style={s.fieldValue}>{displayName}</Text>
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={[s.fieldLabel, { textAlign: 'right' }]}>FORNECEDOR</Text>
+            <Text style={[s.fieldValue, { textAlign: 'right' }]}>{displayName}</Text>
             {docFormatted && (
-              <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
+              <Text style={[s.fieldSub, { textAlign: 'right' }]}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
             )}
-            {profile.address && <Text style={s.fieldSub}>{profile.address}</Text>}
+            {profile.address && <Text style={[s.fieldSub, { textAlign: 'right' }]}>{profile.address}</Text>}
           </View>
         </View>
 

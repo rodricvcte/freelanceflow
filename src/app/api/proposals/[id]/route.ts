@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { bumpProposalVersion, buildNewProposalNumber } from '@/lib/proposal-number'
+import { buildNewProposalNumber } from '@/lib/proposal-number'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 
 export const runtime = 'nodejs'
@@ -35,6 +35,13 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
+
+  // Only 'cancelada' is a valid status transition via PATCH — never allow reverting to 'rascunho'
+  const PATCH_ALLOWED_STATUSES = ['cancelada']
+  if (body.status !== undefined && !PATCH_ALLOWED_STATUSES.includes(body.status)) {
+    return NextResponse.json({ error: 'Transição de status não permitida' }, { status: 400 })
+  }
+
   const allowed = [
     'status', 'title', 'service_description', 'value', 'payment_terms',
     'deadline_days', 'valid_until', 'sections', 'installments',
@@ -50,6 +57,11 @@ export async function PATCH(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (body.status === 'cancelada') {
+    await supabase.from('proposal_events').insert({ proposal_id: id, event_type: 'cancelled', metadata: {} })
+  }
+
   return NextResponse.json(data)
 }
 
@@ -92,13 +104,12 @@ export async function PUT(
     return NextResponse.json({ error: 'Título e valor são obrigatórios' }, { status: 400 })
   }
 
-  const newVersion = (current.version ?? 1) + 1
-  // Bump version on existing number, or generate a fresh one if none exists yet
+  // Draft saves never increment version — version only changes via an explicit "new version" action.
+  // Keep existing proposal_number; generate one only if it doesn't exist yet.
   const proposalNumber = current.proposal_number
-    ? bumpProposalVersion(current.proposal_number)
-    : profile?.freelancer_code
+    ?? (profile?.freelancer_code
       ? await buildNewProposalNumber(user.id, profile.freelancer_code, current.created_at, supabase)
-      : null
+      : null)
 
   const snapshotProfile = profile ? {
     full_name:      profile.full_name,
@@ -129,7 +140,6 @@ export async function PUT(
       valid_until:         valid_until || null,
       client_id:           client_id || null,
       sections:            Array.isArray(sections) ? sections : [],
-      version:             newVersion,
       ...(proposalNumber  ? { proposal_number: proposalNumber } : {}),
       ...(snapshotProfile ? { snapshot_profile: snapshotProfile } : {}),
     })
