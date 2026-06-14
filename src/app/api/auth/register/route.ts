@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
+import { buildEmailConfirmationHtml } from '@/lib/email-templates/notification'
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateFreelancerCode(fullName: string, serviceClient: any): Promise<string> {
@@ -45,19 +49,25 @@ export async function POST(request: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
-  const { data, error } = await supabase.auth.admin.createUser({
+  // Cria o usuário e gera o link de confirmação em um único passo
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: 'signup',
     email,
     password,
-    user_metadata: { full_name },
-    email_confirm: true,
+    options: {
+      data: { full_name },
+      redirectTo: `${APP_URL}/auth/callback`,
+    },
   })
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  const userId = data.user.id
+  const userId     = data.user.id
+  const confirmUrl = data.properties.action_link
 
+  // Cria o perfil com código de freelancer
   let freelancer_code: string
   try {
     freelancer_code = await generateFreelancerCode(full_name.trim(), supabase)
@@ -70,5 +80,22 @@ export async function POST(request: Request) {
     { onConflict: 'id' }
   )
 
-  return NextResponse.json({ userId })
+  // Envia email de confirmação estilizado via Resend
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    await resend.emails.send({
+      from:    'FreelanceFlow <onboarding@resend.dev>',
+      to:      email,
+      subject: 'Confirme seu email — FreelanceFlow',
+      html:    buildEmailConfirmationHtml({
+        name:       full_name.trim().split(/\s+/)[0],
+        confirmUrl,
+      }),
+    })
+  } catch (emailErr) {
+    // Não bloqueia o cadastro se o email falhar
+    console.error('[register] erro ao enviar email de confirmação:', emailErr)
+  }
+
+  return NextResponse.json({ ok: true })
 }

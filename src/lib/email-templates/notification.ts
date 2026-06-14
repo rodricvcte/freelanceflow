@@ -73,6 +73,25 @@ export function buildAcceptedNotificationHtml(d: NotifData): string {
   `)
 }
 
+export function buildEmailConfirmationHtml(d: { name: string; confirmUrl: string }): string {
+  return wrap(`
+    <p style="margin:0 0 6px;font-size:22px">✉️</p>
+    <h1 style="margin:0 0 12px;font-size:18px;font-weight:700;color:#111827">
+      Confirme seu email
+    </h1>
+    <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.6">
+      Olá, <strong>${d.name}</strong>! Sua conta no FreelanceFlow foi criada com sucesso.
+    </p>
+    <p style="margin:0 0 4px;font-size:14px;color:#6b7280;line-height:1.6">
+      Clique no botão abaixo para confirmar seu email e acessar sua conta:
+    </p>
+    ${cta(d.confirmUrl, 'Confirmar email')}
+    <p style="margin-top:16px;font-size:12px;color:#9ca3af;line-height:1.6">
+      Se você não criou uma conta no FreelanceFlow, ignore este email.
+    </p>
+  `)
+}
+
 export function buildDeclinedNotificationHtml(d: NotifData): string {
   return wrap(`
     <p style="margin:0 0 6px;font-size:22px">📋</p>
