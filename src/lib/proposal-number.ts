@@ -17,7 +17,7 @@ export function bumpProposalVersion(proposalNumber: string | null): string | nul
 /**
  * Generates a brand-new proposal_number: CODE-YYYYMMDD-SEQ-v1
  *
- * SEQ = (count of already-numbered proposals this freelancer has on this UTC day) + 1
+ * SEQ = lifetime count of proposals this freelancer has (not daily — never resets)
  * A uniqueness check loops up to 999 to survive race conditions.
  */
 export async function buildNewProposalNumber(
@@ -26,22 +26,13 @@ export async function buildNewProposalNumber(
   createdAt: string,          // ISO string of the new proposal's created_at
   supabase: SupabaseClient
 ): Promise<string> {
-  const dateStr  = createdAt.split('T')[0].replace(/-/g, '')   // YYYYMMDD
-  const dayStart = `${createdAt.split('T')[0]}T00:00:00.000Z`
+  const dateStr = createdAt.split('T')[0].replace(/-/g, '')   // YYYYMMDD
 
-  // Next-day boundary (cleaner than 23:59:59.999)
-  const next = new Date(createdAt)
-  next.setUTCDate(next.getUTCDate() + 1)
-  next.setUTCHours(0, 0, 0, 0)
-  const dayEnd = next.toISOString()
-
-  // Count proposals already numbered for this user on this UTC day
+  // Count ALL proposals ever created by this user (lifetime sequential)
   const { count } = await supabase
     .from('proposals')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .gte('created_at', dayStart)
-    .lt('created_at', dayEnd)
     .not('proposal_number', 'is', null)
 
   let seq = (count ?? 0) + 1

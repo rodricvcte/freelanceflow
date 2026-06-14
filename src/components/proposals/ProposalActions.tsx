@@ -34,12 +34,12 @@ type Props = {
 }
 
 // Which statuses show "Nova versão" and whether they need a confirm dialog
+// expirada is intentionally excluded — it shows only "Clonar"
 const NEW_VERSION_CONFIG: Record<string, { confirm: string } | { confirm: null }> = {
   enviada:     { confirm: 'O cliente ainda tem uma versão em análise. Deseja criar uma nova versão mesmo assim?' },
   visualizada: { confirm: 'O cliente ainda tem uma versão em análise. Deseja criar uma nova versão mesmo assim?' },
   aceita:    { confirm: 'Esta proposta já foi aceita. Deseja criar uma nova versão?' },
   recusada:  { confirm: null },
-  expirada:  { confirm: null },
 }
 
 export default function ProposalActions({ proposalId, status, version, newerVersion, initialPdfUrl, duplicate, sendProps }: Props) {
@@ -63,7 +63,7 @@ export default function ProposalActions({ proposalId, status, version, newerVers
     setDuplicating(true)
     try {
       sessionStorage.setItem('ff_duplicate_draft', JSON.stringify({
-        title:               isExpired ? duplicate.title : `Cópia de ${duplicate.title}`,
+        title:               duplicate.title,
         service_description: duplicate.service_description,
         value:               duplicate.value,
         payment_terms:       duplicate.payment_terms,

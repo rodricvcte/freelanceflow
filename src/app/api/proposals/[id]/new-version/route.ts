@@ -17,7 +17,7 @@ export async function POST(
   const [{ data: current }, { data: profile }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('title, service_description, value, payment_terms, deadline_days, valid_until, client_id, sections, version, proposal_number, snapshot_profile, status')
+      .select('title, service_description, value, payment_terms, deadline_days, valid_until, client_id, sections, version, proposal_number, snapshot_profile, status, parent_proposal_id')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -39,6 +39,8 @@ export async function POST(
 
   const newVersion = (current.version ?? 1) + 1
   const newNumber  = bumpProposalVersion(current.proposal_number as string | null)
+  // All versions in a chain share the same root (v1) as parent_proposal_id
+  const parentId = (current as Record<string, unknown>).parent_proposal_id as string | null ?? id
 
   const snapshotProfile = profile ? {
     full_name:      profile.full_name,
@@ -76,6 +78,7 @@ export async function POST(
       sections,
       status:              'rascunho',
       version:             newVersion,
+      parent_proposal_id:  parentId,
       ...(newNumber        ? { proposal_number: newNumber } : {}),
       ...(snapshotProfile  ? { snapshot_profile: snapshotProfile } : {}),
     })
