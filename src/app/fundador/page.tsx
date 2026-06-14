@@ -73,8 +73,8 @@ export default function FundadorPage() {
         <div className="flex-1 flex flex-col justify-center">
           {/* Badge */}
           <span
-            className="self-start text-xs font-semibold px-3 py-1 rounded-full mb-6 tracking-wide text-white"
-            style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
+            className="self-start text-xs font-semibold px-3 py-1 rounded-full mb-6 tracking-wide"
+            style={{ backgroundColor: '#F59E0B', color: '#1a0a00' }}
           >
             Oferta exclusiva de fundador
           </span>
