@@ -4,57 +4,22 @@ import { useState, type FormEvent } from 'react'
 
 type Status = 'idle' | 'loading' | 'success' | 'duplicate' | 'error'
 
-const benefits: { icon: React.ReactNode; label: string }[] = [
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 flex-shrink-0">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
-    label: 'Propostas ilimitadas',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 flex-shrink-0">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    ),
-    label: 'Rastreamento de abertura',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 flex-shrink-0">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-      </svg>
-    ),
-    label: 'Follow-up automático para o cliente',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 flex-shrink-0">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
-    label: 'Sem marca d\'água',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 flex-shrink-0">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg>
-    ),
-    label: 'Grátis para sempre',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 flex-shrink-0">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-      </svg>
-    ),
-    label: 'Sem cartão de crédito',
-  },
+const benefits = [
+  'Propostas ilimitadas',
+  'Rastreamento de abertura em tempo real',
+  'Follow-up automático para o cliente',
+  'Sem marca d\'água nas propostas',
+  'Grátis para sempre',
 ]
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 flex-shrink-0 mt-0.5">
+      <circle cx="10" cy="10" r="10" fill="rgba(255,255,255,0.2)" />
+      <path d="M6 10l3 3 5-5" stroke="#ffffff" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
 
 export default function FundadorPage() {
   const [name,   setName]   = useState('')
@@ -88,145 +53,148 @@ export default function FundadorPage() {
   const loading = status === 'loading'
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="flex flex-col md:flex-row md:h-screen md:overflow-hidden">
 
-      {/* ── Header ── */}
-      <header className="px-5 py-5 flex items-center gap-2.5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/favicon.svg" width={32} height={32} alt="FreelanceFlow" />
-        <span className="font-semibold text-gray-900 text-base">FreelanceFlow</span>
-      </header>
-
-      {/* ── Hero — fundo verde full-width ── */}
-      <section
-        className="px-5 py-14 text-center"
+      {/* ════════════════════════════════
+          COLUNA ESQUERDA — verde
+      ════════════════════════════════ */}
+      <div
+        className="flex flex-col px-8 py-10 md:w-[480px] md:flex-shrink-0 md:h-full md:overflow-auto"
         style={{ backgroundColor: '#1D9E75' }}
       >
-        <div className="max-w-lg mx-auto">
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 mb-12">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/favicon.svg" width={28} height={28} alt="FreelanceFlow" />
+          <span className="font-semibold text-white text-base">FreelanceFlow</span>
+        </div>
+
+        {/* Conteúdo principal da coluna esquerda */}
+        <div className="flex-1 flex flex-col justify-center">
+          {/* Badge */}
           <span
-            className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-5 tracking-wide text-white"
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+            className="self-start text-xs font-semibold px-3 py-1 rounded-full mb-6 tracking-wide text-white"
+            style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
           >
             Oferta exclusiva de fundador
           </span>
+
+          {/* Título */}
           <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
-            Plano Pro grátis<br />para sempre
+            Plano Pro<br />grátis para<br />sempre
           </h1>
-          <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.82)' }}>
-            Apenas 10 vagas · Para os primeiros freelancers<br className="hidden sm:block" />
-            que embarcarem no FreelanceFlow
+
+          {/* Subtítulo */}
+          <p className="text-base mb-10 leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>
+            Apenas 10 vagas para os<br className="hidden sm:block" />
+            primeiros freelancers
           </p>
-        </div>
-      </section>
 
-      {/* ── Main ── */}
-      <main className="flex-1 flex flex-col items-center px-5 py-10">
-        <div className="w-full max-w-lg">
-
-          {/* ── Benefícios ── */}
-          <div className="grid grid-cols-2 gap-3 mb-10">
+          {/* Benefícios */}
+          <ul className="flex flex-col gap-3.5">
             {benefits.map((b) => (
-              <div
-                key={b.label}
-                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3"
-                style={{ border: '1.5px solid #1D9E75' }}
-              >
-                <span style={{ color: '#1D9E75' }}>{b.icon}</span>
-                <span className="text-sm text-gray-700 font-medium">{b.label}</span>
-              </div>
+              <li key={b} className="flex items-start gap-3">
+                <CheckIcon />
+                <span className="text-sm text-white leading-snug">{b}</span>
+              </li>
             ))}
-          </div>
+          </ul>
+        </div>
 
-          {/* ── Formulário ou mensagem de confirmação ── */}
+        {/* Rodapé da coluna */}
+        <p className="mt-10 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          FreelanceFlow · freelanceflow.com.br
+        </p>
+      </div>
+
+      {/* ════════════════════════════════
+          COLUNA DIREITA — branca
+      ════════════════════════════════ */}
+      <div className="flex-1 bg-white flex items-center justify-center px-8 py-12 md:h-full">
+        <div className="w-full max-w-sm">
+
           {status === 'success' ? (
-            <div
-              className="rounded-2xl p-8 text-center"
-              style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}
-            >
+            /* ── Confirmação ── */
+            <div className="text-center">
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5"
                 style={{ backgroundColor: '#dcfce7' }}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth={2.5} className="w-6 h-6">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth={2.5} className="w-7 h-7">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="font-semibold text-gray-900 text-lg mb-2">
-                Recebemos seu contato!
-              </p>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Em breve você receberá um email com os próximos passos.
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Recebemos seu contato!</h2>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                Em breve você receberá seu cupom de fundador no email cadastrado.
               </p>
             </div>
+
           ) : status === 'duplicate' ? (
-            <div
-              className="rounded-2xl p-8 text-center"
-              style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a' }}
-            >
+            /* ── Já cadastrado ── */
+            <div className="text-center">
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5"
                 style={{ backgroundColor: '#fef9c3' }}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth={2.5} className="w-6 h-6">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth={2.5} className="w-7 h-7">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
                 </svg>
               </div>
-              <p className="font-semibold text-gray-900 text-lg mb-2">
-                Você já está na lista!
-              </p>
-              <p className="text-gray-600 text-sm">
-                Fique atento ao seu email com os próximos passos.
-              </p>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Você já está na lista!</h2>
+              <p className="text-sm text-gray-500">Fique atento ao seu email com os próximos passos.</p>
             </div>
+
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input
-                type="text"
-                placeholder="Nome completo"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                disabled={loading}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50"
-                style={{ '--tw-ring-color': '#1D9E75' } as React.CSSProperties}
-              />
-              <input
-                type="email"
-                placeholder="Seu melhor email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50"
-                style={{ '--tw-ring-color': '#1D9E75' } as React.CSSProperties}
-              />
-
-              {status === 'error' && (
-                <p className="text-red-600 text-sm text-center">{errMsg}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 rounded-xl text-white font-semibold text-sm transition-opacity disabled:opacity-60 mt-1"
-                style={{ backgroundColor: '#1D9E75' }}
-              >
-                {loading ? 'Enviando...' : 'Quero minha vaga de fundador'}
-              </button>
-
-              <p className="text-center text-xs text-gray-400 mt-1">
-                Vaga confirmada por email · Sem spam
+            /* ── Formulário ── */
+            <>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Garanta sua vaga</h2>
+              <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+                Preencha abaixo e entraremos em contato com seu cupom de fundador.
               </p>
-            </form>
+
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                <input
+                  type="text"
+                  placeholder="Nome completo"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+                />
+                <input
+                  type="email"
+                  placeholder="Seu melhor email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+                />
+
+                {status === 'error' && (
+                  <p className="text-red-600 text-xs text-center">{errMsg}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-xl text-white font-semibold text-sm transition-opacity disabled:opacity-60 mt-1"
+                  style={{ backgroundColor: '#1D9E75' }}
+                >
+                  {loading ? 'Enviando...' : 'Quero minha vaga'}
+                </button>
+
+                <p className="text-center text-xs text-gray-400 mt-1">
+                  Apenas 10 vagas · Sem spam
+                </p>
+              </form>
+            </>
           )}
 
         </div>
-      </main>
-
-      {/* ── Footer ── */}
-      <footer className="px-5 py-6 text-center text-xs text-gray-400">
-        FreelanceFlow · freelanceflow.com.br
-      </footer>
+      </div>
 
     </div>
   )
