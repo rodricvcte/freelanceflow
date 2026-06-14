@@ -157,11 +157,35 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ accent_color, logo_url })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Falha ao acessar o site'
-    const isTimeout = msg.includes('abort') || msg.includes('time')
-    return NextResponse.json(
-      { error: isTimeout ? 'O site demorou muito para responder' : msg },
-      { status: 422 }
-    )
+    const raw   = err instanceof Error ? err.message : ''
+    const cause = err instanceof Error && (err as NodeJS.ErrnoException).cause instanceof Error
+      ? ((err as NodeJS.ErrnoException).cause as Error).message
+      : ''
+
+    console.error('[fetch-brand] erro ao buscar', url, '|', raw, cause ? `| causa: ${cause}` : '')
+
+    let friendly = 'Não foi possível acessar o site. Verifique a URL e tente novamente.'
+
+    if (raw.includes('abort') || raw.includes('time') || cause.includes('time')) {
+      friendly = 'O site demorou muito para responder (timeout).'
+    } else if (
+      cause.includes('ENOTFOUND') ||
+      cause.includes('EAI_AGAIN') ||
+      cause.includes('getaddrinfo')
+    ) {
+      friendly = 'Domínio não encontrado. Verifique se a URL está correta.'
+    } else if (
+      cause.includes('ECONNREFUSED') ||
+      cause.includes('ECONNRESET') ||
+      cause.includes('EHOSTUNREACH')
+    ) {
+      friendly = 'O servidor do site recusou a conexão.'
+    } else if (raw.includes('SSL') || raw.includes('certificate') || cause.includes('SSL')) {
+      friendly = 'Erro de certificado SSL no site informado.'
+    } else if (raw !== 'fetch failed' && raw !== '') {
+      friendly = raw
+    }
+
+    return NextResponse.json({ error: friendly }, { status: 422 })
   }
 }
