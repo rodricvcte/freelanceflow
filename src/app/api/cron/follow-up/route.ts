@@ -7,17 +7,11 @@ export const runtime = 'nodejs'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
-// Extracts the base proposal number, stripping any trailing -vN suffix.
-// "RC002-20260612-006-v2" → "RC002-20260612-006"
-// "RC002-20260612-006"    → "RC002-20260612-006"
 function extractBase(proposalNumber: string | null): string | null {
   if (!proposalNumber) return null
   return proposalNumber.replace(/-v\d+$/, '')
 }
 
-// Builds a set of proposal IDs that are the latest SENT version in their family.
-// Drafts (rascunho) are excluded from "latest" — a draft is not visible to the client
-// so the previous sent version should still receive follow-ups.
 function buildLatestVersionIds(
   allProposals: Array<{ id: string; proposal_number: string | null; version: number | null; status: string }>
 ): Set<string> {
@@ -37,7 +31,6 @@ function buildLatestVersionIds(
   const latestIds = new Set<string>()
   for (const { id } of latestByBase.values()) latestIds.add(id)
 
-  // Proposals with no proposal_number and not drafts are always included
   for (const p of allProposals) {
     if (!p.proposal_number && p.status !== 'rascunho') latestIds.add(p.id)
   }
@@ -56,9 +49,11 @@ export async function GET(request: Request) {
   const supabase = createServiceClient()
   const resend   = new Resend(process.env.RESEND_API_KEY)
   const now      = new Date()
-  const results  = { r1_sent: 0, r2_sent: 0, r3_expired: 0, r_expiry_sent: 0 }
+  const results  = { r1_sent: 0, r1_failed: 0, r2_sent: 0, r2_failed: 0, r3_expired: 0, r_expiry_sent: 0, r_expiry_failed: 0 }
 
-  // ── R3: expire proposals ────────────────────────────────────────────────────
+  console.log(`[follow-up] ── início ${now.toISOString()} ──`)
+
+  // ── R3: expirar propostas ───────────────────────────────────────────────────
   const todayStr = now.toISOString().split('T')[0]
   const { data: expired, error: r3Err } = await supabase
     .from('proposals')
@@ -67,39 +62,54 @@ export async function GET(request: Request) {
     .in('status', ['rascunho', 'enviada', 'visualizada'])
     .select('id')
 
-  if (!r3Err && expired?.length) {
+  if (r3Err) {
+    console.error('[follow-up] R3 erro ao expirar propostas:', r3Err.message)
+  } else if (expired?.length) {
     results.r3_expired = expired.length
+    console.log(`[follow-up] R3 expiradas: ${expired.length} proposta(s)`)
     await supabase.from('proposal_events').insert(
       expired.map(p => ({ proposal_id: p.id, event_type: 'expired', metadata: {} }))
     )
+  } else {
+    console.log('[follow-up] R3: nenhuma proposta para expirar hoje')
   }
 
-  // ── Follow-up email sending — available for all plans ──────────────────────
-  const profileQuery = supabase
+  // ── Follow-up email sending — disponível para todos os planos ──────────────
+  const { data: profiles, error: profilesErr } = await supabase
     .from('profiles')
     .select('id, followup_days, followup_enabled, followup_expiry_enabled, full_name, business_name, logo_url, accent_color, email_business')
     .eq('followup_enabled', true)
 
-  const { data: profiles } = await profileQuery
-  if (!profiles?.length) return NextResponse.json({ ok: true, ...results })
+  if (profilesErr) {
+    console.error('[follow-up] erro ao buscar perfis:', profilesErr.message)
+    return NextResponse.json({ ok: false, error: profilesErr.message, ...results }, { status: 500 })
+  }
 
-  // Build auth-email map so we can set Reply-To for each freelancer's emails
-  const { data: authUsersData } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  if (!profiles?.length) {
+    console.log('[follow-up] nenhum perfil com follow-up habilitado')
+    return NextResponse.json({ ok: true, ...results })
+  }
+
+  console.log(`[follow-up] ${profiles.length} perfil(is) com follow-up habilitado`)
+
+  // Mapa de emails de auth para Reply-To
+  const { data: authUsersData, error: authErr } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  if (authErr) console.warn('[follow-up] erro ao listar auth users:', authErr.message)
   const authEmailMap = new Map(
     (authUsersData?.users ?? []).map(u => [u.id, u.email ?? null])
   )
 
   for (const profile of profiles) {
-    const days   = (profile.followup_days as number) ?? 2
-    const cutoff = new Date(now)
+    const days         = (profile.followup_days as number) ?? 2
+    const cutoff       = new Date(now)
     cutoff.setDate(cutoff.getDate() - days)
-
     const freelancerName = (profile.business_name ?? profile.full_name ?? 'Freelancer') as string
-    const accentColor    = (profile.accent_color ?? '#1D9E75') as string
-    const logoUrl        = (profile.logo_url ?? null) as string | null
+    const accentColor    = (profile.accent_color  ?? '#1D9E75') as string
+    const logoUrl        = (profile.logo_url       ?? null) as string | null
     const replyTo        = ((profile.email_business as string | null) ?? authEmailMap.get(profile.id as string)) ?? undefined
 
-    // Fetch all user proposals to determine which are the latest version per family
+    console.log(`[follow-up] perfil "${freelancerName}" (${profile.id}) — cutoff: ${cutoff.toISOString().split('T')[0]} (${days}d)`)
+
     const { data: allUserProposals } = await supabase
       .from('proposals')
       .select('id, proposal_number, version, status')
@@ -109,14 +119,20 @@ export async function GET(request: Request) {
       (allUserProposals ?? []) as Array<{ id: string; proposal_number: string | null; version: number | null; status: string }>
     )
 
-    // ── R1: enviada, not yet viewed ─────────────────────────────────────────
-    const { data: r1Proposals } = await supabase
+    // ── R1: enviada, ainda não visualizada ─────────────────────────────────
+    const { data: r1Proposals, error: r1Err } = await supabase
       .from('proposals')
       .select('id, title, token, value, valid_until, proposal_number, version, recipient_email, recipient_name')
       .eq('user_id', profile.id)
       .eq('status', 'enviada')
       .lt('sent_at', cutoff.toISOString())
       .not('recipient_email', 'is', null)
+
+    if (r1Err) {
+      console.error(`[follow-up] R1 erro ao buscar propostas de "${freelancerName}":`, r1Err.message)
+    } else {
+      console.log(`[follow-up] R1 candidatas para "${freelancerName}": ${r1Proposals?.length ?? 0}`)
+    }
 
     if (r1Proposals?.length) {
       const ids = r1Proposals.map(p => p.id as string)
@@ -132,12 +148,14 @@ export async function GET(request: Request) {
         !alreadySent.has(p.id as string) && latestVersionIds.has(p.id as string)
       )
 
+      console.log(`[follow-up] R1 a enviar para "${freelancerName}": ${toSend.length} (${alreadySent.size} já enviados, ${r1Proposals.length - alreadySent.size - toSend.length} excluídos por versão)`)
+
       for (const p of toSend) {
         const clientName = (p.recipient_name as string | null) || 'Cliente'
         const html = buildFollowUpNotViewedHtml({
           clientName,
           freelancerName,
-          freelancerLogoUrl: logoUrl,
+          freelancerLogoUrl:  logoUrl,
           accentColor,
           proposalTitle:      (p.title as string) ?? '',
           proposalNumber:     (p.proposal_number as string | null) ?? null,
@@ -147,14 +165,19 @@ export async function GET(request: Request) {
         })
 
         const { error } = await resend.emails.send({
-          from:     `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
-          to:       p.recipient_email as string,
+          from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+          to:      p.recipient_email as string,
           replyTo: replyTo,
-          subject:  `Sua proposta está aguardando — ${p.title}`,
+          subject: `Sua proposta está aguardando — ${p.title}`,
           html,
         })
 
-        if (!error) {
+        if (error) {
+          results.r1_failed++
+          console.error(`[follow-up] R1 FALHA → ${p.recipient_email} | proposta "${p.title}" | erro: ${error.message}`)
+        } else {
+          results.r1_sent++
+          console.log(`[follow-up] R1 OK → ${p.recipient_email} | proposta "${p.title}"`)
           await Promise.all([
             supabase.from('follow_ups').insert({
               proposal_id:   p.id,
@@ -170,13 +193,12 @@ export async function GET(request: Request) {
               metadata:    { rule: 'R1', recipient_email: p.recipient_email },
             }),
           ])
-          results.r1_sent++
         }
       }
     }
 
-    // ── R2: visualizada, no response ────────────────────────────────────────
-    const { data: r2Proposals } = await supabase
+    // ── R2: visualizada, sem resposta ───────────────────────────────────────
+    const { data: r2Proposals, error: r2Err } = await supabase
       .from('proposals')
       .select('id, title, token, value, valid_until, proposal_number, version, recipient_email, recipient_name')
       .eq('user_id', profile.id)
@@ -184,6 +206,12 @@ export async function GET(request: Request) {
       .lt('viewed_at', cutoff.toISOString())
       .is('responded_at', null)
       .not('recipient_email', 'is', null)
+
+    if (r2Err) {
+      console.error(`[follow-up] R2 erro ao buscar propostas de "${freelancerName}":`, r2Err.message)
+    } else {
+      console.log(`[follow-up] R2 candidatas para "${freelancerName}": ${r2Proposals?.length ?? 0}`)
+    }
 
     if (r2Proposals?.length) {
       const ids = r2Proposals.map(p => p.id as string)
@@ -199,12 +227,14 @@ export async function GET(request: Request) {
         !alreadySent.has(p.id as string) && latestVersionIds.has(p.id as string)
       )
 
+      console.log(`[follow-up] R2 a enviar para "${freelancerName}": ${toSend.length}`)
+
       for (const p of toSend) {
         const clientName = (p.recipient_name as string | null) || 'Cliente'
         const html = buildFollowUpNotRespondedHtml({
           clientName,
           freelancerName,
-          freelancerLogoUrl: logoUrl,
+          freelancerLogoUrl:  logoUrl,
           accentColor,
           proposalTitle:      (p.title as string) ?? '',
           proposalNumber:     (p.proposal_number as string | null) ?? null,
@@ -214,14 +244,19 @@ export async function GET(request: Request) {
         })
 
         const { error } = await resend.emails.send({
-          from:     `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
-          to:       p.recipient_email as string,
+          from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+          to:      p.recipient_email as string,
           replyTo: replyTo,
-          subject:  `Ficou com alguma dúvida? — ${p.title}`,
+          subject: `Ficou com alguma dúvida? — ${p.title}`,
           html,
         })
 
-        if (!error) {
+        if (error) {
+          results.r2_failed++
+          console.error(`[follow-up] R2 FALHA → ${p.recipient_email} | proposta "${p.title}" | erro: ${error.message}`)
+        } else {
+          results.r2_sent++
+          console.log(`[follow-up] R2 OK → ${p.recipient_email} | proposta "${p.title}"`)
           await Promise.all([
             supabase.from('follow_ups').insert({
               proposal_id:   p.id,
@@ -237,24 +272,29 @@ export async function GET(request: Request) {
               metadata:    { rule: 'R2', recipient_email: p.recipient_email },
             }),
           ])
-          results.r2_sent++
         }
       }
     }
 
     // ── expires_tomorrow: expira amanhã ─────────────────────────────────────
     if (profile.followup_expiry_enabled) {
-      const tomorrow = new Date(now)
+      const tomorrow    = new Date(now)
       tomorrow.setDate(tomorrow.getDate() + 1)
       const tomorrowStr = tomorrow.toISOString().split('T')[0]
 
-      const { data: expiringProposals } = await supabase
+      const { data: expiringProposals, error: expiryErr } = await supabase
         .from('proposals')
         .select('id, title, token, value, valid_until, proposal_number, version, recipient_email, recipient_name')
         .eq('user_id', profile.id)
         .eq('valid_until', tomorrowStr)
         .in('status', ['enviada', 'visualizada'])
         .not('recipient_email', 'is', null)
+
+      if (expiryErr) {
+        console.error(`[follow-up] expiry erro para "${freelancerName}":`, expiryErr.message)
+      } else {
+        console.log(`[follow-up] expiry candidatas para "${freelancerName}" (expira ${tomorrowStr}): ${expiringProposals?.length ?? 0}`)
+      }
 
       if (expiringProposals?.length) {
         const ids = expiringProposals.map(p => p.id as string)
@@ -270,12 +310,14 @@ export async function GET(request: Request) {
           !alreadySent.has(p.id as string) && latestVersionIds.has(p.id as string)
         )
 
+        console.log(`[follow-up] expiry a enviar para "${freelancerName}": ${toSend.length}`)
+
         for (const p of toSend) {
           const clientName = (p.recipient_name as string | null) || 'Cliente'
           const html = buildFollowUpExpiringTomorrowHtml({
             clientName,
             freelancerName,
-            freelancerLogoUrl: logoUrl,
+            freelancerLogoUrl:  logoUrl,
             accentColor,
             proposalTitle:      (p.title as string) ?? '',
             proposalNumber:     (p.proposal_number as string | null) ?? null,
@@ -285,14 +327,19 @@ export async function GET(request: Request) {
           })
 
           const { error } = await resend.emails.send({
-            from:     `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
-            to:       p.recipient_email as string,
+            from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+            to:      p.recipient_email as string,
             replyTo: replyTo,
-            subject:  `Sua proposta expira amanhã — ${p.title}`,
+            subject: `Sua proposta expira amanhã — ${p.title}`,
             html,
           })
 
-          if (!error) {
+          if (error) {
+            results.r_expiry_failed++
+            console.error(`[follow-up] expiry FALHA → ${p.recipient_email} | proposta "${p.title}" | erro: ${error.message}`)
+          } else {
+            results.r_expiry_sent++
+            console.log(`[follow-up] expiry OK → ${p.recipient_email} | proposta "${p.title}"`)
             await Promise.all([
               supabase.from('follow_ups').insert({
                 proposal_id:   p.id,
@@ -308,12 +355,13 @@ export async function GET(request: Request) {
                 metadata:    { rule: 'expires_tomorrow', recipient_email: p.recipient_email },
               }),
             ])
-            results.r_expiry_sent++
           }
         }
       }
     }
   }
+
+  console.log(`[follow-up] ── fim | R1: ${results.r1_sent} ok / ${results.r1_failed} falhas | R2: ${results.r2_sent} ok / ${results.r2_failed} falhas | expiry: ${results.r_expiry_sent} ok / ${results.r_expiry_failed} falhas | expiradas: ${results.r3_expired} ──`)
 
   return NextResponse.json({ ok: true, ...results })
 }
