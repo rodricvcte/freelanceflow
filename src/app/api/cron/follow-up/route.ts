@@ -88,13 +88,19 @@ export async function GET(request: Request) {
 
   let profileQuery = supabase
     .from('profiles')
-    .select('id, followup_days, followup_enabled, followup_expiry_enabled, full_name, business_name, logo_url, accent_color')
+    .select('id, followup_days, followup_enabled, followup_expiry_enabled, full_name, business_name, logo_url, accent_color, email_business')
     .eq('followup_enabled', true)
 
   if (proUserIds !== null) profileQuery = profileQuery.in('id', proUserIds)
 
   const { data: profiles } = await profileQuery
   if (!profiles?.length) return NextResponse.json({ ok: true, ...results })
+
+  // Build auth-email map so we can set Reply-To for each freelancer's emails
+  const { data: authUsersData } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  const authEmailMap = new Map(
+    (authUsersData?.users ?? []).map(u => [u.id, u.email ?? null])
+  )
 
   for (const profile of profiles) {
     const days   = (profile.followup_days as number) ?? 2
@@ -104,6 +110,7 @@ export async function GET(request: Request) {
     const freelancerName = (profile.business_name ?? profile.full_name ?? 'Freelancer') as string
     const accentColor    = (profile.accent_color ?? '#1D9E75') as string
     const logoUrl        = (profile.logo_url ?? null) as string | null
+    const replyTo        = ((profile.email_business as string | null) ?? authEmailMap.get(profile.id as string)) ?? undefined
 
     // Fetch all user proposals to determine which are the latest version per family
     const { data: allUserProposals } = await supabase
@@ -153,9 +160,10 @@ export async function GET(request: Request) {
         })
 
         const { error } = await resend.emails.send({
-          from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
-          to:      p.recipient_email as string,
-          subject: `Sua proposta está aguardando — ${p.title}`,
+          from:     `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+          to:       p.recipient_email as string,
+          replyTo: replyTo,
+          subject:  `Sua proposta está aguardando — ${p.title}`,
           html,
         })
 
@@ -219,9 +227,10 @@ export async function GET(request: Request) {
         })
 
         const { error } = await resend.emails.send({
-          from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
-          to:      p.recipient_email as string,
-          subject: `Ficou com alguma dúvida? — ${p.title}`,
+          from:     `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+          to:       p.recipient_email as string,
+          replyTo: replyTo,
+          subject:  `Ficou com alguma dúvida? — ${p.title}`,
           html,
         })
 
@@ -289,9 +298,10 @@ export async function GET(request: Request) {
           })
 
           const { error } = await resend.emails.send({
-            from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
-            to:      p.recipient_email as string,
-            subject: `Sua proposta expira amanhã — ${p.title}`,
+            from:     `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+            to:       p.recipient_email as string,
+            replyTo: replyTo,
+            subject:  `Sua proposta expira amanhã — ${p.title}`,
             html,
           })
 

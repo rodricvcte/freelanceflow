@@ -1,5 +1,37 @@
 import { NextResponse } from 'next/server'
+import { Resend } from 'resend'
 import { createServiceClient } from '@/lib/supabase-service'
+import { buildDeclinedNotificationHtml } from '@/lib/email-templates/notification'
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+async function sendDeclinedNotification(
+  service: ReturnType<typeof createServiceClient>,
+  proposal: { id: string; user_id: unknown; title: unknown; recipient_name: unknown; recipient_email: unknown }
+) {
+  try {
+    const { data: { user: freelancer } } = await service.auth.admin.getUserById(
+      proposal.user_id as string
+    )
+    if (!freelancer?.email) return
+
+    const resend     = new Resend(process.env.RESEND_API_KEY)
+    const clientName = (proposal.recipient_name as string | null) || 'Seu cliente'
+    await resend.emails.send({
+      from:     'FreelanceFlow <onboarding@resend.dev>',
+      to:       freelancer.email,
+      replyTo: (proposal.recipient_email as string | null) ?? undefined,
+      subject:  `${clientName} recusou sua proposta — ${proposal.title ?? 'Proposta'}`,
+      html:     buildDeclinedNotificationHtml({
+        clientName,
+        proposalTitle: (proposal.title as string) ?? 'Proposta',
+        proposalUrl:   `${APP_URL}/propostas/${proposal.id}`,
+      }),
+    })
+  } catch (err) {
+    console.error('[decline notification]', err)
+  }
+}
 
 export async function GET(
   _request: Request,
@@ -10,7 +42,7 @@ export async function GET(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, status')
+    .select('id, status, user_id, title, recipient_name, recipient_email')
     .eq('token', token)
     .single()
 
@@ -31,6 +63,8 @@ export async function GET(
     await service
       .from('proposal_events')
       .insert({ proposal_id: proposal.id, event_type: 'declined', metadata: { via: 'email' } })
+
+    await sendDeclinedNotification(service, proposal)
   }
 
   return NextResponse.redirect(
@@ -47,7 +81,7 @@ export async function POST(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, status')
+    .select('id, status, user_id, title, recipient_name, recipient_email')
     .eq('token', token)
     .single()
 
@@ -65,6 +99,8 @@ export async function POST(
   await service
     .from('proposal_events')
     .insert({ proposal_id: proposal.id, event_type: 'declined', metadata: {} })
+
+  await sendDeclinedNotification(service, proposal)
 
   return NextResponse.json({ ok: true })
 }
