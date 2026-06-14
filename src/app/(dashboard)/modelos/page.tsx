@@ -27,7 +27,7 @@ export default function ModelosPage() {
   if (!isPro) {
     return (
       <div className="p-6 md:p-8 max-w-2xl">
-        <UpgradeModal open={showUpgrade} onClose={() => setUpgrade(false)} feature="Crie propostas mais rápido com modelos prontos" />
+        <UpgradeModal open={showUpgrade} onClose={() => setUpgrade(false)} feature="Os modelos prontos são exclusivos do plano Pro." />
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Modelos</h1>
           <p className="text-sm text-gray-500 mt-0.5">Crie propostas com agilidade</p>

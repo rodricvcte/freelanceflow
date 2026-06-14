@@ -74,24 +74,11 @@ export async function GET(request: Request) {
     )
   }
 
-  // ── Follow-up email sending ─────────────────────────────────────────────────
-  let proUserIds: string[] | null = null
-  if (process.env.DISABLE_PLAN_LIMITS !== 'true') {
-    const { data: proSubs } = await supabase
-      .from('subscriptions')
-      .select('user_id')
-      .neq('plan', 'free')
-      .in('status', ['active', 'trialing'])
-    proUserIds = (proSubs ?? []).map(s => s.user_id as string)
-    if (!proUserIds.length) return NextResponse.json({ ok: true, ...results })
-  }
-
-  let profileQuery = supabase
+  // ── Follow-up email sending — available for all plans ──────────────────────
+  const profileQuery = supabase
     .from('profiles')
     .select('id, followup_days, followup_enabled, followup_expiry_enabled, full_name, business_name, logo_url, accent_color, email_business')
     .eq('followup_enabled', true)
-
-  if (proUserIds !== null) profileQuery = profileQuery.in('id', proUserIds)
 
   const { data: profiles } = await profileQuery
   if (!profiles?.length) return NextResponse.json({ ok: true, ...results })

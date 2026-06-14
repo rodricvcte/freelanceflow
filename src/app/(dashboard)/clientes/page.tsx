@@ -57,7 +57,7 @@ export default function ClientesPage() {
       <UpgradeModal
         open={showUpgrade}
         onClose={() => setShowUpgrade(false)}
-        feature="Adicione clientes ilimitados no plano Pro"
+        feature="Você atingiu o limite de 5 clientes no plano gratuito."
       />
 
       {/* Header */}

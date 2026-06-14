@@ -69,12 +69,13 @@ export async function canCreateClient(
   return { allowed: used < FREE_CLIENT_LIMIT, used, limit: FREE_CLIENT_LIMIT }
 }
 
-export async function canUseTracking(userId: string, supabase: SupabaseClient): Promise<boolean> {
-  return isPro(userId, supabase)
+// Tracking and follow-ups are available on all plans
+export async function canUseTracking(_userId: string, _supabase: SupabaseClient): Promise<boolean> {
+  return true
 }
 
-export async function canUseFollowUps(userId: string, supabase: SupabaseClient): Promise<boolean> {
-  return isPro(userId, supabase)
+export async function canUseFollowUps(_userId: string, _supabase: SupabaseClient): Promise<boolean> {
+  return true
 }
 
 export async function canUseTemplates(userId: string, supabase: SupabaseClient): Promise<boolean> {

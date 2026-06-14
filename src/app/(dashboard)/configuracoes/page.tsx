@@ -602,11 +602,11 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
 
 const PRO_FEATURES = [
   'Propostas ilimitadas',
-  'PDF com sua identidade visual',
-  'Envio por e-mail com aprovação via link',
-  'Follow-ups automáticos',
-  'Link público rastreável',
-  'Suporte prioritário',
+  'Clientes ilimitados',
+  'PDF sem marca d\'água',
+  'Modelos prontos de proposta',
+  'Follow-up automático para o cliente',
+  'Rastreamento de abertura em tempo real',
 ]
 
 function PlanTab({ sub }: { sub: SubInfo }) {

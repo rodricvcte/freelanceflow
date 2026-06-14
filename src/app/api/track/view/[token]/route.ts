@@ -19,54 +19,41 @@ export async function GET(
     .single()
 
   if (proposal) {
-    // Check if proposal owner is Pro — free users' proposals are not tracked
-    let trackingAllowed = process.env.DISABLE_PLAN_LIMITS === 'true'
-    if (!trackingAllowed) {
-      const { data: sub } = await service
-        .from('subscriptions')
-        .select('plan, status')
-        .eq('user_id', proposal.user_id)
-        .maybeSingle()
-      trackingAllowed = !!sub && sub.plan !== 'free' && (sub.status === 'active' || sub.status === 'trialing')
-    }
+    const isFirstView = proposal.status === 'enviada'
 
-    if (trackingAllowed) {
-      const isFirstView = proposal.status === 'enviada'
+    // Always update viewed_at — keeps proposals UPDATE firing on every visit,
+    // which is the reliable trigger for the dashboard's Realtime subscription.
+    const updatePayload: Record<string, unknown> = { viewed_at: new Date().toISOString() }
+    if (isFirstView) updatePayload.status = 'visualizada'
+    await service.from('proposals').update(updatePayload).eq('id', proposal.id)
 
-      // Always update viewed_at — keeps proposals UPDATE firing on every visit,
-      // which is the reliable trigger for the dashboard's Realtime subscription.
-      const updatePayload: Record<string, unknown> = { viewed_at: new Date().toISOString() }
-      if (isFirstView) updatePayload.status = 'visualizada'
-      await service.from('proposals').update(updatePayload).eq('id', proposal.id)
+    await service
+      .from('proposal_events')
+      .insert({ proposal_id: proposal.id, event_type: 'viewed', metadata: {} })
 
-      await service
-        .from('proposal_events')
-        .insert({ proposal_id: proposal.id, event_type: 'viewed', metadata: {} })
-
-      // Notify the freelancer only on first view
-      if (isFirstView) {
-        try {
-          const { data: { user: freelancer } } = await service.auth.admin.getUserById(
-            proposal.user_id as string
-          )
-          if (freelancer?.email) {
-            const resend    = new Resend(process.env.RESEND_API_KEY)
-            const clientName = (proposal.recipient_name as string | null) || 'Seu cliente'
-            await resend.emails.send({
-              from:     'FreelanceFlow <onboarding@resend.dev>',
-              to:       freelancer.email,
-              replyTo: (proposal.recipient_email as string | null) ?? undefined,
-              subject:  `${clientName} visualizou sua proposta — ${proposal.title ?? 'Proposta'}`,
-              html:     buildViewedNotificationHtml({
-                clientName,
-                proposalTitle: (proposal.title as string) ?? 'Proposta',
-                proposalUrl:   `${APP_URL}/propostas/${proposal.id}`,
-              }),
-            })
-          }
-        } catch (err) {
-          console.error('[view notification]', err)
+    // Notify the freelancer only on first view
+    if (isFirstView) {
+      try {
+        const { data: { user: freelancer } } = await service.auth.admin.getUserById(
+          proposal.user_id as string
+        )
+        if (freelancer?.email) {
+          const resend     = new Resend(process.env.RESEND_API_KEY)
+          const clientName = (proposal.recipient_name as string | null) || 'Seu cliente'
+          await resend.emails.send({
+            from:     'FreelanceFlow <onboarding@resend.dev>',
+            to:       freelancer.email,
+            replyTo: (proposal.recipient_email as string | null) ?? undefined,
+            subject:  `${clientName} visualizou sua proposta — ${proposal.title ?? 'Proposta'}`,
+            html:     buildViewedNotificationHtml({
+              clientName,
+              proposalTitle: (proposal.title as string) ?? 'Proposta',
+              proposalUrl:   `${APP_URL}/propostas/${proposal.id}`,
+            }),
+          })
         }
+      } catch (err) {
+        console.error('[view notification]', err)
       }
     }
   }

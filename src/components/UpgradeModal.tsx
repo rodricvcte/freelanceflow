@@ -4,13 +4,12 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 const ROWS = [
-  { label: 'Propostas',        free: '5/mês',     pro: 'Ilimitadas' },
-  { label: 'Clientes',         free: '5',          pro: 'Ilimitados' },
-  { label: 'PDF sem marca',    free: '✗',          pro: '✓' },
-  { label: 'Rastreamento',     free: '✗',          pro: '✓' },
-  { label: 'Follow-ups',       free: '✗',          pro: '✓' },
-  { label: 'Modelos',          free: '✗',          pro: '✓' },
-  { label: 'Cor personalizada',free: '✗',          pro: '✓' },
+  { label: 'Propostas',     free: '5/mês', pro: 'Ilimitadas' },
+  { label: 'Clientes',      free: '5',     pro: 'Ilimitados' },
+  { label: 'Rastreamento',  free: '✓',     pro: '✓' },
+  { label: 'Follow-ups',    free: '✓',     pro: '✓' },
+  { label: 'PDF sem marca', free: '✗',     pro: '✓' },
+  { label: 'Modelos',       free: '✗',     pro: '✓' },
 ]
 
 type Props = {

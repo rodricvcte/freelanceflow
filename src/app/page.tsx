@@ -452,12 +452,12 @@ export default function LandingPage() {
               <ul className="space-y-3">
                 {[
                   { t: '5 propostas por mês', ok: true },
-                  { t: 'PDF com marca FreelanceFlow', ok: true },
-                  { t: 'Envio por e-mail', ok: true },
                   { t: '5 clientes', ok: true },
-                  { t: 'Rastreamento de visualização', ok: false },
-                  { t: 'Follow-ups automáticos', ok: false },
+                  { t: 'Rastreamento de abertura', ok: true },
+                  { t: 'Follow-up automático', ok: true },
+                  { t: 'PDF com marca FreelanceFlow', ok: true },
                   { t: 'Modelos de proposta', ok: false },
+                  { t: 'PDF sem marca d\'água', ok: false },
                 ].map(item => (
                   <li key={item.t} className="flex items-center gap-3">
                     <Check ok={item.ok} />
@@ -487,12 +487,11 @@ export default function LandingPage() {
               <ul className="space-y-3">
                 {[
                   { t: 'Propostas ilimitadas', ok: true },
-                  { t: 'PDF sem marca', ok: true },
-                  { t: 'Envio por e-mail', ok: true },
                   { t: 'Clientes ilimitados', ok: true },
-                  { t: 'Rastreamento de visualização', ok: true },
-                  { t: 'Follow-ups automáticos', ok: true },
-                  { t: 'Modelos de proposta', ok: true },
+                  { t: 'PDF sem marca d\'água', ok: true },
+                  { t: 'Modelos prontos de proposta', ok: true },
+                  { t: 'Rastreamento de abertura', ok: true },
+                  { t: 'Follow-up automático', ok: true },
                 ].map(item => (
                   <li key={item.t} className="flex items-center gap-3">
                     <Check ok={item.ok} />
