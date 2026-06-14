@@ -92,42 +92,44 @@ export default function FundadorPage() {
 
       {/* ── Header ── */}
       <header className="px-5 py-5 flex items-center gap-2.5">
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-          style={{ backgroundColor: '#1D9E75' }}
-        >
-          FF
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/favicon.svg" width={32} height={32} alt="FreelanceFlow" />
         <span className="font-semibold text-gray-900 text-base">FreelanceFlow</span>
       </header>
+
+      {/* ── Hero — fundo verde full-width ── */}
+      <section
+        className="px-5 py-14 text-center"
+        style={{ backgroundColor: '#1D9E75' }}
+      >
+        <div className="max-w-lg mx-auto">
+          <span
+            className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-5 tracking-wide text-white"
+            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+          >
+            Oferta exclusiva de fundador
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
+            Plano Pro grátis<br />para sempre
+          </h1>
+          <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.82)' }}>
+            Apenas 10 vagas · Para os primeiros freelancers<br className="hidden sm:block" />
+            que embarcarem no FreelanceFlow
+          </p>
+        </div>
+      </section>
 
       {/* ── Main ── */}
       <main className="flex-1 flex flex-col items-center px-5 py-10">
         <div className="w-full max-w-lg">
-
-          {/* ── Hero ── */}
-          <div className="text-center mb-10">
-            <span
-              className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-5 tracking-wide"
-              style={{ backgroundColor: '#dcfce7', color: '#15803d' }}
-            >
-              Oferta exclusiva de fundador
-            </span>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
-              Plano Pro grátis<br />para sempre
-            </h1>
-            <p className="text-gray-500 text-base leading-relaxed">
-              Apenas 10 vagas · Para os primeiros freelancers<br className="hidden sm:block" />
-              que embarcarem no FreelanceFlow
-            </p>
-          </div>
 
           {/* ── Benefícios ── */}
           <div className="grid grid-cols-2 gap-3 mb-10">
             {benefits.map((b) => (
               <div
                 key={b.label}
-                className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3"
+                style={{ border: '1.5px solid #1D9E75' }}
               >
                 <span style={{ color: '#1D9E75' }}>{b.icon}</span>
                 <span className="text-sm text-gray-700 font-medium">{b.label}</span>
@@ -170,10 +172,10 @@ export default function FundadorPage() {
                 </svg>
               </div>
               <p className="font-semibold text-gray-900 text-lg mb-2">
-                Voce ja esta na lista!
+                Você já está na lista!
               </p>
               <p className="text-gray-600 text-sm">
-                Fique atento ao seu email com os proximos passos.
+                Fique atento ao seu email com os próximos passos.
               </p>
             </div>
           ) : (
