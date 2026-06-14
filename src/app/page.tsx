@@ -439,9 +439,12 @@ export default function LandingPage() {
             <div className="rounded-2xl border border-gray-200 p-8">
               <h3 className="text-lg font-bold text-gray-900">Free</h3>
               <p className="text-sm text-gray-500 mt-1">Para começar a testar</p>
-              <div className="mt-4 flex items-baseline gap-1 mb-6">
-                <span className="text-3xl font-bold text-gray-900">R$0</span>
-                <span className="text-sm text-gray-400">/mês</span>
+              <div className="mt-4 mb-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-gray-900">R$0</span>
+                  <span className="text-sm text-gray-400">/mês</span>
+                </div>
+                <div className="mt-2 h-[22px]" />
               </div>
               <Link
                 href="/cadastro"
