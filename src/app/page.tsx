@@ -439,12 +439,9 @@ export default function LandingPage() {
             <div className="rounded-2xl border border-gray-200 p-8">
               <h3 className="text-lg font-bold text-gray-900">Free</h3>
               <p className="text-sm text-gray-500 mt-1">Para começar a testar</p>
-              <div className="mt-4 mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-gray-900">R$0</span>
-                  <span className="text-sm text-gray-400">/mês</span>
-                </div>
-                <div className="mt-2 h-[22px]" />
+              <div className="mt-4 flex items-baseline gap-1 mb-6">
+                <span className="text-3xl font-bold text-gray-900">R$0</span>
+                <span className="text-sm text-gray-400">/mês</span>
               </div>
               <Link
                 href="/cadastro"
@@ -477,12 +474,12 @@ export default function LandingPage() {
               </span>
               <h3 className="text-lg font-bold text-gray-900">Pro</h3>
               <p className="text-sm text-gray-500 mt-1">Para fechar mais trabalhos</p>
-              <div className="mt-4 mb-6">
+              <div className="mt-4 mb-6 flex items-center gap-3 flex-wrap">
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold text-gray-900">R$19</span>
                   <span className="text-sm text-gray-400">/mês</span>
                 </div>
-                <span className="inline-flex items-center gap-1 mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>
                   <svg viewBox="0 0 12 12" className="w-2.5 h-2.5 fill-current"><path d="M6 0l1.5 4H12L8.5 6.5 10 11 6 8.5 2 11l1.5-4.5L0 4h4.5z"/></svg>
                   Preço de lançamento
                 </span>
