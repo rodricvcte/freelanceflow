@@ -666,51 +666,105 @@ export function ProposalPDFDocument({
   }
 
   const CoverPage = (
-    <Page size="A4" style={{ fontFamily: 'Helvetica', backgroundColor: accent }}>
-      <View style={{ flex: 1, paddingHorizontal: 48, paddingTop: 60, justifyContent: 'space-between' }}>
-        <View style={{ alignItems: 'center', marginBottom: 40 }}>
-          {profile.logo_url && (
-            // eslint-disable-next-line jsx-a11y/alt-text
-            <Image
-              src={profile.logo_url}
-              style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20 }}
-            />
-          )}
-          <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', letterSpacing: 3, marginBottom: 14, fontFamily: 'Helvetica' }}>
-            PROPOSTA COMERCIAL
-          </Text>
-          <Text style={{ fontSize: coverTitleFontSize(proposal.title), fontFamily: 'Helvetica-Bold', color: '#ffffff', lineHeight: 1.3, marginBottom: 10, textAlign: 'center' }}>
+    <Page size="A4" style={{ fontFamily: 'Helvetica', backgroundColor: '#ffffff' }}>
+
+      {/* ── Faixa superior com a cor de destaque — ~35% da página ── */}
+      <View style={{
+        backgroundColor: accent,
+        height: 294,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 48,
+        paddingVertical: 40,
+      }}>
+        {profile.logo_url && (
+          // eslint-disable-next-line jsx-a11y/alt-text
+          <Image
+            src={profile.logo_url}
+            style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 16 }}
+          />
+        )}
+        <Text style={{
+          fontSize: 20,
+          fontFamily: 'Helvetica-Bold',
+          color: '#ffffff',
+          textAlign: 'center',
+          marginBottom: 10,
+          lineHeight: 1.2,
+        }}>
+          {displayName}
+        </Text>
+        <Text style={{
+          fontSize: 8,
+          color: 'rgba(255,255,255,0.7)',
+          letterSpacing: 2.5,
+          textAlign: 'center',
+        }}>
+          PROPOSTA COMERCIAL
+        </Text>
+      </View>
+
+      {/* ── Área branca — ~65% da página ── */}
+      <View style={{
+        flex: 1,
+        backgroundColor: '#ffffff',
+        paddingHorizontal: 48,
+        paddingTop: 56,
+        justifyContent: 'space-between',
+      }}>
+
+        {/* Título e nome do cliente */}
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{
+            fontSize: coverTitleFontSize(proposal.title),
+            fontFamily: 'Helvetica-Bold',
+            color: '#111827',
+            lineHeight: 1.3,
+            textAlign: 'center',
+            marginBottom: 14,
+          }}>
             {proposal.title}
           </Text>
-          <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontFamily: 'Helvetica' }}>
-            {displayName}
-          </Text>
+          {proposal.clients && (
+            <Text style={{ fontSize: 11, color: '#9ca3af', textAlign: 'center' }}>
+              Preparada para {proposal.clients.name}
+            </Text>
+          )}
         </View>
-        <View style={{ backgroundColor: 'rgba(0,0,0,0.2)', marginHorizontal: -48, paddingHorizontal: 48, paddingVertical: 24 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            {proposal.clients && (
-              <View>
-                <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold' }}>CLIENTE</Text>
-                <Text style={{ fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3 }}>
-                  {proposal.clients.name}
-                </Text>
-                {proposal.clients.email && (
-                  <Text style={{ fontSize: 9, color: 'rgba(255,255,255,0.65)' }}>{proposal.clients.email}</Text>
-                )}
-              </View>
-            )}
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 5, fontFamily: 'Helvetica-Bold', textAlign: 'right' }}>PROPOSTA</Text>
-              <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff', marginBottom: 3, textAlign: 'right' }}>{ref}</Text>
-              <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', textAlign: 'right' }}>Emitida em {today}</Text>
-              {proposal.valid_until && (
-                <Text style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', marginTop: 1, textAlign: 'right' }}>
-                  Válida até {fmtDate(proposal.valid_until)}
-                </Text>
+
+        {/* Rodapé da capa — CLIENTE + PROPOSTA lado a lado */}
+        <View style={{
+          borderTopWidth: 1,
+          borderTopColor: '#e5e7eb',
+          paddingTop: 20,
+          paddingBottom: 40,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+        }}>
+          {proposal.clients && (
+            <View>
+              <Text style={{ fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#9ca3af', letterSpacing: 1.5, marginBottom: 5 }}>CLIENTE</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Helvetica-Bold', color: '#111827', marginBottom: 3 }}>
+                {proposal.clients.name}
+              </Text>
+              {proposal.clients.email && (
+                <Text style={{ fontSize: 9, color: '#6b7280' }}>{proposal.clients.email}</Text>
               )}
             </View>
+          )}
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={{ fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#9ca3af', letterSpacing: 1.5, marginBottom: 5, textAlign: 'right' }}>PROPOSTA</Text>
+            <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#111827', marginBottom: 3, textAlign: 'right' }}>{ref}</Text>
+            <Text style={{ fontSize: 8.5, color: '#6b7280', textAlign: 'right' }}>Emitida em {today}</Text>
+            {proposal.valid_until && (
+              <Text style={{ fontSize: 8.5, color: '#6b7280', marginTop: 1, textAlign: 'right' }}>
+                Válida até {fmtDate(proposal.valid_until)}
+              </Text>
+            )}
           </View>
         </View>
+
       </View>
     </Page>
   )
