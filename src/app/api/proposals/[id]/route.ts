@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { buildNewProposalNumber } from '@/lib/proposal-number'
+import { createServiceClient } from '@/lib/supabase-service'
+import { buildProposalCode } from '@/lib/proposal-number'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 
 export const runtime = 'nodejs'
@@ -77,7 +78,7 @@ export async function PUT(
   const [{ data: current }, { data: profile }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, version, created_at, proposal_number, status')
+      .select('id, version, created_at, proposal_number, code, status')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -104,12 +105,10 @@ export async function PUT(
     return NextResponse.json({ error: 'Título e valor são obrigatórios' }, { status: 400 })
   }
 
-  // Draft saves never increment version — version only changes via an explicit "new version" action.
-  // Keep existing proposal_number; generate one only if it doesn't exist yet.
-  const proposalNumber = current.proposal_number
-    ?? (profile?.freelancer_code
-      ? await buildNewProposalNumber(user.id, profile.freelancer_code, current.created_at, supabase)
-      : null)
+  // Draft saves never increment version. Keep existing code; generate only if missing.
+  const currentCode = (current as Record<string, unknown>).code as string | null
+  const proposalCode = currentCode
+    ?? await buildProposalCode(user.id, supabase, createServiceClient(), current.created_at)
 
   const snapshotProfile = profile ? {
     full_name:      profile.full_name,
@@ -140,7 +139,8 @@ export async function PUT(
       valid_until:         valid_until || null,
       client_id:           client_id || null,
       sections:            Array.isArray(sections) ? sections : [],
-      ...(proposalNumber  ? { proposal_number: proposalNumber } : {}),
+      code:            proposalCode,
+      proposal_number: proposalCode,   // keep in sync for LIKE-based version queries
       ...(snapshotProfile ? { snapshot_profile: snapshotProfile } : {}),
     })
     .eq('id', id)

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { canCreateProposal } from '@/lib/plan'
-import { buildNewProposalNumber } from '@/lib/proposal-number'
+import { buildProposalCode } from '@/lib/proposal-number'
 import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 import { getViewAs } from '@/lib/view-as'
 
@@ -19,7 +19,7 @@ export async function GET() {
 
   const { data, error } = await queryClient
     .from('proposals')
-    .select('id, title, value, status, created_at, sent_at, version, proposal_number, pdf_url, clients(id, name)')
+    .select('id, title, value, status, created_at, sent_at, version, proposal_number, code, pdf_url, clients(id, name)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
@@ -84,9 +84,10 @@ export async function POST(request: Request) {
 
   const updates: Record<string, unknown> = {}
 
-  if (profile?.freelancer_code) {
-    updates.proposal_number = await buildNewProposalNumber(user.id, profile.freelancer_code, data.created_at, supabase)
-  }
+  const serviceClient = createServiceClient()
+  const proposalCode = await buildProposalCode(user.id, supabase, serviceClient, data.created_at)
+  updates.code            = proposalCode
+  updates.proposal_number = proposalCode  // keep proposal_number in sync for LIKE queries
 
   if (profile) {
     updates.snapshot_profile = {

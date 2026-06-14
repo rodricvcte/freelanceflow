@@ -13,7 +13,7 @@ export async function generateAndSaveProposalPDF(
   const [{ data: raw }, { data: authData }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('title, service_description, value, payment_terms, deadline_days, valid_until, token, proposal_number, version, sections, snapshot_profile, clients(name, email)')
+      .select('title, service_description, value, payment_terms, deadline_days, valid_until, token, proposal_number, code, version, sections, snapshot_profile, clients(name, email)')
       .eq('id', proposalId)
       .single(),
     supabase.auth.getUser(),
@@ -55,6 +55,8 @@ export async function generateAndSaveProposalPDF(
     ? (rawClients[0] as { name: string; email: string | null } | undefined) ?? null
     : (rawClients as { name: string; email: string | null } | null)
 
+  const rawCode = (raw as Record<string, unknown>).code as string | null
+
   const proposal: ProposalForPDF = {
     title:               raw.title,
     service_description: raw.service_description,
@@ -63,6 +65,7 @@ export async function generateAndSaveProposalPDF(
     deadline_days:       raw.deadline_days,
     valid_until:         raw.valid_until,
     token:               raw.token,
+    code:                rawCode,
     proposal_number:     raw.proposal_number ?? null,
     version:             raw.version ?? 1,
     sections:            (raw.sections as Section[] | null) ?? [],
@@ -85,7 +88,7 @@ export async function generateAndSaveProposalPDF(
     <ProposalPDFDocument proposal={proposal} profile={profile} isFreePlan={isFreePlan} /> as any
   )
 
-  const num = raw.proposal_number as string | null
+  const num = rawCode ?? (raw.proposal_number as string | null)
   const filePath = `${authData.user.id}/${num ?? proposalId}.pdf`
 
   await service.storage.createBucket(BUCKET, { public: true }).catch(() => {})

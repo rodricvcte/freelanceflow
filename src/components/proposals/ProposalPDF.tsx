@@ -52,6 +52,7 @@ export type ProposalForPDF = {
   deadline_days: number | null
   valid_until: string | null
   token: string
+  code: string | null
   proposal_number: string | null
   version: number
   sections: Section[]
@@ -651,7 +652,8 @@ export function ProposalPDFDocument({
 }) {
   const accent      = profile.accent_color ?? '#1D9E75'
   const displayName = profile.business_name ?? profile.full_name ?? 'Freelancer'
-  const ref = proposal.proposal_number
+  const ref = proposal.code
+    ?? proposal.proposal_number
     ?? ('#' + proposal.token.substring(0, 8).toUpperCase() + ' · v' + proposal.version)
   const today        = new Intl.DateTimeFormat('pt-BR').format(new Date())
   const docFormatted = fmtDoc(profile.document_type, profile.cpf_cnpj)

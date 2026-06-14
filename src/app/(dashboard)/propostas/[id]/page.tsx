@@ -35,6 +35,7 @@ type ProposalRow = {
   status: string
   pdf_url: string | null
   token: string
+  code: string | null
   proposal_number: string | null
   version: number
   created_at: string
@@ -419,7 +420,7 @@ export default async function ProposalDetailPage({
   const [proposalRes, eventsRes, followUpsRes, profileRes, subRes] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, version, client_id, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
+      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, code, version, client_id, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -463,10 +464,9 @@ export default async function ProposalDetailPage({
   const statusCfg = STATUS_CONFIG[proposal.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.rascunho
 
   const version    = proposal.version ?? 1
-  const baseNumber = proposal.proposal_number?.replace(/-v\d+$/, '') ?? null
-  const ref = baseNumber
-    ? `${baseNumber}-v${version}`
-    : '#' + proposal.token.substring(0, 8).toUpperCase()
+  const displayCode  = proposal.code ?? proposal.proposal_number
+  const baseNumber   = displayCode?.replace(/-v\d+$/, '') ?? null
+  const ref = displayCode ?? ('#' + proposal.token.substring(0, 8).toUpperCase())
 
   const clientsRaw = (proposalRes.data as Record<string, unknown>).clients
   const client = Array.isArray(clientsRaw)
@@ -476,15 +476,27 @@ export default async function ProposalDetailPage({
   const card = 'bg-white rounded-[10px] border border-gray-100'
   const viewCount = events.filter(e => e.event_type === 'viewed').length
 
-  // Other versions of the same proposal (same base number, excluding current)
-  const otherVersions = baseNumber
-    ? ((await supabase
-        .from('proposals')
-        .select('id, proposal_number, version, status, created_at')
-        .eq('user_id', user.id)
-        .like('proposal_number', `${baseNumber}-v%`)
-        .neq('id', id)
-        .order('version', { ascending: false })).data ?? [])
+  // Other versions of the same proposal (same base code, excluding current)
+  // Prefer querying by `code`; fall back to `proposal_number` for older proposals
+  const codeBase = proposal.code?.replace(/-v\d+$/, '') ?? null
+  const numBase  = proposal.proposal_number?.replace(/-v\d+$/, '') ?? null
+  const otherVersions = (codeBase ?? numBase)
+    ? ((await (codeBase
+        ? supabase
+            .from('proposals')
+            .select('id, code, proposal_number, version, status, created_at')
+            .eq('user_id', user.id)
+            .like('code', `${codeBase}-v%`)
+            .neq('id', id)
+            .order('version', { ascending: false })
+        : supabase
+            .from('proposals')
+            .select('id, code, proposal_number, version, status, created_at')
+            .eq('user_id', user.id)
+            .like('proposal_number', `${numBase}-v%`)
+            .neq('id', id)
+            .order('version', { ascending: false })
+      )).data ?? [])
     : []
 
   const newerVersions = otherVersions.filter(v => (v.version ?? 1) > version)

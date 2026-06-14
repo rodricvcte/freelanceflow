@@ -13,6 +13,7 @@ type Proposal = {
   status: string
   created_at: string
   version: number
+  code: string | null
   proposal_number: string | null
   pdf_url: string | null
   clients: { id: string; name: string } | null
@@ -154,7 +155,8 @@ function ProposalsPageInner() {
       }
       if (!matchesValueRange(p.value, valueRange)) return false
       const q = search.toLowerCase()
-      if (q && !p.title.toLowerCase().includes(q) && !(p.proposal_number?.toLowerCase().includes(q))) return false
+      const displayCode = p.code ?? p.proposal_number
+      if (q && !p.title.toLowerCase().includes(q) && !displayCode?.toLowerCase().includes(q)) return false
       return true
     })
   }, [proposals, search, statusFilter, period, clientFilter, valueRange])
@@ -272,8 +274,8 @@ function ProposalsPageInner() {
                 {filtered.map((p, i) => (
                   <tr key={p.id} className={`transition-colors hover:bg-gray-50 ${i % 2 !== 0 ? 'bg-gray-50/70' : 'bg-white'}`}>
                     <td className="px-5 py-3.5 max-w-[220px]">
-                      {p.proposal_number && (
-                        <span className="font-mono text-xs text-[#1D9E75] font-semibold block mb-0.5">{p.proposal_number}</span>
+                      {(p.code ?? p.proposal_number) && (
+                        <span className="font-mono text-xs text-[#1D9E75] font-semibold block mb-0.5">{p.code ?? p.proposal_number}</span>
                       )}
                       <span className="font-medium text-gray-900 text-sm line-clamp-1">{p.title}</span>
                     </td>
