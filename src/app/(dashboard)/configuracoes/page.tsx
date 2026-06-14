@@ -915,7 +915,7 @@ function NotificationsTab() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'perfil' | 'plano' | 'notificacoes' | 'followups'
+type Tab = 'perfil' | 'plano' | 'notificacoes' | 'followups' | 'suporte'
 
 export default function ConfiguracoesPage() {
   return (
@@ -963,6 +963,7 @@ function ConfiguracoesInner() {
     { id: 'plano',         label: 'Plano' },
     { id: 'notificacoes',  label: 'Notificações' },
     { id: 'followups',     label: 'Follow-ups' },
+    { id: 'suporte',       label: 'Suporte' },
   ]
 
   return (
@@ -1013,8 +1014,101 @@ function ConfiguracoesInner() {
               initialExpiryEnabled={profile.followup_expiry_enabled ?? true}
             />
           )}
+          {tab === 'suporte' && <SuporteTab />}
         </>
       )}
+    </div>
+  )
+}
+
+// ─── Tab: Suporte ─────────────────────────────────────────────────────────────
+
+const TIPOS_SUPORTE = ['Dúvida', 'Sugestão', 'Problema', 'Outro'] as const
+
+function SuporteTab() {
+  const [tipo,     setTipo]     = useState<string>('Dúvida')
+  const [mensagem, setMensagem] = useState('')
+  const [sending,  setSending]  = useState(false)
+  const [result,   setResult]   = useState<{ ok: boolean; text: string } | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (mensagem.trim().length < 20) return
+    setSending(true)
+    setResult(null)
+    try {
+      const res  = await fetch('/api/support', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ tipo, mensagem: mensagem.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Erro ao enviar')
+      setResult({ ok: true, text: 'Mensagem enviada! Responderemos em breve no seu email.' })
+      setTipo('Dúvida')
+      setMensagem('')
+    } catch (e: unknown) {
+      setResult({ ok: false, text: e instanceof Error ? e.message : 'Erro ao enviar mensagem.' })
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+        <h2 className="text-base font-semibold text-gray-900 mb-1">Fale conosco</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Dúvidas, sugestões ou problemas? Nos conte o que está acontecendo.
+        </p>
+
+        {result && (
+          <div className={`mb-5 p-3 rounded-lg text-sm ${result.ok ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+            {result.text}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+            <select
+              value={tipo}
+              onChange={e => setTipo(e.target.value)}
+              disabled={sending}
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent disabled:opacity-50"
+            >
+              {TIPOS_SUPORTE.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem</label>
+            <textarea
+              value={mensagem}
+              onChange={e => setMensagem(e.target.value)}
+              required
+              disabled={sending}
+              rows={5}
+              placeholder="Descreva sua dúvida, sugestão ou problema com o máximo de detalhes..."
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent resize-none disabled:opacity-50"
+            />
+            <p className={`text-xs mt-1 ${mensagem.trim().length < 20 && mensagem.length > 0 ? 'text-amber-600' : 'text-gray-400'}`}>
+              {mensagem.trim().length} / 20 caracteres mínimos
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={sending || mensagem.trim().length < 20}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors disabled:opacity-50"
+          >
+            {sending && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            {sending ? 'Enviando...' : 'Enviar mensagem'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

@@ -202,6 +202,9 @@ export default function Sidebar() {
                 ) : (
                   <span className="text-[10px] text-gray-400">FreelanceFlow Free</span>
                 )}
+                {userInfo.email && (
+                  <p className="text-[11px] text-gray-400 truncate mt-0.5">{userInfo.email}</p>
+                )}
               </div>
             </Link>
           ) : (

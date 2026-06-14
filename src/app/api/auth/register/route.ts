@@ -38,11 +38,13 @@ async function generateFreelancerCode(fullName: string, serviceClient: any): Pro
 }
 
 export async function POST(request: Request) {
-  const { email, password, full_name } = await request.json()
+  const { email, password } = await request.json()
 
-  if (!email || !password || !full_name) {
-    return NextResponse.json({ error: 'Todos os campos são obrigatórios' }, { status: 400 })
+  if (!email || !password) {
+    return NextResponse.json({ error: 'Email e senha são obrigatórios' }, { status: 400 })
   }
+
+  const full_name = email.split('@')[0]
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

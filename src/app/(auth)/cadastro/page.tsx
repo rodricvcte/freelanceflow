@@ -3,15 +3,20 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import PasswordInput from '@/components/PasswordInput'
 
 export default function CadastroPage() {
-  const [nome, setNome] = useState('')
-  const [email, setEmail] = useState('')
+  const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
+  const [confirm,  setConfirm]  = useState('')
+  const [error,    setError]    = useState<string | null>(null)
+  const [success,  setSuccess]  = useState(false)
+  const [loading,  setLoading]  = useState(false)
+  const [googleLoading,  setGoogleLoading]  = useState(false)
+  const [resendStatus,   setResendStatus]   = useState<'idle' | 'sending' | 'sent'>('idle')
+
+  const passwordMismatch = confirm.length > 0 && password !== confirm
+  const canSubmit = !loading && !passwordMismatch && password.length >= 8 && confirm === password
 
   async function handleGoogle() {
     setGoogleLoading(true)
@@ -24,71 +29,79 @@ export default function CadastroPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (password !== confirm) { setError('As senhas não coincidem.'); return }
     setError(null)
     setLoading(true)
 
-    try {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, full_name: nome }),
+    const supabase = createClient()
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
 
-    const data = await res.json()
+    setLoading(false)
 
-    if (!res.ok) {
-      setError(data.error ?? 'Erro ao criar conta.')
-      setLoading(false)
+    if (error) {
+      setError(error.message)
       return
     }
 
     setSuccess(true)
-    } catch {
-      setError('Erro inesperado. Tente novamente.')
-      setLoading(false)
-    }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <svg
-          className="animate-spin h-10 w-10 text-[#1D9E75]"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      </div>
-    )
+  async function handleResend() {
+    if (resendStatus !== 'idle') return
+    setResendStatus('sending')
+    const supabase = createClient()
+    await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    })
+    setResendStatus('sent')
+    setTimeout(() => setResendStatus('idle'), 30_000)
   }
 
+  /* ── Tela de confirmação ── */
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="w-12 h-12 bg-[#1D9E75]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <div className="w-16 h-16 bg-[#1D9E75]/10 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Conta criada com sucesso!</h2>
-          <p className="text-sm text-gray-500 mb-6">
-            Enviamos um email de confirmação para <strong>{email}</strong>. Verifique sua caixa de entrada para ativar sua conta.
+
+          <h2 className="text-xl font-bold text-gray-900 mb-3">Verifique seu email</h2>
+
+          <p className="text-sm text-gray-600 leading-relaxed mb-1">
+            Enviamos um link de confirmação para <strong>{email}</strong>.
           </p>
-          <Link
-            href="/login"
-            className="inline-block py-2.5 px-6 bg-[#1D9E75] text-white rounded-lg text-sm font-medium hover:bg-[#188f68] transition-colors"
+          <p className="text-sm text-gray-600 leading-relaxed mb-6">
+            Clique no link para ativar sua conta.
+          </p>
+
+          <p className="text-xs text-gray-400 mb-3">
+            Não recebeu? Verifique a pasta de spam ou clique abaixo para reenviar.
+          </p>
+
+          <button
+            onClick={handleResend}
+            disabled={resendStatus !== 'idle'}
+            className="text-sm font-medium text-[#1D9E75] hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Ir para o login
-          </Link>
+            {resendStatus === 'sending' && 'Reenviando...'}
+            {resendStatus === 'sent'    && 'Reenviado! Verifique sua caixa.'}
+            {resendStatus === 'idle'    && 'Reenviar email'}
+          </button>
         </div>
       </div>
     )
   }
 
+  /* ── Formulário ── */
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
@@ -110,7 +123,7 @@ export default function CadastroPage() {
             className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-5"
           >
             {googleLoading ? (
-              <svg className="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
@@ -139,22 +152,6 @@ export default function CadastroPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
-                Nome completo
-              </label>
-              <input
-                id="nome"
-                type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-                autoComplete="name"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent transition-shadow"
-                placeholder="Seu nome completo"
-              />
-            </div>
-
-            <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
               </label>
@@ -174,24 +171,46 @@ export default function CadastroPage() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Senha
               </label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent transition-shadow"
                 placeholder="Mínimo 8 caracteres"
               />
             </div>
 
+            <div>
+              <label htmlFor="confirm" className="block text-sm font-medium text-gray-700 mb-1">
+                Confirmar senha
+              </label>
+              <PasswordInput
+                id="confirm"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+                autoComplete="new-password"
+                placeholder="Repita a senha"
+                className={passwordMismatch ? 'border-red-400 focus:ring-red-400' : ''}
+              />
+              {passwordMismatch && (
+                <p className="mt-1 text-xs text-red-600">As senhas não coincidem.</p>
+              )}
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-2.5 px-4 bg-[#1D9E75] text-white rounded-lg text-sm font-medium hover:bg-[#188f68] active:bg-[#147a59] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!canSubmit}
+              className="w-full py-2.5 px-4 bg-[#1D9E75] text-white rounded-lg text-sm font-medium hover:bg-[#188f68] active:bg-[#147a59] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
+              {loading && (
+                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
               {loading ? 'Criando conta...' : 'Criar conta grátis'}
             </button>
           </form>
