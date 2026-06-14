@@ -189,11 +189,17 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
     setMsg(null)
     setSaving(true)
     try {
+      const rawWebsite = form.website.trim()
+      const website = rawWebsite
+        ? (/^https?:\/\//i.test(rawWebsite) ? rawWebsite : `https://${rawWebsite}`)
+        : ''
+
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          website,
           cpf_cnpj: form.cpf_cnpj.replace(/\D/g, '') || null,
         }),
       })
@@ -308,8 +314,8 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
 
         <div>
           <label className={labelCls}>Site / portfólio</label>
-          <input type="url" value={form.website} onChange={e => set('website', e.target.value)}
-            placeholder="https://rcdesign.com.br" className={inputCls} />
+          <input type="text" value={form.website} onChange={e => set('website', e.target.value)}
+            placeholder="rcdesign.com.br" className={inputCls} />
         </div>
       </div>
 
