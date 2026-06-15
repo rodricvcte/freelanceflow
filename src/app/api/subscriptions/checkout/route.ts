@@ -5,8 +5,8 @@ import { stripe } from '@/lib/stripe'
 import { APP_URL } from '@/lib/app-url'
 
 export async function POST(_request: Request) {
-  const priceId = process.env.STRIPE_PRICE_ID
-  if (!priceId) return NextResponse.json({ error: 'STRIPE_PRICE_ID não configurado' }, { status: 500 })
+  const priceId = process.env.STRIPE_PRICE_MONTHLY
+  if (!priceId) return NextResponse.json({ error: 'STRIPE_PRICE_MONTHLY não configurado' }, { status: 500 })
 
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
