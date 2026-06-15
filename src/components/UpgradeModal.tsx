@@ -26,9 +26,9 @@ export default function UpgradeModal({ open, onClose }: Props) {
     setError(null)
     try {
       const res  = await fetch('/api/subscriptions/checkout', { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error ?? 'Erro ao iniciar checkout'); return }
-      if (data.url) window.location.href = data.url
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) { setError((data as {error?: string}).error ?? `Erro ${res.status}`); return }
+      if ((data as {url?: string}).url) window.location.href = (data as {url: string}).url
     } catch {
       setError('Erro de conexão. Tente novamente.')
     } finally {
