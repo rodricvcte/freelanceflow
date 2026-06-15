@@ -34,24 +34,32 @@ export async function POST(request: Request) {
   const confirmUrl = data.properties.action_link
   const name = email.split('@')[0]
 
-  if (!process.env.RESEND_API_KEY) {
-    return NextResponse.json({ error: 'Configuração de email ausente no servidor.' }, { status: 500 })
+  let resendOk = false
+  if (process.env.RESEND_API_KEY) {
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const { error: emailError } = await resend.emails.send({
+      from:    'FreelanceFlow <noreply@freelanceflow.com.br>',
+      to:      email,
+      subject: 'Confirme sua conta — FreelanceFlow',
+      html:    buildEmailConfirmationHtml({ name, confirmUrl }),
+    })
+    if (emailError) {
+      console.warn('[resend-confirmation] Resend falhou, usando fallback Supabase:', emailError.message)
+    } else {
+      resendOk = true
+    }
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY)
-  const { error: emailError } = await resend.emails.send({
-    from:    'FreelanceFlow <noreply@freelanceflow.com.br>',
-    to:      email,
-    subject: 'Confirme sua conta — FreelanceFlow',
-    html:    buildEmailConfirmationHtml({ name, confirmUrl }),
-  })
-
-  if (emailError) {
-    console.error('[resend-confirmation] Resend error:', emailError)
-    return NextResponse.json(
-      { error: `Erro ao reenviar email: ${emailError.message}` },
-      { status: 500 }
+  if (!resendOk) {
+    const anonClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
+    await anonClient.auth.resend({
+      type:    'signup',
+      email,
+      options: { emailRedirectTo: `${APP_URL}/auth/callback` },
+    })
   }
 
   return NextResponse.json({ ok: true })

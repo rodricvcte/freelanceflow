@@ -87,28 +87,37 @@ export async function POST(request: Request) {
   )
 
   // Envia email de confirmação via Resend
-  if (!process.env.RESEND_API_KEY) {
-    console.error('[register] RESEND_API_KEY não configurada')
-    return NextResponse.json({ error: 'Configuração de email ausente no servidor.' }, { status: 500 })
+  // Tenta enviar email customizado via Resend; cai no email nativo do Supabase se falhar
+  let resendOk = false
+  if (process.env.RESEND_API_KEY) {
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const { error: emailError } = await resend.emails.send({
+      from:    'FreelanceFlow <noreply@freelanceflow.com.br>',
+      to:      email,
+      subject: 'Confirme sua conta — FreelanceFlow',
+      html:    buildEmailConfirmationHtml({
+        name:       full_name.trim().split(/\s+/)[0],
+        confirmUrl,
+      }),
+    })
+    if (emailError) {
+      console.warn('[register] Resend falhou, usando fallback Supabase:', emailError.message)
+    } else {
+      resendOk = true
+    }
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY)
-  const { error: emailError } = await resend.emails.send({
-    from:    'FreelanceFlow <noreply@freelanceflow.com.br>',
-    to:      email,
-    subject: 'Confirme sua conta — FreelanceFlow',
-    html:    buildEmailConfirmationHtml({
-      name:       full_name.trim().split(/\s+/)[0],
-      confirmUrl,
-    }),
-  })
-
-  if (emailError) {
-    console.error('[register] Resend error:', emailError)
-    return NextResponse.json(
-      { error: `Erro ao enviar email: ${emailError.message}` },
-      { status: 500 }
+  // Fallback: email nativo do Supabase (funciona sem domínio verificado)
+  if (!resendOk) {
+    const anonClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
+    await anonClient.auth.resend({
+      type:    'signup',
+      email,
+      options: { emailRedirectTo: `${APP_URL}/auth/callback` },
+    })
   }
 
   return NextResponse.json({ ok: true })
