@@ -1,19 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import PasswordInput from '@/components/PasswordInput'
 
 export default function CadastroPage() {
+  const router = useRouter()
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [confirm,  setConfirm]  = useState('')
   const [error,    setError]    = useState<string | null>(null)
-  const [success,  setSuccess]  = useState(false)
   const [loading,  setLoading]  = useState(false)
   const [googleLoading,  setGoogleLoading]  = useState(false)
-  const [resendStatus,   setResendStatus]   = useState<'idle' | 'sending' | 'sent'>('idle')
 
   const passwordMismatch = confirm.length > 0 && password !== confirm
   const canSubmit = !loading && !passwordMismatch && password.length >= 8 && confirm === password
@@ -34,66 +34,12 @@ export default function CadastroPage() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
+    const { error } = await supabase.auth.signUp({ email, password })
     setLoading(false)
 
     if (error) { setError(error.message); return }
-    setSuccess(true)
-  }
-
-  async function handleResend() {
-    if (resendStatus !== 'idle') return
-    setResendStatus('sending')
-    const supabase = createClient()
-    await supabase.auth.resend({
-      type:    'signup',
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
-    setResendStatus('sent')
-    setTimeout(() => setResendStatus('idle'), 30_000)
-  }
-
-  /* ── Tela de confirmação ── */
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="w-16 h-16 bg-[#1D9E75]/10 rounded-full flex items-center justify-center mx-auto mb-5">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-
-          <h2 className="text-xl font-bold text-gray-900 mb-3">Verifique seu email</h2>
-
-          <p className="text-sm text-gray-600 leading-relaxed mb-1">
-            Enviamos um link de confirmação para <strong>{email}</strong>.
-          </p>
-          <p className="text-sm text-gray-600 leading-relaxed mb-6">
-            Clique no link para ativar sua conta.
-          </p>
-
-          <p className="text-xs text-gray-400 mb-3">
-            Não recebeu? Verifique a pasta de spam ou clique abaixo para reenviar.
-          </p>
-
-          <button
-            onClick={handleResend}
-            disabled={resendStatus !== 'idle'}
-            className="text-sm font-medium text-[#1D9E75] hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {resendStatus === 'sending' && 'Reenviando...'}
-            {resendStatus === 'sent'    && 'Reenviado! Verifique sua caixa.'}
-            {resendStatus === 'idle'    && 'Reenviar email'}
-          </button>
-        </div>
-      </div>
-    )
+    router.push('/dashboard')
+    router.refresh()
   }
 
   /* ── Formulário ── */
