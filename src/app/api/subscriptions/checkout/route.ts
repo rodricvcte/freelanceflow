@@ -23,6 +23,20 @@ export async function POST(_request: Request) {
 
     let customerId = sub?.stripe_customer_id as string | undefined
 
+    if (customerId) {
+      // Validate the saved customer still exists in the current Stripe mode (test vs live)
+      try {
+        await stripe.customers.retrieve(customerId)
+      } catch (err: unknown) {
+        const stripeErr = err as { code?: string }
+        if (stripeErr.code === 'resource_missing') {
+          customerId = undefined // stale test-mode ID — will create a new one below
+        } else {
+          throw err
+        }
+      }
+    }
+
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email!,
