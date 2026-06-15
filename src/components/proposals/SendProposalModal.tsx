@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 type Props = {
@@ -29,9 +29,9 @@ export default function SendProposalModal({
     custom_message:  DEFAULT_MESSAGE,
   })
 
+  const wasOpen = useRef(false)
   useEffect(() => {
-    if (open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (open && !wasOpen.current) {
       setSuccess(false)
       setError(null)
       setForm({
@@ -40,7 +40,10 @@ export default function SendProposalModal({
         custom_message:  DEFAULT_MESSAGE,
       })
     }
-  }, [open, clientEmail, clientName])
+    wasOpen.current = open
+  // Reset only when modal transitions from closed → open, not on prop changes while open
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   function setField(k: keyof typeof form, v: string) {
     setForm(p => ({ ...p, [k]: v }))
