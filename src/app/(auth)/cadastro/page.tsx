@@ -33,11 +33,21 @@ export default function CadastroPage() {
     setError(null)
     setLoading(true)
 
+    // Cria conta via API (sem email de confirmação)
+    const res = await fetch('/api/auth/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error ?? 'Erro ao criar conta.'); setLoading(false); return }
+
+    // Faz login imediatamente
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ email, password })
+    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
 
-    if (error) { setError(error.message); return }
+    if (loginError) { setError(loginError.message); return }
     router.push('/dashboard')
     router.refresh()
   }

@@ -1,13 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { Resend } from 'resend'
-import { buildEmailConfirmationHtml } from '@/lib/email-templates/notification'
-
-// Prefer explicit server-side URL over NEXT_PUBLIC_ which defaults to localhost in .env.local
-const APP_URL =
-  process.env.APP_URL ??
-  process.env.NEXT_PUBLIC_APP_URL ??
-  'https://www.freelanceflow.com.br'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateFreelancerCode(fullName: string, serviceClient: any): Promise<string> {
@@ -55,25 +47,20 @@ export async function POST(request: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
-  // Cria o usuário e gera o link de confirmação em um único passo
-  const { data, error } = await supabase.auth.admin.generateLink({
-    type: 'signup',
+  // Cria usuário já confirmado — sem enviar nenhum email
+  const { data, error } = await supabase.auth.admin.createUser({
     email,
     password,
-    options: {
-      data: { full_name },
-      redirectTo: `${APP_URL}/auth/callback`,
-    },
+    email_confirm: true,
+    user_metadata: { full_name },
   })
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  const userId     = data.user.id
-  const confirmUrl = data.properties.action_link
+  const userId = data.user.id
 
-  // Cria o perfil com código de freelancer
   let freelancer_code: string
   try {
     freelancer_code = await generateFreelancerCode(full_name.trim(), supabase)
@@ -85,40 +72,6 @@ export async function POST(request: Request) {
     { id: userId, full_name: full_name.trim(), freelancer_code },
     { onConflict: 'id' }
   )
-
-  // Envia email de confirmação via Resend
-  // Tenta enviar email customizado via Resend; cai no email nativo do Supabase se falhar
-  let resendOk = false
-  if (process.env.RESEND_API_KEY) {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const { error: emailError } = await resend.emails.send({
-      from:    'FreelanceFlow <noreply@freelanceflow.com.br>',
-      to:      email,
-      subject: 'Confirme sua conta — FreelanceFlow',
-      html:    buildEmailConfirmationHtml({
-        name:       full_name.trim().split(/\s+/)[0],
-        confirmUrl,
-      }),
-    })
-    if (emailError) {
-      console.warn('[register] Resend falhou, usando fallback Supabase:', emailError.message)
-    } else {
-      resendOk = true
-    }
-  }
-
-  // Fallback: email nativo do Supabase (funciona sem domínio verificado)
-  if (!resendOk) {
-    const anonClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
-    await anonClient.auth.resend({
-      type:    'signup',
-      email,
-      options: { emailRedirectTo: `${APP_URL}/auth/callback` },
-    })
-  }
 
   return NextResponse.json({ ok: true })
 }
