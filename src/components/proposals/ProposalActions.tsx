@@ -63,7 +63,7 @@ export default function ProposalActions({ proposalId, status, version, newerVers
     setDuplicating(true)
     try {
       sessionStorage.setItem('ff_duplicate_draft', JSON.stringify({
-        title:               duplicate.title,
+        title:               `Cópia de ${duplicate.title}`,
         service_description: duplicate.service_description,
         value:               duplicate.value,
         payment_terms:       duplicate.payment_terms,
