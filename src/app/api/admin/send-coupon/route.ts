@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error: emailError } = await resend.emails.send({
-    from:    'FreelanceFlow <noreply@freelanceflow.com.br>',
+    from:    'FreelanceFlow <contato@freelanceflow.com.br>',
     to:      email,
     replyTo: ADMIN_EMAIL,
     subject: 'Seu cupom de fundador chegou — FreelanceFlow',

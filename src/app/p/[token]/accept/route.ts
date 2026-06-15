@@ -18,7 +18,7 @@ async function sendAcceptedNotification(
     const resend     = new Resend(process.env.RESEND_API_KEY)
     const clientName = (proposal.recipient_name as string | null) || 'Seu cliente'
     await resend.emails.send({
-      from:     'FreelanceFlow <noreply@freelanceflow.com.br>',
+      from:     'FreelanceFlow <contato@freelanceflow.com.br>',
       to:       freelancer.email,
       replyTo: (proposal.recipient_email as string | null) ?? undefined,
       subject:  `${clientName} aceitou sua proposta — ${proposal.title ?? 'Proposta'}`,
