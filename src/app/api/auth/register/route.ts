@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     await resend.emails.send({
       from:    'FreelanceFlow <onboarding@resend.dev>',
       to:      email,
-      subject: 'Confirme seu email — FreelanceFlow',
+      subject: 'Confirme sua conta — FreelanceFlow',
       html:    buildEmailConfirmationHtml({
         name:       full_name.trim().split(/\s+/)[0],
         confirmUrl,

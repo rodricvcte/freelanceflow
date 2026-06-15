@@ -33,17 +33,16 @@ export default function CadastroPage() {
     setError(null)
     setLoading(true)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    const res  = await fetch('/api/auth/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password }),
     })
-
+    const data = await res.json()
     setLoading(false)
 
-    if (error) {
-      setError(error.message)
+    if (!res.ok) {
+      setError(data.error ?? 'Erro ao criar conta. Tente novamente.')
       return
     }
 
@@ -53,12 +52,13 @@ export default function CadastroPage() {
   async function handleResend() {
     if (resendStatus !== 'idle') return
     setResendStatus('sending')
-    const supabase = createClient()
-    await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
+    try {
+      await fetch('/api/auth/resend-confirmation', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password }),
+      })
+    } catch { /* silent — show "sent" regardless */ }
     setResendStatus('sent')
     setTimeout(() => setResendStatus('idle'), 30_000)
   }
