@@ -1,15 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
 
-const ROWS = [
-  { label: 'Propostas',     free: '5/mês', pro: 'Ilimitadas' },
-  { label: 'Clientes',      free: '5',     pro: 'Ilimitados' },
-  { label: 'Rastreamento',  free: '✓',     pro: '✓' },
-  { label: 'Follow-ups',    free: '✓',     pro: '✓' },
-  { label: 'PDF sem marca', free: '✗',     pro: '✓' },
-  { label: 'Modelos',       free: '✗',     pro: '✓' },
+const BENEFITS = [
+  'Propostas ilimitadas',
+  'Clientes ilimitados',
+  'PDF sem marca d\'água',
+  'Modelos prontos de proposta',
 ]
 
 type Props = {
@@ -18,23 +15,23 @@ type Props = {
   feature?: string
 }
 
-export default function UpgradeModal({ open, onClose, feature }: Props) {
+export default function UpgradeModal({ open, onClose }: Props) {
   const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState<string | null>(null)
 
   if (!open) return null
 
   async function handleCheckout() {
     setLoading(true)
+    setError(null)
     try {
-      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY ?? ''
-      const res = await fetch('/api/subscriptions/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ price_id: priceId }),
-      })
+      const res  = await fetch('/api/subscriptions/checkout', { method: 'POST' })
       const data = await res.json()
-      if (res.ok && data.url) window.location.href = data.url
-    } catch { /* ignore */ } finally {
+      if (!res.ok) { setError(data.error ?? 'Erro ao iniciar checkout'); return }
+      if (data.url) window.location.href = data.url
+    } catch {
+      setError('Erro de conexão. Tente novamente.')
+    } finally {
       setLoading(false)
     }
   }
@@ -45,76 +42,70 @@ export default function UpgradeModal({ open, onClose, feature }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-7"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#1D9E75]/10 flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-gray-900">Recurso exclusivo do plano Pro</h2>
-              {feature && <p className="text-xs text-gray-500 mt-0.5">{feature}</p>}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 rounded-full bg-[#1D9E75]/10 flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-          </button>
+          </div>
+          <h2 className="text-lg font-bold text-gray-900">Assine o plano Pro</h2>
+          <p className="text-sm text-gray-500 mt-1">Desbloqueie todo o potencial do FreelanceFlow</p>
         </div>
 
-        {/* Comparison table */}
-        <div className="rounded-xl overflow-hidden border border-gray-100 mb-5">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500">Recurso</th>
-                <th className="px-4 py-2.5 text-center text-xs font-semibold text-gray-400 w-20">Free</th>
-                <th className="px-4 py-2.5 text-center text-xs font-semibold text-[#1D9E75] w-20">Pro</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {ROWS.map(row => (
-                <tr key={row.label}>
-                  <td className="px-4 py-2 text-gray-700 text-xs">{row.label}</td>
-                  <td className="px-4 py-2 text-center text-xs text-gray-400">{row.free}</td>
-                  <td className="px-4 py-2 text-center text-xs font-medium text-[#1D9E75]">{row.pro}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Benefits */}
+        <ul className="space-y-2.5 mb-6">
+          {BENEFITS.map(b => (
+            <li key={b} className="flex items-center gap-2.5 text-sm text-gray-700">
+              <span className="w-5 h-5 rounded-full bg-[#1D9E75]/10 flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-[#1D9E75]" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </span>
+              {b}
+            </li>
+          ))}
+        </ul>
+
+        {/* Price */}
+        <div className="text-center mb-5">
+          <span className="text-3xl font-bold text-gray-900">R$19</span>
+          <span className="text-sm text-gray-400">/mês</span>
         </div>
 
-        {/* CTA */}
+        {/* Error */}
+        {error && (
+          <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-3 text-center">
+            {error}
+          </p>
+        )}
+
+        {/* Buttons */}
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="w-full py-3 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] transition-colors disabled:opacity-60 mb-2"
+          className="w-full py-3 bg-[#1D9E75] text-white text-sm font-semibold rounded-xl hover:bg-[#188f68] active:bg-[#147a59] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {loading ? 'Aguarde...' : 'Assinar Pro — R$19/mês'}
+          {loading && (
+            <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          )}
+          {loading ? 'Aguarde...' : 'Assinar por R$19/mês'}
         </button>
 
-        <div className="flex gap-3 justify-center">
-          <Link
-            href="/configuracoes?tab=plano"
-            className="text-xs text-[#1D9E75] font-medium hover:underline"
-            onClick={onClose}
-          >
-            Ver planos
-          </Link>
-          <span className="text-gray-200 text-xs">·</span>
-          <button onClick={onClose} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            Agora não
-          </button>
-        </div>
+        <p className="text-xs text-gray-400 text-center mt-2 mb-4">Cancele quando quiser</p>
+
+        <button
+          onClick={onClose}
+          className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Agora não
+        </button>
       </div>
     </div>
   )
