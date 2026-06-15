@@ -59,10 +59,6 @@ export default function SendProposalModal({
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail ?? data.error ?? 'Erro ao enviar')
       setSuccess(true)
-      setTimeout(() => {
-        onClose()
-        router.refresh()
-      }, 1800)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao enviar')
     } finally {
@@ -97,6 +93,12 @@ export default function SendProposalModal({
             </div>
             <p className="text-base font-semibold text-gray-900">Proposta enviada!</p>
             <p className="text-sm text-gray-500 mt-1">O cliente receberá o e-mail em instantes.</p>
+            <button
+              onClick={() => { onClose(); router.refresh() }}
+              className="mt-5 px-6 py-2.5 bg-[#1D9E75] text-white rounded-xl text-sm font-semibold hover:bg-[#188f68] transition-colors"
+            >
+              OK
+            </button>
           </div>
         ) : (
           <div className="px-6 py-5 space-y-4">
