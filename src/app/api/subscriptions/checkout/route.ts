@@ -4,13 +4,13 @@ import { createServiceClient } from '@/lib/supabase-service'
 import { stripe } from '@/lib/stripe'
 import { APP_URL } from '@/lib/app-url'
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
+  const priceId = process.env.STRIPE_PRICE_ID
+  if (!priceId) return NextResponse.json({ error: 'STRIPE_PRICE_ID não configurado' }, { status: 500 })
+
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { price_id } = await request.json() as { price_id: string }
-  if (!price_id) return NextResponse.json({ error: 'price_id obrigatório' }, { status: 400 })
 
   const service = createServiceClient()
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
-    line_items: [{ price: price_id, quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${APP_URL}/dashboard?upgraded=true`,
     cancel_url:  `${APP_URL}/configuracoes?tab=plano`,
     allow_promotion_codes: true,
