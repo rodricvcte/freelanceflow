@@ -659,6 +659,12 @@ export function ProposalPDFDocument({
   const docFormatted = fmtDoc(profile.document_type, profile.cpf_cnpj)
   const sections     = proposal.sections ?? []
 
+  function coverTitleFontSize(len: number): number {
+    if (len <= 40) return 28
+    if (len <= 70) return 22
+    return 18
+  }
+
   const CoverPage = (
     <Page size="A4" style={{ fontFamily: 'Helvetica', backgroundColor: '#ffffff' }}>
 
@@ -707,14 +713,17 @@ export function ProposalPDFDocument({
 
         {/* Título centralizado no espaço branco */}
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <Text style={{
-            fontSize: 28,
+            fontSize: coverTitleFontSize(proposal.title.length),
             fontFamily: 'Helvetica-Bold',
             color: '#2C2C2A',
             lineHeight: 1.3,
             textAlign: 'center',
             marginBottom: 14,
-          }}>
+            hyphens: 'none',
+            wordBreak: 'keep-all',
+          } as any}>
             {proposal.title}
           </Text>
           {proposal.clients && (
