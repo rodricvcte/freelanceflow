@@ -76,7 +76,10 @@ export async function buildProposalCode(
   version = 1
 ): Promise<string> {
   const userSeq = await getOrAssignUserSeq(userId, authSupabase, serviceSupabase)
-  const dateStr = createdAt.split('T')[0].replace(/-/g, '')   // YYYYMMDD
+  const dateStr = new Date(createdAt).toLocaleDateString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).split('/').reverse().join('')  // YYYYMMDD em horário de Brasília
   const prefix  = `RC${String(userSeq).padStart(3, '0')}`
 
   // Count proposals already coded (current proposal has code = null, so not counted)
