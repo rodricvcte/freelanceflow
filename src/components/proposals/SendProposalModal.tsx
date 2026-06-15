@@ -57,7 +57,7 @@ export default function SendProposalModal({
         body: JSON.stringify(form),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Erro ao enviar')
+      if (!res.ok) throw new Error(data.detail ?? data.error ?? 'Erro ao enviar')
       setSuccess(true)
       setTimeout(() => {
         onClose()

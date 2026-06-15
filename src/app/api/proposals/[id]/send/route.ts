@@ -90,8 +90,11 @@ export async function POST(
   })
 
   if (sendError) {
-    console.error('[send] Resend error:', sendError)
-    return NextResponse.json({ error: 'Falha ao enviar e-mail' }, { status: 502 })
+    console.error('[send] Resend error:', JSON.stringify(sendError))
+    return NextResponse.json(
+      { error: 'Falha ao enviar e-mail', detail: (sendError as { message?: string }).message ?? String(sendError) },
+      { status: 502 }
+    )
   }
 
   // Persist recipient info + mark as enviada
