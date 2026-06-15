@@ -165,7 +165,7 @@ export async function GET(request: Request) {
         })
 
         const { error } = await resend.emails.send({
-          from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+          from:    `${freelancerName} via FreelanceFlow <noreply@freelanceflow.com.br>`,
           to:      p.recipient_email as string,
           replyTo: replyTo,
           subject: `Sua proposta está aguardando — ${p.title}`,
@@ -244,7 +244,7 @@ export async function GET(request: Request) {
         })
 
         const { error } = await resend.emails.send({
-          from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+          from:    `${freelancerName} via FreelanceFlow <noreply@freelanceflow.com.br>`,
           to:      p.recipient_email as string,
           replyTo: replyTo,
           subject: `Ficou com alguma dúvida? — ${p.title}`,
@@ -327,7 +327,7 @@ export async function GET(request: Request) {
           })
 
           const { error } = await resend.emails.send({
-            from:    `${freelancerName} via FreelanceFlow <onboarding@resend.dev>`,
+            from:    `${freelancerName} via FreelanceFlow <noreply@freelanceflow.com.br>`,
             to:      p.recipient_email as string,
             replyTo: replyTo,
             subject: `Sua proposta expira amanhã — ${p.title}`,

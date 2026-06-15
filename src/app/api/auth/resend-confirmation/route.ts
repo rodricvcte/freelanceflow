@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error: emailError } = await resend.emails.send({
-    from:    'FreelanceFlow <onboarding@resend.dev>',
+    from:    'FreelanceFlow <noreply@freelanceflow.com.br>',
     to:      email,
     subject: 'Confirme sua conta — FreelanceFlow',
     html:    buildEmailConfirmationHtml({ name, confirmUrl }),

@@ -18,7 +18,7 @@ async function sendDeclinedNotification(
     const resend     = new Resend(process.env.RESEND_API_KEY)
     const clientName = (proposal.recipient_name as string | null) || 'Seu cliente'
     await resend.emails.send({
-      from:     'FreelanceFlow <onboarding@resend.dev>',
+      from:     'FreelanceFlow <noreply@freelanceflow.com.br>',
       to:       freelancer.email,
       replyTo: (proposal.recipient_email as string | null) ?? undefined,
       subject:  `${clientName} recusou sua proposta — ${proposal.title ?? 'Proposta'}`,
