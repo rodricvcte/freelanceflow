@@ -3,14 +3,10 @@ import { Resend } from 'resend'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { buildProposalEmailHtml } from '@/lib/email-templates/proposal'
+import { APP_URL } from '@/lib/app-url'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
-
-const APP_URL =
-  process.env.APP_URL ??
-  process.env.NEXT_PUBLIC_APP_URL ??
-  'https://www.freelanceflow.com.br'
 
 export async function POST(
   request: Request,

@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createServiceClient } from '@/lib/supabase-service'
 import { buildDeclinedNotificationHtml } from '@/lib/email-templates/notification'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+import { APP_URL } from '@/lib/app-url'
 
 async function sendDeclinedNotification(
   service: ReturnType<typeof createServiceClient>,
@@ -47,11 +46,11 @@ export async function GET(
     .single()
 
   if (!proposal) {
-    return NextResponse.redirect(new URL(`/p/${token}`, process.env.NEXT_PUBLIC_APP_URL!))
+    return NextResponse.redirect(new URL(`/p/${token}`, APP_URL))
   }
 
   if (['expirada', 'cancelada'].includes(proposal.status)) {
-    return NextResponse.redirect(new URL(`/p/${token}`, process.env.NEXT_PUBLIC_APP_URL!))
+    return NextResponse.redirect(new URL(`/p/${token}`, APP_URL))
   }
 
   if (!['aceita', 'recusada'].includes(proposal.status)) {
@@ -68,7 +67,7 @@ export async function GET(
   }
 
   return NextResponse.redirect(
-    new URL(`/p/${token}/confirmed?action=declined`, process.env.NEXT_PUBLIC_APP_URL!)
+    new URL(`/p/${token}/confirmed?action=declined`, APP_URL)
   )
 }
 

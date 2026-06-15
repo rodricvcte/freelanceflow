@@ -2,11 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { buildEmailConfirmationHtml } from '@/lib/email-templates/notification'
-
-const APP_URL =
-  process.env.APP_URL ??
-  process.env.NEXT_PUBLIC_APP_URL ??
-  'https://www.freelanceflow.com.br'
+import { APP_URL } from '@/lib/app-url'
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()

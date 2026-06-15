@@ -3,6 +3,7 @@ import type Stripe from 'stripe'
 import { stripe, stripeTimestampToISO } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase-service'
 import { Resend } from 'resend'
+import { APP_URL } from '@/lib/app-url'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -146,7 +147,7 @@ export async function POST(request: Request) {
           to:      invoice.customer_email,
           replyTo: 'rodrigosc19@gmail.com',
           subject: 'Falha no pagamento da sua assinatura FreelanceFlow',
-          html: `<p>Olá,</p><p>Houve uma falha ao processar o pagamento da sua assinatura Pro. Por favor, atualize seu método de pagamento para continuar com acesso ilimitado.</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL}/configuracoes?tab=plano">Gerenciar assinatura →</a></p>`,
+          html: `<p>Olá,</p><p>Houve uma falha ao processar o pagamento da sua assinatura Pro. Por favor, atualize seu método de pagamento para continuar com acesso ilimitado.</p><p><a href="${APP_URL}/configuracoes?tab=plano">Gerenciar assinatura →</a></p>`,
         }).catch(() => {})
       }
       break

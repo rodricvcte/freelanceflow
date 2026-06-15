@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createServiceClient } from '@/lib/supabase-service'
 import { buildFollowUpNotViewedHtml, buildFollowUpNotRespondedHtml, buildFollowUpExpiringTomorrowHtml } from '@/lib/email-templates/followup'
+import { APP_URL } from '@/lib/app-url'
 
 export const runtime = 'nodejs'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
 function extractBase(proposalNumber: string | null): string | null {
   if (!proposalNumber) return null

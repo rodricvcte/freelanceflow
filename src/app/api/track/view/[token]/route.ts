@@ -2,8 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { Resend } from 'resend'
 import { createServiceClient } from '@/lib/supabase-service'
 import { buildViewedNotificationHtml } from '@/lib/email-templates/notification'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+import { APP_URL } from '@/lib/app-url'
 
 export async function GET(
   request: NextRequest,

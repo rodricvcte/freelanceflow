@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { stripe } from '@/lib/stripe'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+import { APP_URL } from '@/lib/app-url'
 
 export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient()
