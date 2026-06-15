@@ -3,7 +3,10 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { buildEmailConfirmationHtml } from '@/lib/email-templates/notification'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+const APP_URL =
+  process.env.APP_URL ??
+  process.env.NEXT_PUBLIC_APP_URL ??
+  'https://www.freelanceflow.com.br'
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()
@@ -31,16 +34,24 @@ export async function POST(request: Request) {
   const confirmUrl = data.properties.action_link
   const name = email.split('@')[0]
 
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from:    'FreelanceFlow <onboarding@resend.dev>',
-      to:      email,
-      subject: 'Confirme sua conta — FreelanceFlow',
-      html:    buildEmailConfirmationHtml({ name, confirmUrl }),
-    })
-  } catch (emailErr) {
-    console.error('[resend-confirmation] erro ao reenviar email:', emailErr)
+  if (!process.env.RESEND_API_KEY) {
+    return NextResponse.json({ error: 'Configuração de email ausente no servidor.' }, { status: 500 })
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const { error: emailError } = await resend.emails.send({
+    from:    'FreelanceFlow <onboarding@resend.dev>',
+    to:      email,
+    subject: 'Confirme sua conta — FreelanceFlow',
+    html:    buildEmailConfirmationHtml({ name, confirmUrl }),
+  })
+
+  if (emailError) {
+    console.error('[resend-confirmation] Resend error:', emailError)
+    return NextResponse.json(
+      { error: `Erro ao reenviar email: ${emailError.message}` },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({ ok: true })

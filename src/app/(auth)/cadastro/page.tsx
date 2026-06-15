@@ -52,13 +52,17 @@ export default function CadastroPage() {
   async function handleResend() {
     if (resendStatus !== 'idle') return
     setResendStatus('sending')
-    try {
-      await fetch('/api/auth/resend-confirmation', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
-      })
-    } catch { /* silent — show "sent" regardless */ }
+    const res  = await fetch('/api/auth/resend-confirmation', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password }),
+    })
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      setError(d.error ?? 'Erro ao reenviar. Tente novamente.')
+      setResendStatus('idle')
+      return
+    }
     setResendStatus('sent')
     setTimeout(() => setResendStatus('idle'), 30_000)
   }

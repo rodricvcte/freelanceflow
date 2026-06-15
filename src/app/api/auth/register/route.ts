@@ -3,7 +3,11 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { buildEmailConfirmationHtml } from '@/lib/email-templates/notification'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+// Prefer explicit server-side URL over NEXT_PUBLIC_ which defaults to localhost in .env.local
+const APP_URL =
+  process.env.APP_URL ??
+  process.env.NEXT_PUBLIC_APP_URL ??
+  'https://www.freelanceflow.com.br'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateFreelancerCode(fullName: string, serviceClient: any): Promise<string> {
@@ -82,21 +86,29 @@ export async function POST(request: Request) {
     { onConflict: 'id' }
   )
 
-  // Envia email de confirmação estilizado via Resend
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from:    'FreelanceFlow <onboarding@resend.dev>',
-      to:      email,
-      subject: 'Confirme sua conta — FreelanceFlow',
-      html:    buildEmailConfirmationHtml({
-        name:       full_name.trim().split(/\s+/)[0],
-        confirmUrl,
-      }),
-    })
-  } catch (emailErr) {
-    // Não bloqueia o cadastro se o email falhar
-    console.error('[register] erro ao enviar email de confirmação:', emailErr)
+  // Envia email de confirmação via Resend
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[register] RESEND_API_KEY não configurada')
+    return NextResponse.json({ error: 'Configuração de email ausente no servidor.' }, { status: 500 })
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const { error: emailError } = await resend.emails.send({
+    from:    'FreelanceFlow <onboarding@resend.dev>',
+    to:      email,
+    subject: 'Confirme sua conta — FreelanceFlow',
+    html:    buildEmailConfirmationHtml({
+      name:       full_name.trim().split(/\s+/)[0],
+      confirmUrl,
+    }),
+  })
+
+  if (emailError) {
+    console.error('[register] Resend error:', emailError)
+    return NextResponse.json(
+      { error: `Erro ao enviar email: ${emailError.message}` },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({ ok: true })
