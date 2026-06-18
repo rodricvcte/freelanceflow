@@ -21,6 +21,7 @@ export async function POST(
     recipient_email: string
     recipient_name?: string
     custom_message?: string
+    resend?: boolean
   }
 
   if (!body.recipient_email?.trim()) {
@@ -43,6 +44,16 @@ export async function POST(
   ])
 
   if (!proposal) return NextResponse.json({ error: 'Proposta não encontrada' }, { status: 404 })
+
+  if (body.resend) {
+    if (proposal.status !== 'enviada' && proposal.status !== 'visualizada') {
+      return NextResponse.json({ error: 'Só é possível reenviar propostas enviadas ou visualizadas' }, { status: 400 })
+    }
+  } else {
+    if (proposal.status !== 'rascunho') {
+      return NextResponse.json({ error: 'Só é possível enviar propostas em rascunho' }, { status: 400 })
+    }
+  }
 
   const snap = proposal.snapshot_profile as Record<string, unknown> | null
   const freelancerName = (
@@ -97,25 +108,23 @@ export async function POST(
     )
   }
 
-  // Persist recipient + mark as enviada (fire-and-forget, não bloqueia a resposta)
+  // Persist recipient; on first send also mark as enviada (fire-and-forget)
   const service = createServiceClient()
+  const proposalUpdate: Record<string, unknown> = {
+    recipient_email: body.recipient_email.trim(),
+    recipient_name:  body.recipient_name?.trim() ?? null,
+  }
+  if (!body.resend) {
+    proposalUpdate.status  = 'enviada'
+    proposalUpdate.sent_at = new Date().toISOString()
+  }
   void Promise.all([
-    service
-      .from('proposals')
-      .update({
-        status:          'enviada',
-        sent_at:         new Date().toISOString(),
-        recipient_email: body.recipient_email.trim(),
-        recipient_name:  body.recipient_name?.trim() ?? null,
-      })
-      .eq('id', id),
-    service
-      .from('proposal_events')
-      .insert({
-        proposal_id: id,
-        event_type:  'sent',
-        metadata:    { recipient_email: body.recipient_email.trim() },
-      }),
+    service.from('proposals').update(proposalUpdate).eq('id', id),
+    service.from('proposal_events').insert({
+      proposal_id: id,
+      event_type:  body.resend ? 'resent' : 'sent',
+      metadata:    { recipient_email: body.recipient_email.trim() },
+    }),
   ])
 
   return NextResponse.json({ ok: true })

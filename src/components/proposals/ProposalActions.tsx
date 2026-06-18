@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SendProposalModal from './SendProposalModal'
+import SendWhatsAppModal from './SendWhatsAppModal'
 
 type DuplicateData = {
   title: string
@@ -21,6 +22,8 @@ type SendProps = {
   clientEmail: string | null
   clientName: string | null
   freelancerName: string
+  proposalToken: string
+  proposalValidUntil: string | null
 }
 
 type Props = {
@@ -45,15 +48,32 @@ const NEW_VERSION_CONFIG: Record<string, { confirm: string } | { confirm: null }
 export default function ProposalActions({ proposalId, status, version, newerVersion, initialPdfUrl, duplicate, sendProps }: Props) {
   const router = useRouter()
 
-  const [duplicating,       setDuplicating]       = useState(false)
-  const [showSend,          setShowSend]           = useState(false)
-  const [showCancel,        setShowCancel]         = useState(false)
+  const [duplicating,         setDuplicating]         = useState(false)
+  const [showSend,            setShowSend]             = useState(false)
+  const [showWhatsApp,        setShowWhatsApp]         = useState(false)
+  const [showSendDropdown,    setShowSendDropdown]     = useState(false)
+  const [showResendConfirm,   setShowResendConfirm]    = useState(false)
+  const [resendChannel,       setResendChannel]        = useState<'email' | 'whatsapp' | null>(null)
+  const [showCancel,          setShowCancel]           = useState(false)
+
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!showSendDropdown) return
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowSendDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showSendDropdown])
   const [cancelling,        setCancelling]         = useState(false)
   const [cancelError,       setCancelError]        = useState<string | null>(null)
   const [showNewVersion,  setShowNewVersion]   = useState(false)
   const [newVersionError, setNewVersionError] = useState<string | null>(null)
 
   const isDraft      = status === 'rascunho'
+  const isResend     = status === 'enviada' || status === 'visualizada'
   const isExpired    = status === 'expirada'
   const isCancelled  = status === 'cancelada'
   const canCancel    = status !== 'aceita' && status !== 'cancelada' && status !== 'recusada'
@@ -212,21 +232,53 @@ export default function ProposalActions({ proposalId, status, version, newerVers
           </a>
         )}
 
-        {/* Separador antes de Enviar */}
-        {isDraft && sendProps && sep}
+        {/* Separador antes de Enviar / Reenviar */}
+        {(isDraft || isResend) && sendProps && sep}
 
-        {/* Enviar */}
-        {isDraft && sendProps && (
-          <button
-            onClick={() => setShowSend(true)}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-[#1D9E75] rounded-lg hover:bg-[#188f68] transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="5" width="18" height="14" rx="2" />
-              <polyline points="3 7 12 13 21 7" />
-            </svg>
-            Enviar
-          </button>
+        {/* Enviar / Reenviar — dropdown com canal */}
+        {(isDraft || isResend) && sendProps && (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setShowSendDropdown(p => !p)}
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-[#1D9E75] rounded-lg hover:bg-[#188f68] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <polyline points="3 7 12 13 21 7" />
+              </svg>
+              {isResend ? 'Reenviar' : 'Enviar'}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+
+            {showSendDropdown && (
+              <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
+                <button
+                  onClick={() => {
+                    setShowSendDropdown(false)
+                    if (isResend) { setResendChannel('email'); setShowResendConfirm(true) }
+                    else setShowSend(true)
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                >
+                  <span className="text-base leading-none">📧</span>
+                  Por e-mail
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSendDropdown(false)
+                    if (isResend) { setResendChannel('whatsapp'); setShowResendConfirm(true) }
+                    else setShowWhatsApp(true)
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                >
+                  <span className="text-base leading-none">💬</span>
+                  Pelo WhatsApp
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Separador antes de Cancelar */}
@@ -247,7 +299,7 @@ export default function ProposalActions({ proposalId, status, version, newerVers
         )}
       </div>
 
-      {/* ── Modal enviar ── */}
+      {/* ── Modal enviar / reenviar ── */}
       {sendProps && (
         <SendProposalModal
           open={showSend}
@@ -257,7 +309,51 @@ export default function ProposalActions({ proposalId, status, version, newerVers
           clientEmail={sendProps.clientEmail}
           clientName={sendProps.clientName}
           freelancerName={sendProps.freelancerName}
+          resend={isResend}
         />
+      )}
+
+      {/* ── Modal WhatsApp ── */}
+      {sendProps && (
+        <SendWhatsAppModal
+          open={showWhatsApp}
+          onClose={() => setShowWhatsApp(false)}
+          proposalId={proposalId}
+          proposalToken={sendProps.proposalToken}
+          proposalValidUntil={sendProps.proposalValidUntil}
+          clientName={sendProps.clientName}
+          resend={isResend}
+        />
+      )}
+
+      {/* ── Modal confirmação de reenvio ── */}
+      {showResendConfirm && resendChannel && sendProps && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 text-center mb-3">Reenviar proposta?</h3>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              Esta proposta já foi enviada. Deseja reenviar?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowResendConfirm(false); setResendChannel(null) }}
+                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setShowResendConfirm(false)
+                  if (resendChannel === 'email') setShowSend(true)
+                  else setShowWhatsApp(true)
+                }}
+                className="flex-1 py-2.5 bg-[#1D9E75] text-white rounded-xl text-sm font-medium hover:bg-[#188f68] transition-colors"
+              >
+                Sim, reenviar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── Modal nova versão ── */}
