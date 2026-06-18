@@ -3,6 +3,8 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import TemplatePickerModal from '@/components/templates/TemplatePickerModal'
+import { useTemplates, type ApiTemplate } from '@/hooks/useTemplates'
 
 // ── Section types ─────────────────────────────────────────────────────────────
 
@@ -705,6 +707,13 @@ function NewProposalInner() {
   const [isNewVersion, setIsNewVersion]       = useState(false)
   const [sourceProposalId, setSourceProposalId] = useState<string | null>(null)
 
+  // Template picker modal
+  const { templates, loading: templatesLoading } = useTemplates()
+  const [showTemplatePicker, setShowTemplatePicker] = useState(
+    () => !searchParams.get('mode') && !searchParams.get('template')
+  )
+  const templatePrefillDone = useRef(false)
+
   useEffect(() => {
     Promise.all([
       fetch('/api/clients').then(r => r.json()).catch(() => []),
@@ -782,6 +791,39 @@ function NewProposalInner() {
       setField('client_id', clientId)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pre-fill from ?template=ID on page load or after modal selection updates URL
+  useEffect(() => {
+    const templateId = searchParams.get('template')
+    if (!templateId || templatesLoading || templatePrefillDone.current || templates.length === 0) return
+    const tmpl = templates.find(t => t.id === templateId)
+    if (!tmpl) return
+    setForm({
+      title:         tmpl.title         ?? '',
+      value:         tmpl.value         != null ? String(tmpl.value) : '',
+      deadline_days: tmpl.deadline_days != null ? String(tmpl.deadline_days) : '',
+      valid_until:   tmpl.valid_until   ?? '',
+      payment_terms: tmpl.payment_terms ?? '',
+      client_id:     '',
+    })
+    if (Array.isArray(tmpl.sections)) setSections(tmpl.sections as Section[])
+    templatePrefillDone.current = true
+  }, [templates, templatesLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSelectTemplate(tmpl: ApiTemplate) {
+    setForm({
+      title:         tmpl.title         ?? '',
+      value:         tmpl.value         != null ? String(tmpl.value) : '',
+      deadline_days: tmpl.deadline_days != null ? String(tmpl.deadline_days) : '',
+      valid_until:   tmpl.valid_until   ?? '',
+      payment_terms: tmpl.payment_terms ?? '',
+      client_id:     '',
+    })
+    if (Array.isArray(tmpl.sections)) setSections(tmpl.sections as Section[])
+    templatePrefillDone.current = true
+    setShowTemplatePicker(false)
+    router.replace(`/propostas/new?template=${tmpl.id}`, { scroll: false })
+  }
 
   function setField(k: keyof typeof EMPTY_FORM, v: string) {
     setForm(p => ({ ...p, [k]: v }))
@@ -891,8 +933,20 @@ function NewProposalInner() {
     return <UpgradeModal used={plan.used} limit={plan.limit} />
   }
 
+  const isPro = !planLoading && plan?.plan !== 'free'
+
   return (
     <div className="p-6 md:p-8 max-w-2xl">
+      <TemplatePickerModal
+        open={showTemplatePicker}
+        isPro={isPro}
+        templates={templates}
+        loading={templatesLoading}
+        loadingNicho={null}
+        onSelect={handleSelectTemplate}
+        onSkip={() => setShowTemplatePicker(false)}
+      />
+
       {/* Plan usage banner */}
       {plan && plan.plan === 'free' && (
         <div className="mb-6 flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
