@@ -554,10 +554,12 @@ export default async function ProposalDetailPage({
             sections:            proposal.sections ?? [],
           }}
           sendProps={{
-            proposalTitle: proposal.title,
-            clientEmail:   (proposalAny.recipient_email as string | null) ?? client?.email ?? null,
-            clientName:    (proposalAny.recipient_name  as string | null) ?? client?.name  ?? null,
+            proposalTitle:      proposal.title,
+            clientEmail:        (proposalAny.recipient_email as string | null) ?? client?.email ?? null,
+            clientName:         (proposalAny.recipient_name  as string | null) ?? client?.name  ?? null,
             freelancerName,
+            proposalToken:      proposal.token,
+            proposalValidUntil: proposal.valid_until,
           }}
         />
       </div>

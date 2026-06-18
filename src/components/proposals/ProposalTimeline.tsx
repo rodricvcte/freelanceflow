@@ -182,6 +182,15 @@ export default function ProposalTimeline({
     const cfg = EVENT_CONFIG[item.ev.event_type] ?? { label: item.ev.event_type, dot: 'bg-gray-300', line: 'bg-gray-100' }
 
     let label = cfg.label
+    if (item.ev.event_type === 'sent') {
+      const channel = item.ev.metadata?.channel as string | undefined
+      if (channel === 'whatsapp') {
+        label = '💬 Enviada pelo WhatsApp'
+      } else if (channel === 'email' || item.ev.metadata?.recipient_email) {
+        label = '📧 Enviada por e-mail'
+      }
+      // else: label stays 'Proposta enviada' (fallback for old events)
+    }
     if (item.ev.event_type === 'follow_up_sent') {
       const rule = item.ev.metadata?.rule as string | undefined
       label = rule === 'R1'
