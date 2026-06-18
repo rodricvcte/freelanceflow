@@ -15,6 +15,7 @@ export type TimelineEvent = {
 const EVENT_CONFIG: Record<string, { label: string; dot: string; line: string; icon?: 'bell' }> = {
   created:         { label: 'Proposta criada',                              dot: 'bg-gray-500',   line: 'bg-gray-100'   },
   sent:            { label: 'Proposta enviada',                             dot: 'bg-blue-700',   line: 'bg-blue-100'   },
+  resent:          { label: 'Proposta reenviada',                           dot: 'bg-blue-500',   line: 'bg-blue-100'   },
   viewed:          { label: 'Visualizada pelo cliente',                     dot: 'bg-yellow-500', line: 'bg-yellow-100' },
   accepted:        { label: 'Proposta aceita',                              dot: 'bg-[#1D9E75]',  line: 'bg-emerald-50' },
   declined:        { label: 'Proposta recusada',                            dot: 'bg-red-700',    line: 'bg-red-100'    },
@@ -189,7 +190,14 @@ export default function ProposalTimeline({
       } else if (channel === 'email' || item.ev.metadata?.recipient_email) {
         label = '📧 Enviada por e-mail'
       }
-      // else: label stays 'Proposta enviada' (fallback for old events)
+    }
+    if (item.ev.event_type === 'resent') {
+      const channel = item.ev.metadata?.channel as string | undefined
+      if (channel === 'whatsapp') {
+        label = '💬 Reenviada pelo WhatsApp'
+      } else if (channel === 'email' || item.ev.metadata?.recipient_email) {
+        label = '📧 Reenviada por e-mail'
+      }
     }
     if (item.ev.event_type === 'follow_up_sent') {
       const rule = item.ev.metadata?.rule as string | undefined

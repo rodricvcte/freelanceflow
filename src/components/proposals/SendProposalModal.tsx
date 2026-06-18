@@ -11,13 +11,14 @@ type Props = {
   clientEmail: string | null
   clientName: string | null
   freelancerName: string
+  resend?: boolean
 }
 
 const DEFAULT_MESSAGE = 'Olá! Segue em anexo a proposta comercial conforme conversamos. Fico à disposição para qualquer dúvida.'
 
 export default function SendProposalModal({
   open, onClose,
-  proposalId, proposalTitle, clientEmail, clientName, freelancerName,
+  proposalId, proposalTitle, clientEmail, clientName, freelancerName, resend,
 }: Props) {
   const router = useRouter()
   const [sending, setSending] = useState(false)
@@ -57,7 +58,7 @@ export default function SendProposalModal({
       const res  = await fetch(`/api/proposals/${proposalId}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, resend: resend ?? false }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail ?? data.error ?? 'Erro ao enviar')
@@ -79,7 +80,7 @@ export default function SendProposalModal({
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Enviar proposta por e-mail</h2>
+          <h2 className="text-base font-bold text-gray-900">{resend ? 'Reenviar proposta por e-mail' : 'Enviar proposta por e-mail'}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -94,7 +95,7 @@ export default function SendProposalModal({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-base font-semibold text-gray-900">Proposta enviada!</p>
+            <p className="text-base font-semibold text-gray-900">{resend ? 'Proposta reenviada!' : 'Proposta enviada!'}</p>
             <p className="text-sm text-gray-500 mt-1">O cliente receberá o e-mail em instantes.</p>
             <button
               onClick={() => { onClose(); router.refresh() }}

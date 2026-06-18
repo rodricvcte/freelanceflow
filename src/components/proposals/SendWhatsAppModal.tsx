@@ -10,6 +10,7 @@ type Props = {
   proposalToken: string
   proposalValidUntil: string | null
   clientName: string | null
+  resend?: boolean
 }
 
 function fmtDate(iso: string): string {
@@ -27,7 +28,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://freelanceflow.com.b
 const inputCls  = 'w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent'
 
 export default function SendWhatsAppModal({
-  open, onClose, proposalId, proposalToken, proposalValidUntil, clientName,
+  open, onClose, proposalId, proposalToken, proposalValidUntil, clientName, resend,
 }: Props) {
   const router = useRouter()
 
@@ -68,7 +69,7 @@ export default function SendWhatsAppModal({
       const res  = await fetch(`/api/proposals/${proposalId}/send-whatsapp`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ recipient_name: recipientName.trim() || null }),
+        body:    JSON.stringify({ recipient_name: recipientName.trim() || null, resend: resend ?? false }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao registrar envio')
@@ -91,7 +92,7 @@ export default function SendWhatsAppModal({
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Enviar pelo WhatsApp</h2>
+          <h2 className="text-base font-bold text-gray-900">{resend ? 'Reenviar pelo WhatsApp' : 'Enviar pelo WhatsApp'}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
