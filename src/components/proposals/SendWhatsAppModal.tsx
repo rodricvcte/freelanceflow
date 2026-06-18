@@ -18,9 +18,11 @@ function fmtDate(iso: string): string {
 }
 
 function buildMessage(name: string, url: string, validUntil: string | null): string {
-  const valid = validUntil ? `\nVálida até ${fmtDate(validUntil)}. Qualquer dúvida é só falar!` : '\nQualquer dúvida é só falar!'
-  return `Olá ${name}! 👋\n\nPreparei uma proposta comercial para você.\nAcesse pelo link abaixo:\n\n👉 ${url}${valid}`
+  const valid = validUntil ? `\n\nVálida até ${fmtDate(validUntil)}. Qualquer dúvida é só falar!` : '\n\nQualquer dúvida é só falar!'
+  return `Olá ${name}!\n\nPreparei uma proposta comercial para você.\nAcesse pelo link abaixo:\n\n${url}${valid}`
 }
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://freelanceflow.com.br'
 
 const inputCls  = 'w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent'
 
@@ -40,7 +42,7 @@ export default function SendWhatsAppModal({
   useEffect(() => {
     if (open && !wasOpen.current) {
       const name = (clientName ?? '').trim() || 'cliente'
-      const url  = `${window.location.origin}/p/${proposalToken}`
+      const url  = `${BASE_URL}/p/${proposalToken}`
       setRecipientName(clientName ?? '')
       setMessage(buildMessage(name, url, proposalValidUntil))
       setError(null)
@@ -54,7 +56,7 @@ export default function SendWhatsAppModal({
   useEffect(() => {
     if (!open) return
     const name = recipientName.trim() || 'cliente'
-    const url  = `${window.location.origin}/p/${proposalToken}`
+    const url  = `${BASE_URL}/p/${proposalToken}`
     setMessage(buildMessage(name, url, proposalValidUntil))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipientName])
