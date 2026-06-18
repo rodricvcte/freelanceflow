@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateFreelancerCode(fullName: string, serviceClient: any): Promise<string> {
@@ -72,6 +73,14 @@ export async function POST(request: Request) {
     { id: userId, full_name: full_name.trim(), freelancer_code },
     { onConflict: 'id' }
   )
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  await resend.emails.send({
+    from:    'FreelanceFlow <contato@freelanceflow.com.br>',
+    to:      'rodrigosc19@gmail.com',
+    subject: 'Novo usuário cadastrado — FreelanceFlow',
+    html:    `<p>Novo cadastro realizado:</p><ul><li><strong>Email:</strong> ${email}</li><li><strong>Nome:</strong> ${full_name}</li><li><strong>Código:</strong> ${freelancer_code}</li><li><strong>Data:</strong> ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</li></ul>`,
+  })
 
   return NextResponse.json({ ok: true })
 }
