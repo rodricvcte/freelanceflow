@@ -823,6 +823,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <span className="text-base font-bold text-[#1D9E75]">FreelanceFlow</span>
           <span className="text-sm text-gray-400">© 2026 FreelanceFlow · Para freelancers brasileiros</span>
+          <a href="/privacidade" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">Política de Privacidade</a>
         </div>
       </footer>
 
