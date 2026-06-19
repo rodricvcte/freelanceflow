@@ -28,6 +28,7 @@ export default function CadastroPage() {
 
   async function handleGoogle() {
     if (!checkPrivacy()) return
+    document.cookie = 'ff_terms_accepted=1; max-age=300; path=/; SameSite=Lax'
     setGoogleLoading(true)
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
