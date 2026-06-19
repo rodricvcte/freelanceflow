@@ -2,6 +2,21 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
+const AUTH_ERRORS: Record<string, string> = {
+  'A user with this email address has already been registered': 'Este e-mail já está cadastrado. Tente fazer login.',
+  'Password should be at least 6 characters': 'A senha deve ter pelo menos 6 caracteres.',
+  'Unable to validate email address: invalid format': 'Endereço de e-mail inválido.',
+  'Email address is invalid': 'Endereço de e-mail inválido.',
+  'Signup is disabled': 'Cadastro temporariamente desabilitado.',
+}
+
+function translateAuthError(msg: string): string {
+  for (const [en, pt] of Object.entries(AUTH_ERRORS)) {
+    if (msg.includes(en)) return pt
+  }
+  return 'Erro ao criar conta. Tente novamente.'
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateFreelancerCode(fullName: string, serviceClient: any): Promise<string> {
   const parts = fullName.trim().split(/\s+/)
@@ -62,7 +77,8 @@ export async function POST(request: Request) {
   })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
+    const msg = translateAuthError(error.message)
+    return NextResponse.json({ error: msg }, { status: 400 })
   }
 
   const userId = data.user.id
