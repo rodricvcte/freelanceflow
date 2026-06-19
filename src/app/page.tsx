@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
 /* ─── Icons ─── */
@@ -457,9 +457,30 @@ function JsonLd() {
   )
 }
 
+/* ─── Scroll-reveal hook ─── */
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const targets = el.querySelectorAll<HTMLElement>('.reveal')
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add('revealed'); observer.unobserve(e.target) } }),
+      { threshold: 0.12 }
+    )
+    targets.forEach(t => observer.observe(t))
+    return () => observer.disconnect()
+  }, [])
+  return ref
+}
+
 /* ─── Page ─── */
 export default function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const refComo        = useReveal()
+  const refFeatures    = useReveal()
+  const refPlanos      = useReveal()
+  const refCta         = useReveal()
 
   function scrollTo(id: string) {
     setMobileOpen(false)
@@ -552,42 +573,44 @@ export default function LandingPage() {
       {/* ━━━ HERO ━━━ */}
       <section className="pt-32 pb-0 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#1D9E75]/10 text-[#1D9E75] mb-6">
+          <span style={{ animationDelay: '0ms' }} className="anim-fade-in inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#1D9E75]/10 text-[#1D9E75] mb-6">
             Para freelancers brasileiros
           </span>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight tracking-tight mb-6">
+          <h1 style={{ animationDelay: '80ms' }} className="anim-fade-up text-4xl sm:text-5xl font-bold text-gray-900 leading-tight tracking-tight mb-6">
             Da proposta ao{' '}
             <span className="text-[#1D9E75]">"pode começar"</span>
             {' '}sem perder o timing
           </h1>
-          <p className="text-lg text-gray-500 leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p style={{ animationDelay: '180ms' }} className="anim-fade-up text-lg text-gray-500 leading-relaxed mb-8 max-w-2xl mx-auto">
             Você sabe quando o cliente abriu. Recebe a resposta por e-mail ou WhatsApp. E tem follow-up automático quando ele some. Tudo em um lugar só.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div style={{ animationDelay: '280ms' }} className="anim-fade-up flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/cadastro"
-              className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 bg-[#1D9E75] text-white font-medium rounded-lg hover:bg-[#188f68] active:bg-[#147a59] transition-colors text-sm"
+              className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 bg-[#1D9E75] text-white font-medium rounded-lg hover:bg-[#188f68] hover:scale-[1.02] active:bg-[#147a59] transition-all text-sm"
             >
               Começar grátis — sem cartão
             </Link>
             <button
               onClick={() => scrollTo('funcionalidades')}
-              className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm cursor-pointer"
+              className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:scale-[1.02] transition-all text-sm cursor-pointer"
             >
               Ver demonstração
             </button>
           </div>
-          <p className="mt-5 text-sm text-gray-400">
+          <p style={{ animationDelay: '360ms' }} className="anim-fade-in mt-5 text-sm text-gray-400">
             Grátis para sempre · 5 propostas/mês no plano Free
           </p>
         </div>
-        <AppMockup />
+        <div style={{ animationDelay: '440ms' }} className="anim-scale-in">
+          <AppMockup />
+        </div>
       </section>
 
       {/* ━━━ COMO FUNCIONA ━━━ */}
       <section id="como-funciona" className="py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+        <div ref={refComo} className="max-w-5xl mx-auto">
+          <div className="text-center mb-14 reveal">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#1D9E75] mb-3 block">
               Como funciona
             </span>
@@ -612,10 +635,10 @@ export default function LandingPage() {
                 title: 'Acompanhe em tempo real',
                 desc: 'Saiba quando o cliente abriu, quando respondeu e receba alertas automáticos para nunca perder o timing.',
               },
-            ].map(step => (
+            ].map((step, i) => (
               <div
                 key={step.num}
-                className="flex flex-col items-center text-center bg-[#F4F5F7] rounded-2xl p-8 border border-gray-100"
+                className={`reveal reveal-delay-${i + 1} flex flex-col items-center text-center bg-[#F4F5F7] rounded-2xl p-8 border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300`}
               >
                 <div className="w-10 h-10 rounded-full bg-[#1D9E75] text-white text-sm font-bold flex items-center justify-center mb-5 shrink-0">
                   {step.num}
@@ -630,8 +653,8 @@ export default function LandingPage() {
 
       {/* ━━━ FUNCIONALIDADES ━━━ */}
       <section id="funcionalidades" className="py-20 px-4 sm:px-6 bg-[#F4F5F7]">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+        <div ref={refFeatures} className="max-w-5xl mx-auto">
+          <div className="text-center mb-14 reveal">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#1D9E75] mb-3 block">
               Funcionalidades
             </span>
@@ -671,10 +694,10 @@ export default function LandingPage() {
                 title: 'Modelos prontos',
                 desc: 'Templates profissionais por tipo de serviço. Escolha um modelo ao criar a proposta e comece com tudo preenchido.',
               },
-            ].map(feat => (
+            ].map((feat, i) => (
               <div
                 key={feat.title}
-                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                className={`reveal reveal-delay-${(i % 6) + 1} bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-[#1D9E75]/20 transition-all duration-300`}
               >
                 <div className="w-10 h-10 rounded-lg bg-[#1D9E75]/10 flex items-center justify-center text-[#1D9E75] mb-4">
                   {feat.icon}
@@ -689,8 +712,8 @@ export default function LandingPage() {
 
       {/* ━━━ PLANOS ━━━ */}
       <section id="planos" className="py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
+        <div ref={refPlanos} className="max-w-4xl mx-auto">
+          <div className="text-center mb-14 reveal">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#1D9E75] mb-3 block">
               Planos
             </span>
@@ -701,7 +724,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
             {/* FREE */}
-            <div className="rounded-2xl border border-gray-200 p-8">
+            <div className="reveal reveal-delay-1 rounded-2xl border border-gray-200 p-8 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
               <h3 className="text-lg font-bold text-gray-900">Free</h3>
               <p className="text-sm text-gray-500 mt-1">Para começar sem compromisso</p>
               <div className="mt-4 flex items-baseline gap-1 mb-6">
@@ -734,7 +757,7 @@ export default function LandingPage() {
             </div>
 
             {/* PRO */}
-            <div className="rounded-2xl border-2 border-[#1D9E75] p-8 relative h-full">
+            <div className="reveal reveal-delay-2 rounded-2xl border-2 border-[#1D9E75] p-8 relative h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 inline-flex px-3 py-1 bg-[#1D9E75] text-white text-xs font-semibold rounded-full whitespace-nowrap">
                 Mais popular
               </span>
@@ -779,16 +802,16 @@ export default function LandingPage() {
 
       {/* ━━━ CTA FINAL ━━━ */}
       <section className="py-24 px-4 sm:px-6 bg-[#1D9E75]">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+        <div ref={refCta} className="max-w-2xl mx-auto text-center">
+          <h2 className="reveal text-3xl font-bold text-white mb-4">
             Sua próxima proposta já pode ser diferente
           </h2>
-          <p className="text-white/80 text-base mb-8">
+          <p className="reveal reveal-delay-1 text-white/80 text-base mb-8">
             Crie sua conta em menos de 2 minutos e mande a primeira proposta ainda hoje. Sem cartão de crédito.
           </p>
           <Link
             href="/cadastro"
-            className="inline-flex items-center px-8 py-3.5 bg-white text-[#1D9E75] font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="reveal reveal-delay-2 inline-flex items-center px-8 py-3.5 bg-white text-[#1D9E75] font-semibold rounded-lg hover:bg-gray-50 hover:scale-105 transition-all text-sm"
           >
             Criar conta grátis
           </Link>
