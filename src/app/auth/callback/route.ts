@@ -80,6 +80,26 @@ export async function GET(request: Request) {
         data.user.user_metadata?.name ??
         null
       await ensureFreelancerCode(data.user.id, fullName)
+
+      // Salva aceite da política para novos usuários Google
+      // (checkbox obrigatório antes de iniciar o fluxo OAuth)
+      const service = createServiceClient()
+      const { data: profile } = await service
+        .from('profiles')
+        .select('terms_accepted_at')
+        .eq('id', data.user.id)
+        .maybeSingle()
+
+      if (!profile?.terms_accepted_at) {
+        const ip =
+          request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+          request.headers.get('x-real-ip') ??
+          null
+        await service
+          .from('profiles')
+          .update({ terms_accepted_at: new Date().toISOString(), terms_accepted_ip: ip })
+          .eq('id', data.user.id)
+      }
     }
   }
 
