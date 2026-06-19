@@ -14,11 +14,20 @@ export default function CadastroPage() {
   const [error,    setError]    = useState<string | null>(null)
   const [loading,  setLoading]  = useState(false)
   const [googleLoading,  setGoogleLoading]  = useState(false)
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
+  const [privacyError, setPrivacyError] = useState(false)
 
   const passwordMismatch = confirm.length > 0 && password !== confirm
-  const canSubmit = !loading && !passwordMismatch && password.length >= 8 && confirm === password
+  const canSubmit = !loading && !passwordMismatch && password.length >= 8 && confirm === password && acceptedPrivacy
+
+  function checkPrivacy() {
+    if (!acceptedPrivacy) { setPrivacyError(true); return false }
+    setPrivacyError(false)
+    return true
+  }
 
   async function handleGoogle() {
+    if (!checkPrivacy()) return
     setGoogleLoading(true)
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
@@ -29,6 +38,7 @@ export default function CadastroPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!checkPrivacy()) return
     if (password !== confirm) { setError('As senhas não coincidem.'); return }
     setError(null)
     setLoading(true)
@@ -37,7 +47,7 @@ export default function CadastroPage() {
     const res = await fetch('/api/auth/register', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email, password }),
+      body:    JSON.stringify({ email, password, privacyAccepted: acceptedPrivacy }),
     })
     const json = await res.json()
     if (!res.ok) { setError(json.error ?? 'Erro ao criar conta.'); setLoading(false); return }
@@ -65,6 +75,28 @@ export default function CadastroPage() {
             <h1 className="text-xl font-bold text-gray-900">Criar sua conta</h1>
             <p className="text-sm text-gray-500 mt-1">Comece a criar e gerenciar suas propostas hoje</p>
           </div>
+
+          {/* Opt-in política de privacidade */}
+          <label className="flex items-start gap-2 cursor-pointer mb-5">
+            <input
+              type="checkbox"
+              checked={acceptedPrivacy}
+              onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+              className="mt-0.5 h-3 w-3 rounded border-gray-300 accent-[#1D9E75] shrink-0 cursor-pointer"
+            />
+            <span className="text-xs text-gray-500 leading-snug">
+              Li e aceito a{' '}
+              <Link href="/privacidade" target="_blank" className="text-[#1D9E75] hover:underline">
+                Política de Privacidade
+              </Link>
+              {' '}e concordo com o tratamento dos meus dados conforme a LGPD.
+            </span>
+          </label>
+          {privacyError && (
+            <p className="text-[10px] text-red-500 -mt-3 mb-2">
+              Leia e aceite a Política de Privacidade para continuar.
+            </p>
+          )}
 
           {/* Google */}
           <button

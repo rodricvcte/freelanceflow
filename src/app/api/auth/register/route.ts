@@ -35,11 +35,16 @@ async function generateFreelancerCode(fullName: string, serviceClient: any): Pro
 }
 
 export async function POST(request: Request) {
-  const { email, password } = await request.json()
+  const { email, password, privacyAccepted } = await request.json()
 
   if (!email || !password) {
     return NextResponse.json({ error: 'Email e senha são obrigatórios' }, { status: 400 })
   }
+
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    request.headers.get('x-real-ip') ??
+    null
 
   const full_name = email.split('@')[0]
 
@@ -70,7 +75,15 @@ export async function POST(request: Request) {
   }
 
   await supabase.from('profiles').upsert(
-    { id: userId, full_name: full_name.trim(), freelancer_code },
+    {
+      id: userId,
+      full_name: full_name.trim(),
+      freelancer_code,
+      ...(privacyAccepted && {
+        terms_accepted_at: new Date().toISOString(),
+        terms_accepted_ip: ip,
+      }),
+    },
     { onConflict: 'id' }
   )
 
