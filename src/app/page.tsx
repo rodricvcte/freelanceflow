@@ -574,15 +574,14 @@ export default function LandingPage() {
       <section className="pt-32 pb-0 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <span style={{ animationDelay: '0ms' }} className="anim-fade-in inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#1D9E75]/10 text-[#1D9E75] mb-6">
-            Para freelancers brasileiros
+            Para freelancers e agências brasileiras
           </span>
           <h1 style={{ animationDelay: '80ms' }} className="anim-fade-up text-4xl sm:text-5xl font-bold text-gray-900 leading-tight tracking-tight mb-6">
-            Da proposta ao{' '}
-            <span className="text-[#1D9E75]">"pode começar"</span>
-            {' '}sem perder o timing
+            Você manda o orçamento. O cliente some.{' '}
+            <span className="text-[#1D9E75]">E você fica sem saber o que aconteceu.</span>
           </h1>
           <p style={{ animationDelay: '180ms' }} className="anim-fade-up text-lg text-gray-500 leading-relaxed mb-8 max-w-2xl mx-auto">
-            Você sabe quando o cliente abriu. Recebe a resposta por e-mail ou WhatsApp. E tem follow-up automático quando ele some. Tudo em um lugar só.
+            Envie propostas comerciais com layout profissional, saiba quando o cliente abriu e nunca perca um negócio por falta de retorno.
           </p>
           <div style={{ animationDelay: '280ms' }} className="anim-fade-up flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -633,7 +632,7 @@ export default function LandingPage() {
               {
                 num: '3',
                 title: 'Acompanhe em tempo real',
-                desc: 'Saiba quando o cliente abriu, quando respondeu e receba alertas automáticos para nunca perder o timing.',
+                desc: 'Saiba quando o cliente abriu, quantas vezes visualizou e quando respondeu.',
               },
             ].map((step, i) => (
               <div
@@ -659,7 +658,7 @@ export default function LandingPage() {
               Funcionalidades
             </span>
             <h2 className="text-3xl font-bold text-gray-900">
-              Feito para o jeito que o freelancer brasileiro trabalha
+              Tudo que você precisa para criar, enviar e fechar propostas
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -677,12 +676,12 @@ export default function LandingPage() {
               {
                 icon: <IconEye />,
                 title: 'Rastreamento de abertura',
-                desc: 'Chega de mandar e ficar no escuro. Veja quando o cliente abriu, quantas vezes releu e o que ainda está pendente.',
+                desc: 'Chega de mandar proposta e ficar no escuro. Veja quando o cliente abriu, quantas vezes releu — e saiba quem ainda está sem resposta.',
               },
               {
                 icon: <IconBell />,
                 title: 'Follow-ups automáticos',
-                desc: 'Quando o cliente some, você recebe um aviso. Nunca mais perca o momento certo de fechar.',
+                desc: 'Enviou a proposta e o cliente sumiu? O sistema avisa automaticamente — enquanto você foca em conquistar novos clientes.',
               },
               {
                 icon: <IconUsers />,
@@ -804,7 +803,7 @@ export default function LandingPage() {
       <section className="py-24 px-4 sm:px-6 bg-[#1D9E75]">
         <div ref={refCta} className="max-w-2xl mx-auto text-center">
           <h2 className="reveal text-3xl font-bold text-white mb-4">
-            Sua próxima proposta já pode ser diferente
+            Troque o simples orçamento por uma proposta comercial profissional.
           </h2>
           <p className="reveal reveal-delay-1 text-white/80 text-base mb-8">
             Crie sua conta em menos de 2 minutos e mande a primeira proposta ainda hoje. Sem cartão de crédito.
