@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-service'
+import { APP_URL } from '@/lib/app-url'
 
 async function ensureFreelancerCode(userId: string, fullName: string | null) {
   const service = createServiceClient()
@@ -79,8 +80,32 @@ export async function GET(request: Request) {
         data.user.user_metadata?.name ??
         null
       await ensureFreelancerCode(data.user.id, fullName)
+
+      const service = createServiceClient()
+      const { data: profile } = await service
+        .from('profiles')
+        .select('terms_accepted_at')
+        .eq('id', data.user.id)
+        .maybeSingle()
+
+      if (!profile?.terms_accepted_at) {
+        const fromSignup = cookieStore.get('ff_terms_accepted')?.value === '1'
+
+        if (fromSignup) {
+          const ip =
+            request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+            request.headers.get('x-real-ip') ??
+            null
+          await service
+            .from('profiles')
+            .update({ terms_accepted_at: new Date().toISOString(), terms_accepted_ip: ip })
+            .eq('id', data.user.id)
+        } else {
+          return NextResponse.redirect(`${APP_URL}/aceitar-termos`)
+        }
+      }
     }
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`)
+  return NextResponse.redirect(`${APP_URL}/dashboard`)
 }

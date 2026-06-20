@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const ADMIN_EMAIL   = 'rodrigosc19@gmail.com'
-const publicRoutes  = ['/', '/login', '/cadastro', '/fundador', '/auth/callback']
+const publicRoutes  = ['/', '/login', '/cadastro', '/fundador', '/auth/callback', '/privacidade']
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })

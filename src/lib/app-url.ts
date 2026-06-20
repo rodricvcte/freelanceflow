@@ -4,4 +4,4 @@
 export const APP_URL =
   process.env.APP_URL ??
   process.env.NEXT_PUBLIC_APP_URL ??
-  'https://www.freelanceflow.com.br'
+  'https://freelanceflow.com.br'
