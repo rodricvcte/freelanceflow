@@ -95,6 +95,10 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://connect.facebook.net" />
+      </head>
       <body className="min-h-full flex flex-col">
         <GoogleAnalytics />
         <MetaPixel />

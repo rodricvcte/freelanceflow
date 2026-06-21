@@ -1,7 +1,6 @@
-'use client'
-
-import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import NavHeader from '@/components/NavHeader'
+import RevealSection from '@/components/RevealSection'
 
 /* ─── Icons ─── */
 function IconFileText() {
@@ -58,30 +57,6 @@ function IconGrid() {
     </svg>
   )
 }
-function IconWhatsApp() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-    </svg>
-  )
-}
-function IconMenu() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
-  )
-}
-function IconClose() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  )
-}
 function Check({ ok }: { ok: boolean }) {
   return ok ? (
     <svg className="w-5 h-5 text-[#1D9E75] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -98,41 +73,36 @@ function Check({ ok }: { ok: boolean }) {
 function AppMockup() {
   const f = 'ui-sans-serif,system-ui,sans-serif'
 
-  // Donut chart helpers (r=58, cx=860, cy=348)
-  // Circumference = 2π×58 ≈ 364.4
   const C = 364.4
   const donutCx = 798, donutCy = 320, donutR = 58, donutW = 24
 
-  // segments: [color, pct]
   const segments: [string, number][] = [
-    ['#1D9E75', 0.80],  // Aceita
-    ['#ef4444', 0.12],  // Recusada
-    ['#d1d5db', 0.05],  // Rascunho
-    ['#3b82f6', 0.03],  // Enviada
+    ['#1D9E75', 0.80],
+    ['#ef4444', 0.12],
+    ['#d1d5db', 0.05],
+    ['#3b82f6', 0.03],
   ]
   let cumulative = 0
   const donutSegments = segments.map(([color, pct]) => {
     const len = C * pct
-    const offset = C * 0.25 - C * cumulative  // start at 12 o'clock
+    const offset = C * 0.25 - C * cumulative
     cumulative += pct
     return { color, len, offset }
   })
 
-  // Bar chart (simple) — only Jun has value
   const barMonths = ['jan','fev','mar','abr','mai','jun']
   const barValues = [4, 7, 11, 16, 22, 37]
   const barMaxH = 100, barMaxV = 40
   const barX0 = 282, barY0 = 412, barW = 26, barGap = 30
 
-  // Status rows
   const statuses: [string, string, number][] = [
-    ['#6b7280', 'bg-gray-100', 5],   // Rascunho
-    ['#2563eb', '#dbeafe',    2],   // Enviada
-    ['#d97706', '#fef3c7',    3],   // Visualizada
-    ['#1D9E75', '#dcfce7',    9],   // Aceita
-    ['#ef4444', '#fee2e2',    1],   // Recusada
-    ['#ea580c', '#ffedd5',   11],   // Expirada
-    ['#991b1b', '#fecaca',    6],   // Cancelada
+    ['#6b7280', 'bg-gray-100', 5],
+    ['#2563eb', '#dbeafe',    2],
+    ['#d97706', '#fef3c7',    3],
+    ['#1D9E75', '#dcfce7',    9],
+    ['#ef4444', '#fee2e2',    1],
+    ['#ea580c', '#ffedd5',   11],
+    ['#991b1b', '#fecaca',    6],
   ]
   const statusLabels = ['Rascunho','Enviada','Visualizada','Aceita','Recusada','Expirada','Cancelada']
 
@@ -142,7 +112,6 @@ function AppMockup() {
         <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" className="w-full block" aria-hidden="true">
           <rect width="1200" height="700" fill="white" />
 
-          {/* ── browser chrome ── */}
           <rect width="1200" height="36" fill="#f3f4f6" />
           <circle cx="16" cy="18" r="5.5" fill="#fc5c65" />
           <circle cx="33" cy="18" r="5.5" fill="#ffce54" />
@@ -150,23 +119,18 @@ function AppMockup() {
           <rect x="76" y="10" width="680" height="16" rx="8" fill="#e5e7eb" />
           <text x="416" y="22" textAnchor="middle" fontSize="9" fill="#9ca3af" fontFamily={f}>app.freelanceflow.com.br/dashboard</text>
 
-          {/* ── sidebar ── */}
           <rect x="0" y="36" width="200" height="664" fill="white" />
           <rect x="199" y="36" width="1" height="664" fill="#f3f4f6" />
 
-          {/* Logo */}
           <text x="20" y="72" fontSize="14" fontWeight="700" fill="#1D9E75" fontFamily={f}>FreelanceFlow</text>
 
-          {/* Dashboard — active */}
           <rect x="8" y="84" width="184" height="34" rx="6" fill="#f0fdf4" />
           <text x="36" y="106" fontSize="12" fontWeight="600" fill="#1D9E75" fontFamily={f}>Dashboard</text>
 
-          {/* Nav items */}
           {['Propostas','Clientes','Follow-ups','Modelos','Configurações'].map((label, i) => (
             <text key={label} x="36" y={144 + i * 34} fontSize="12" fill="#6b7280" fontFamily={f}>{label}</text>
           ))}
 
-          {/* User info */}
           <rect x="8" y="634" width="184" height="54" rx="8" fill="#f9fafb" />
           <circle cx="30" cy="661" r="14" fill="#1D9E75" />
           <text x="30" y="665" textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily={f}>A</text>
@@ -174,10 +138,8 @@ function AppMockup() {
           <rect x="52" y="660" width="94" height="16" rx="8" fill="#1D9E75" />
           <text x="99" y="672" textAnchor="middle" fontSize="8" fontWeight="700" fill="white" fontFamily={f}>FreelanceFlow Pro</text>
 
-          {/* ── main area ── */}
           <rect x="200" y="36" width="1000" height="664" fill="#f9fafb" />
 
-          {/* top bar */}
           <rect x="200" y="36" width="1000" height="70" fill="white" />
           <line x1="200" y1="106" x2="1200" y2="106" stroke="#f3f4f6" strokeWidth="1" />
           <text x="228" y="62" fontSize="18" fontWeight="700" fill="#111827" fontFamily={f}>Olá, Carlos Alberto!</text>
@@ -185,40 +147,30 @@ function AppMockup() {
           <rect x="1044" y="48" width="140" height="36" rx="8" fill="#1D9E75" />
           <text x="1114" y="71" textAnchor="middle" fontSize="11" fontWeight="600" fill="white" fontFamily={f}>+ Nova Proposta</text>
 
-          {/* ── metric cards ── */}
-          {/* Valor aprovado */}
           <rect x="220" y="118" width="224" height="80" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
           <text x="240" y="139" fontSize="10" fill="#6b7280" fontFamily={f}>Valor aprovado</text>
           <text x="240" y="167" fontSize="26" fontWeight="700" fill="#1D9E75" fontFamily={f}>R$ 9.250</text>
           <text x="240" y="185" fontSize="9" fill="#9ca3af" fontFamily={f}>9 aceitas</text>
 
-          {/* Em aberto */}
           <rect x="456" y="118" width="196" height="80" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
           <text x="476" y="139" fontSize="10" fill="#6b7280" fontFamily={f}>Em aberto</text>
           <text x="476" y="167" fontSize="26" fontWeight="700" fill="#111827" fontFamily={f}>5</text>
           <text x="476" y="185" fontSize="9" fill="#9ca3af" fontFamily={f}>enviadas + visualizadas</text>
 
-          {/* Taxa de resposta */}
           <rect x="664" y="118" width="216" height="80" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
           <text x="684" y="139" fontSize="10" fill="#6b7280" fontFamily={f}>Taxa de resposta</text>
           <text x="684" y="167" fontSize="26" fontWeight="700" fill="#111827" fontFamily={f}>67%</text>
           <text x="684" y="185" fontSize="9" fill="#9ca3af" fontFamily={f}>propostas respondidas / 30 dias</text>
 
-          {/* Este mês */}
           <rect x="892" y="118" width="288" height="80" rx="8" fill="white" stroke="#f3f4f6" strokeWidth="1" />
           <text x="912" y="139" fontSize="10" fill="#6b7280" fontFamily={f}>Este mês</text>
           <text x="912" y="167" fontSize="26" fontWeight="700" fill="#111827" fontFamily={f}>37</text>
           <text x="912" y="185" fontSize="9" fill="#9ca3af" fontFamily={f}>plano pro: ilimitado</text>
 
-          {/* ── charts row ── */}
-
-          {/* Bar chart card */}
           <rect x="220" y="212" width="420" height="220" rx="10" fill="white" />
           <text x="240" y="236" fontSize="12" fontWeight="600" fill="#111827" fontFamily={f}>Propostas por mês</text>
-          {/* axis */}
           <line x1="272" y1="252" x2="272" y2={barY0} stroke="#f3f4f6" strokeWidth="1" />
           <line x1="272" y1={barY0} x2="618" y2={barY0} stroke="#f3f4f6" strokeWidth="1" />
-          {/* grid lines + y labels */}
           {[0,9,18,27,36].map((v,i) => {
             const gy = barY0 - i * (barMaxH / barMaxV) * 10
             return (
@@ -228,7 +180,6 @@ function AppMockup() {
               </g>
             )
           })}
-          {/* bars */}
           {barMonths.map((m, i) => {
             const bx = barX0 + i * (barW + barGap)
             const bh = (barValues[i] / barMaxV) * barMaxH
@@ -241,10 +192,8 @@ function AppMockup() {
             )
           })}
 
-          {/* Doughnut card */}
           <rect x="652" y="212" width="292" height="220" rx="10" fill="white" />
           <text x="672" y="236" fontSize="12" fontWeight="600" fill="#111827" fontFamily={f}>Valor em negociação</text>
-          {/* donut */}
           <circle cx={donutCx} cy={donutCy} r={donutR} fill="none" stroke="#f3f4f6" strokeWidth={donutW} />
           {donutSegments.map((s, i) => (
             <circle
@@ -258,7 +207,6 @@ function AppMockup() {
             />
           ))}
           <circle cx={donutCx} cy={donutCy} r={donutR - donutW / 2 - 2} fill="white" />
-          {/* legend */}
           {[['#1D9E75','Aceita'],['#3b82f6','Enviada'],['#d1d5db','Rascunho'],['#ef4444','Recusada']].map(([c,l],i) => (
             <g key={l}>
               <circle cx="666" cy={392 + i * 10} r="4" fill={c} />
@@ -266,7 +214,6 @@ function AppMockup() {
             </g>
           ))}
 
-          {/* Status list card */}
           <rect x="956" y="212" width="224" height="220" rx="10" fill="white" />
           <text x="976" y="236" fontSize="12" fontWeight="600" fill="#111827" fontFamily={f}>Por status</text>
           {statuses.map(([color, bg, count], i) => (
@@ -277,9 +224,6 @@ function AppMockup() {
             </g>
           ))}
 
-          {/* ── bottom row ── */}
-
-          {/* Propostas recentes */}
           <rect x="220" y="446" width="516" height="218" rx="10" fill="white" />
           <text x="240" y="470" fontSize="12" fontWeight="600" fill="#111827" fontFamily={f}>Propostas recentes</text>
           <text x="706" y="470" fontSize="11" fill="#1D9E75" textAnchor="end" fontFamily={f}>Ver todas →</text>
@@ -298,7 +242,6 @@ function AppMockup() {
             </g>
           ))}
 
-          {/* Atenção necessária */}
           <rect x="748" y="446" width="432" height="218" rx="10" fill="white" />
           <text x="768" y="470" fontSize="12" fontWeight="600" fill="#111827" fontFamily={f}>Atenção necessária</text>
           <circle cx="1150" cy="465" r="10" fill="#f59e0b" />
@@ -365,7 +308,7 @@ function JsonLd() {
             name: 'Pro',
             price: '19',
             priceCurrency: 'BRL',
-            description: 'Propostas ilimitadas, clientes ilimitados, PDF sem marca d\'água, modelos prontos e todos os recursos do plano Free.',
+            description: "Propostas ilimitadas, clientes ilimitados, PDF sem marca d'água, modelos prontos e todos os recursos do plano Free.",
           },
         ],
       },
@@ -425,7 +368,7 @@ function JsonLd() {
             name: 'O que está incluído no plano Pro?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'O plano Pro custa R$19/mês e inclui propostas ilimitadas, clientes ilimitados, PDF sem marca d\'água, modelos prontos de proposta, rastreamento e follow-up automático.',
+              text: "O plano Pro custa R$19/mês e inclui propostas ilimitadas, clientes ilimitados, PDF sem marca d'água, modelos prontos de proposta, rastreamento e follow-up automático.",
             },
           },
           {
@@ -441,7 +384,7 @@ function JsonLd() {
             name: 'O FreelanceFlow gera PDF da proposta automaticamente?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Sim. O PDF é gerado automaticamente com sua logo, cor e dados da empresa. No plano Free aparece com marca do FreelanceFlow; no plano Pro o PDF é sem marca d\'água.',
+              text: "Sim. O PDF é gerado automaticamente com sua logo, cor e dados da empresa. No plano Free aparece com marca do FreelanceFlow; no plano Pro o PDF é sem marca d'água.",
             },
           },
         ],
@@ -457,118 +400,14 @@ function JsonLd() {
   )
 }
 
-/* ─── Scroll-reveal hook ─── */
-function useReveal() {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const targets = el.querySelectorAll<HTMLElement>('.reveal')
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add('revealed'); observer.unobserve(e.target) } }),
-      { threshold: 0.12 }
-    )
-    targets.forEach(t => observer.observe(t))
-    return () => observer.disconnect()
-  }, [])
-  return ref
-}
-
 /* ─── Page ─── */
 export default function LandingPage() {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const refComo        = useReveal()
-  const refFeatures    = useReveal()
-  const refPlanos      = useReveal()
-  const refCta         = useReveal()
-
-  function scrollTo(id: string) {
-    setMobileOpen(false)
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <JsonLd />
 
       {/* ━━━ NAVBAR ━━━ */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#1D9E75] select-none">FreelanceFlow</span>
-
-          {/* Desktop links */}
-          <nav className="hidden md:flex items-center gap-8">
-            {[
-              { label: 'Como funciona', id: 'como-funciona' },
-              { label: 'Funcionalidades', id: 'funcionalidades' },
-              { label: 'Planos', id: 'planos' },
-            ].map(({ label, id }) => (
-              <button
-                key={id}
-                onClick={() => scrollTo(id)}
-                className="text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="hidden sm:inline-flex items-center px-4 py-2 text-gray-600 text-sm font-medium hover:text-gray-900 transition-colors"
-            >
-              Já tenho conta
-            </Link>
-            <Link
-              href="/cadastro"
-              className="hidden sm:inline-flex items-center px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
-            >
-              Começar grátis
-            </Link>
-            <button
-              onClick={() => setMobileOpen(o => !o)}
-              className="md:hidden p-2 text-gray-600 hover:text-gray-900"
-              aria-label="Abrir menu"
-            >
-              {mobileOpen ? <IconClose /> : <IconMenu />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 flex flex-col gap-1">
-            {[
-              { label: 'Como funciona', id: 'como-funciona' },
-              { label: 'Funcionalidades', id: 'funcionalidades' },
-              { label: 'Planos', id: 'planos' },
-            ].map(({ label, id }) => (
-              <button
-                key={id}
-                onClick={() => scrollTo(id)}
-                className="text-sm text-gray-700 text-left px-2 py-3 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                {label}
-              </button>
-            ))}
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className="inline-flex justify-center items-center px-4 py-2.5 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Já tenho conta
-            </Link>
-            <Link
-              href="/cadastro"
-              onClick={() => setMobileOpen(false)}
-              className="inline-flex justify-center items-center px-4 py-2.5 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
-            >
-              Começar grátis
-            </Link>
-          </div>
-        )}
-      </header>
+      <NavHeader />
 
       {/* ━━━ HERO ━━━ */}
       <section className="pt-32 pb-0 px-4 sm:px-6">
@@ -590,12 +429,12 @@ export default function LandingPage() {
             >
               Começar grátis — sem cartão
             </Link>
-            <button
-              onClick={() => scrollTo('funcionalidades')}
-              className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:scale-[1.02] transition-all text-sm cursor-pointer"
+            <a
+              href="#funcionalidades"
+              className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:scale-[1.02] transition-all text-sm"
             >
               Ver demonstração
-            </button>
+            </a>
           </div>
           <p style={{ animationDelay: '360ms' }} className="anim-fade-in mt-5 text-sm text-gray-400">
             Grátis para sempre · 5 propostas/mês no plano Free
@@ -608,7 +447,7 @@ export default function LandingPage() {
 
       {/* ━━━ COMO FUNCIONA ━━━ */}
       <section id="como-funciona" className="py-20 px-4 sm:px-6 bg-white">
-        <div ref={refComo} className="max-w-5xl mx-auto">
+        <RevealSection className="max-w-5xl mx-auto">
           <div className="text-center mb-14 reveal">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#1D9E75] mb-3 block">
               Como funciona
@@ -647,12 +486,12 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </div>
+        </RevealSection>
       </section>
 
       {/* ━━━ FUNCIONALIDADES ━━━ */}
       <section id="funcionalidades" className="py-20 px-4 sm:px-6 bg-[#F4F5F7]">
-        <div ref={refFeatures} className="max-w-5xl mx-auto">
+        <RevealSection className="max-w-5xl mx-auto">
           <div className="text-center mb-14 reveal">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#1D9E75] mb-3 block">
               Funcionalidades
@@ -706,12 +545,12 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </div>
+        </RevealSection>
       </section>
 
       {/* ━━━ PLANOS ━━━ */}
       <section id="planos" className="py-20 px-4 sm:px-6 bg-white">
-        <div ref={refPlanos} className="max-w-4xl mx-auto">
+        <RevealSection className="max-w-4xl mx-auto">
           <div className="text-center mb-14 reveal">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#1D9E75] mb-3 block">
               Planos
@@ -745,7 +584,7 @@ export default function LandingPage() {
                   { t: 'Follow-up automático', ok: true },
                   { t: 'PDF com marca FreelanceFlow', ok: true },
                   { t: 'Modelos de proposta', ok: false },
-                  { t: 'PDF sem marca d\'água', ok: false },
+                  { t: "PDF sem marca d'água", ok: false },
                 ].map(item => (
                   <li key={item.t} className="flex items-center gap-3">
                     <Check ok={item.ok} />
@@ -783,7 +622,7 @@ export default function LandingPage() {
                   { t: 'Propostas ilimitadas', ok: true },
                   { t: 'Clientes ilimitados', ok: true },
                   { t: 'Envio por e-mail e WhatsApp', ok: true },
-                  { t: 'PDF sem marca d\'água', ok: true },
+                  { t: "PDF sem marca d'água", ok: true },
                   { t: 'Modelos prontos de proposta', ok: true },
                   { t: 'Rastreamento de abertura', ok: true },
                   { t: 'Follow-up automático', ok: true },
@@ -796,12 +635,12 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-        </div>
+        </RevealSection>
       </section>
 
       {/* ━━━ CTA FINAL ━━━ */}
       <section className="py-24 px-4 sm:px-6 bg-[#1D9E75]">
-        <div ref={refCta} className="max-w-2xl mx-auto text-center">
+        <RevealSection className="max-w-2xl mx-auto text-center">
           <h2 className="reveal text-3xl font-bold text-white mb-4">
             Troque o simples orçamento por uma proposta comercial profissional.
           </h2>
@@ -814,7 +653,7 @@ export default function LandingPage() {
           >
             Criar conta grátis
           </Link>
-        </div>
+        </RevealSection>
       </section>
 
       {/* ━━━ FOOTER ━━━ */}
