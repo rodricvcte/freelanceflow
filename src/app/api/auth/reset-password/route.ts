@@ -27,13 +27,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Este e-mail não está cadastrado.' }, { status: 404 })
   }
 
-  const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalized, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://freelanceflow.com.br'}/redefinir-senha`,
-  })
-
-  if (resetError) {
-    return NextResponse.json({ error: 'Erro ao enviar email. Tente novamente.' }, { status: 500 })
-  }
-
+  // Email existe — o envio é feito pelo browser para manter o PKCE verifier no cliente
   return NextResponse.json({ ok: true })
 }

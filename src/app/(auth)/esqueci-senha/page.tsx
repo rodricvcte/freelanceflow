@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase-browser'
 
 export default function EsqueciSenhaPage() {
   const [email,   setEmail]   = useState('')
@@ -14,6 +15,7 @@ export default function EsqueciSenhaPage() {
     setError(null)
     setLoading(true)
     try {
+      // Passo 1: verifica se o email está cadastrado
       const res = await fetch('/api/auth/reset-password', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -24,6 +26,18 @@ export default function EsqueciSenhaPage() {
         setError(data.error ?? 'Erro ao enviar. Tente novamente.')
         return
       }
+
+      // Passo 2: email confirmado — envia o link pelo browser
+      // (o PKCE verifier fica nos cookies do usuário para troca posterior)
+      const supabase = createClient()
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/redefinir-senha`,
+      })
+      if (resetError) {
+        setError('Erro ao enviar email. Tente novamente.')
+        return
+      }
+
       setSent(true)
     } catch {
       setError('Erro de conexão. Tente novamente.')

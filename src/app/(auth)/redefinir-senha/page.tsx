@@ -16,28 +16,28 @@ export default function RedefinirSenhaPage() {
 
   useEffect(() => {
     const supabase = createClient()
+    let done = false
 
-    // Check if already in a valid session (page refresh after arriving via link)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setSessionReady(true)
-    })
-
-    // Listen for PASSWORD_RECOVERY (hash-based flow) or SIGNED_IN (PKCE flow)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-        setSessionReady(true)
-      }
-    })
-
-    // After delay, if still waiting, the link is invalid/expired
-    const timer = setTimeout(() => {
-      setSessionReady(prev => prev === null ? false : prev)
-    }, 3000)
-
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timer)
+    function resolve(value: boolean) {
+      if (!done) { done = true; setSessionReady(value) }
     }
+
+    // Escuta eventos de auth — cobre PKCE (SIGNED_IN) e hash-based (PASSWORD_RECOVERY)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') resolve(true)
+      if (event === 'SIGNED_IN' && session) resolve(true)
+      if (event === 'SIGNED_OUT') resolve(false)
+    })
+
+    // Verifica sessão já existente (ex: refresh de página após troca)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) resolve(true)
+    })
+
+    // Timeout: se o código não foi trocado em 8s, o link é inválido
+    const timer = setTimeout(() => resolve(false), 8000)
+
+    return () => { subscription.unsubscribe(); clearTimeout(timer) }
   }, [])
 
   const passwordMismatch = confirm.length > 0 && password !== confirm
