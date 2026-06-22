@@ -803,21 +803,25 @@ export function ProposalPDFDocument({
       <View style={s.content}>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <View wrap={false as any} style={s.clientCard}>
-          {proposal.clients && (
-            <View>
-              <Text style={s.fieldLabel}>CLIENTE</Text>
-              <Text style={s.fieldValue}>{proposal.clients.name}</Text>
-              {proposal.clients.email && <Text style={s.fieldSub}>{proposal.clients.email}</Text>}
-            </View>
-          )}
-          <View style={{ alignItems: 'flex-end' }}>
-            <Text style={[s.fieldLabel, { textAlign: 'right' }]}>FORNECEDOR</Text>
-            <Text style={[s.fieldValue, { textAlign: 'right' }]}>{displayName}</Text>
+          {/* Fornecedor — always left */}
+          <View>
+            <Text style={s.fieldLabel}>FORNECEDOR</Text>
+            <Text style={s.fieldValue}>{displayName}</Text>
             {docFormatted && (
-              <Text style={[s.fieldSub, { textAlign: 'right' }]}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
+              <Text style={s.fieldSub}>{profile.document_type?.toUpperCase()}: {docFormatted}</Text>
             )}
-            {profile.address && <Text style={[s.fieldSub, { textAlign: 'right' }]}>{profile.address}</Text>}
+            {profile.address && <Text style={s.fieldSub}>{profile.address}</Text>}
           </View>
+          {/* Cliente — right, empty column when absent keeps layout stable */}
+          {proposal.clients ? (
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={[s.fieldLabel, { textAlign: 'right' }]}>CLIENTE</Text>
+              <Text style={[s.fieldValue, { textAlign: 'right' }]}>{proposal.clients.name}</Text>
+              {proposal.clients.email && <Text style={[s.fieldSub, { textAlign: 'right' }]}>{proposal.clients.email}</Text>}
+            </View>
+          ) : (
+            <View />
+          )}
         </View>
 
         {/* Legacy service_description */}

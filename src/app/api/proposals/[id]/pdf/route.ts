@@ -65,7 +65,7 @@ export async function POST(
   if (!exists) return NextResponse.json({ error: 'Proposta não encontrada' }, { status: 404 })
 
   try {
-    const pdfUrl = await generateAndSaveProposalPDF(id, supabase)
+    const pdfUrl = await generateAndSaveProposalPDF(id, user.id)
     return NextResponse.json({ pdf_url: pdfUrl })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erro ao gerar PDF'

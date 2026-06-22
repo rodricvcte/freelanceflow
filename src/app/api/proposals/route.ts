@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
   let pdfUrl: string | null = data.pdf_url ?? null
   try {
-    pdfUrl = await generateAndSaveProposalPDF(data.id, supabase)
+    pdfUrl = await generateAndSaveProposalPDF(data.id, user.id)
   } catch (e) {
     console.error('[PDF] Falha ao gerar PDF da proposta', data.id, e)
   }

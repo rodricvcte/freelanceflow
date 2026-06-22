@@ -92,7 +92,7 @@ export async function POST(
   await supabase.from('proposal_events').insert({ proposal_id: draft.id, event_type: 'created', metadata: { version: newVersion } })
 
   try {
-    await generateAndSaveProposalPDF(draft.id, supabase)
+    await generateAndSaveProposalPDF(draft.id, user.id)
   } catch (e) {
     console.error('[PDF] Falha ao gerar PDF da nova versão', draft.id, e)
   }
