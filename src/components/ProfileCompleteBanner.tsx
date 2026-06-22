@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 type Fields = {
@@ -19,23 +18,19 @@ function pct(f: Fields): number {
   return Math.round((filled / 6) * 100)
 }
 
-export default function ProfileCompleteBanner() {
+export default function ProfileCompleteBanner({ initialPercent }: { initialPercent: number | null }) {
   const [dismissed, setDismissed] = useState(false)
-  const [percent, setPercent]     = useState<number | null>(null)
-  const pathname = usePathname()
+  const [percent, setPercent]     = useState<number | null>(initialPercent)
 
-  function refresh() {
-    fetch('/api/profile', { cache: 'no-store' })
-      .then(r => r.json())
-      .then((data: Fields) => setPercent(pct(data)))
-      .catch(() => {})
-  }
-
+  // Atualiza apenas quando o usuário salva o perfil na mesma sessão.
+  // Não re-busca em cada navegação — o valor inicial vem do servidor via prop.
   useEffect(() => {
-    refresh()
-  }, [pathname])
-
-  useEffect(() => {
+    function refresh() {
+      fetch('/api/profile', { cache: 'no-store' })
+        .then(r => r.json())
+        .then((data: Fields) => setPercent(pct(data)))
+        .catch(() => {})
+    }
     window.addEventListener('ff:profile-updated', refresh)
     return () => window.removeEventListener('ff:profile-updated', refresh)
   }, [])

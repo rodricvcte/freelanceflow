@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import ProposalActions from '@/components/proposals/ProposalActions'
-import FollowUpSidebar from '@/components/proposals/FollowUpSidebar'
+import ProposalNotes from '@/components/proposals/ProposalNotes'
 import VersionGroup from '@/components/proposals/VersionGroup'
 import ProposalTimeline from '@/components/proposals/ProposalTimeline'
 import type { TimelineEvent } from '@/components/proposals/ProposalTimeline'
@@ -46,13 +46,7 @@ type ProposalRow = {
 
 type EventRow = TimelineEvent
 
-type FollowUpRow = {
-  id: string
-  type: 'whatsapp' | 'email'
-  trigger_rule: string | null
-  scheduled_for: string | null
-  created_at: string
-}
+type NoteRow = { id: string; content: string; created_at: string }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -419,7 +413,7 @@ export default async function ProposalDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) notFound()
 
-  const [proposalRes, eventsRes, followUpsRes, profileRes] = await Promise.all([
+  const [proposalRes, eventsRes, notesRes, profileRes] = await Promise.all([
     supabase
       .from('proposals')
       .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, code, version, client_id, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
@@ -432,12 +426,11 @@ export default async function ProposalDetailPage({
       .eq('proposal_id', id)
       .order('created_at', { ascending: false }),
     supabase
-      .from('follow_ups')
-      .select('id, type, trigger_rule, scheduled_for, created_at')
+      .from('proposal_notes')
+      .select('id, content, created_at')
       .eq('proposal_id', id)
       .eq('user_id', user.id)
-      .is('sent_at', null)
-      .order('scheduled_for', { ascending: true }),
+      .order('created_at', { ascending: false }),
     supabase
       .from('profiles')
       .select('full_name, business_name')
@@ -448,8 +441,8 @@ export default async function ProposalDetailPage({
   if (!proposalRes.data) notFound()
 
   const proposal      = proposalRes.data as unknown as ProposalRow
-  const events        = (eventsRes.data   ?? []) as EventRow[]
-  const followUps     = (followUpsRes.data ?? []) as FollowUpRow[]
+  const events        = (eventsRes.data  ?? []) as EventRow[]
+  const notes         = (notesRes.data   ?? []) as NoteRow[]
   const sections      = Array.isArray(proposal.sections) ? proposal.sections : []
   const profile       = profileRes.data
   const freelancerName = profile?.business_name ?? profile?.full_name ?? 'Freelancer'
@@ -708,8 +701,8 @@ export default async function ProposalDetailPage({
             </details>
           )}
 
-          {/* Follow-ups */}
-          <FollowUpSidebar proposalId={proposal.id} initialFollowUps={followUps} />
+          {/* Notas */}
+          <ProposalNotes proposalId={proposal.id} initialNotes={notes} />
 
         </div>
       </div>

@@ -201,6 +201,64 @@ export default async function DashboardPage() {
   // ── Shared card class ────────────────────────────────────────────────────────
   const card = 'bg-white rounded-[10px] border border-gray-100'
 
+  // ── Empty state para novos usuários ──────────────────────────────────────────
+  if (proposals.length === 0) {
+    return (
+      <div className="p-6 md:p-8 max-w-[1200px]">
+        <div className="flex items-start justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-[18px] font-medium text-gray-900 leading-snug">Olá, {firstName}!</h1>
+            <p className="text-[12px] text-gray-400 mt-0.5">{fmtFullDate(now)}</p>
+          </div>
+          <Link
+            href="/propostas/new"
+            className="shrink-0 flex items-center gap-2 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Nova Proposta
+          </Link>
+        </div>
+
+        <div className="flex flex-col items-center justify-center pt-4 pb-12 px-4 text-center">
+          <div className="text-4xl mb-4" aria-hidden="true">🎉</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Bem-vindo ao FreelanceFlow!</h2>
+          <p className="text-sm text-gray-500 mb-7 leading-relaxed max-w-xs">
+            Crie sua primeira proposta em 2 minutos e envie pro seu próximo cliente com rastreamento profissional.
+          </p>
+          <Link
+            href="/propostas/new"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-[#1D9E75] text-white text-sm font-semibold rounded-lg hover:bg-[#188f68] transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Criar minha primeira proposta
+          </Link>
+
+          <div className="mt-10 border-t border-gray-100 pt-8 w-full max-w-xs">
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-5">O que você vai poder ver</p>
+            <div className="flex flex-col gap-4 text-left">
+              <div className="flex items-center gap-3">
+                <span className="text-lg shrink-0" aria-hidden="true">📊</span>
+                <p className="text-sm text-gray-600">Quando o cliente abriu a proposta</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg shrink-0" aria-hidden="true">🔔</span>
+                <p className="text-sm text-gray-600">Follow-up automático para não perder negócios</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg shrink-0" aria-hidden="true">✅</span>
+                <p className="text-sm text-gray-600">Cliente aceita ou recusa pelo link</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-6 md:p-8 max-w-[1200px]">
 

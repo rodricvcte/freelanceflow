@@ -1,5 +1,4 @@
 import { renderToBuffer } from '@react-pdf/renderer'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { ProposalPDFDocument } from '@/components/proposals/ProposalPDF'
 import type { ProposalForPDF, ProfileForPDF, Section } from '@/components/proposals/ProposalPDF'
 import { createServiceClient } from '@/lib/supabase-service'
@@ -8,46 +7,32 @@ const BUCKET = 'proposals-pdfs'
 
 export async function generateAndSaveProposalPDF(
   proposalId: string,
-  supabase: SupabaseClient
+  userId: string
 ): Promise<string> {
-  const [{ data: raw }, { data: authData }] = await Promise.all([
-    supabase
+  const service = createServiceClient()
+
+  // All DB reads in a single parallel batch — no auth round-trip needed
+  const [{ data: raw }, { data: profileRaw }, { data: sub }] = await Promise.all([
+    service
       .from('proposals')
       .select('title, service_description, value, payment_terms, deadline_days, valid_until, token, proposal_number, code, version, sections, snapshot_profile, clients(name, email)')
       .eq('id', proposalId)
       .single(),
-    supabase.auth.getUser(),
-  ])
-
-  if (!raw || !authData.user) throw new Error('Proposta ou usuário não encontrado')
-
-  // Use snapshot saved at creation time; fall back to current profile for old proposals
-  const snapshotProfile = (raw as Record<string, unknown>).snapshot_profile as ProfileForPDF | null
-
-  const service = createServiceClient()
-
-  const [{ data: profileRaw }, { data: sub }, { data: sigRow }] = await Promise.all([
-    snapshotProfile
-      ? Promise.resolve({ data: null })
-      : supabase
-          .from('profiles')
-          .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj, instagram, linkedin, facebook, youtube, tiktok, signature_data')
-          .eq('id', authData.user.id)
-          .single(),
-    supabase
-      .from('subscriptions')
-      .select('plan, status')
-      .eq('user_id', authData.user.id)
-      .maybeSingle(),
-    // Always fetch signature_data from the current profile — snapshot doesn't carry it.
-    // Use service client to bypass RLS so signature works for all plan types.
     service
       .from('profiles')
-      .select('signature_data')
-      .eq('id', authData.user.id)
+      .select('full_name, business_name, accent_color, logo_url, phone, email_business, address, website, document_type, cpf_cnpj, instagram, linkedin, facebook, youtube, tiktok, signature_data')
+      .eq('id', userId)
       .single(),
+    service
+      .from('subscriptions')
+      .select('plan, status')
+      .eq('user_id', userId)
+      .maybeSingle(),
   ])
 
+  if (!raw) throw new Error('Proposta não encontrada')
+
+  const snapshotProfile = (raw as Record<string, unknown>).snapshot_profile as ProfileForPDF | null
   const isFreePlan = !sub || sub.plan === 'free' || sub.status !== 'active'
 
   const rawClients = (raw as Record<string, unknown>).clients
@@ -80,16 +65,16 @@ export async function generateAndSaveProposalPDF(
       instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
       signature_data: null,
     }),
-    signature_data: sigRow?.signature_data ?? null,
+    // Always use current signature_data — snapshot doesn't carry it
+    signature_data: profileRaw?.signature_data ?? null,
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buffer = await renderToBuffer(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <ProposalPDFDocument proposal={proposal} profile={profile} isFreePlan={isFreePlan} /> as any
   )
 
-  const num = rawCode ?? (raw.proposal_number as string | null)
-  const filePath = `${authData.user.id}/${num ?? proposalId}.pdf`
+  const filePath = `${userId}/${rawCode ?? (raw.proposal_number as string | null) ?? proposalId}.pdf`
 
   await service.storage.createBucket(BUCKET, { public: true }).catch(() => {})
 
@@ -101,10 +86,9 @@ export async function generateAndSaveProposalPDF(
 
   const { data: { publicUrl } } = service.storage.from(BUCKET).getPublicUrl(filePath)
 
-  // Append version to bust CDN cache — same file path is overwritten on each save
   const versionedUrl = `${publicUrl}?v=${Date.now()}`
 
-  await supabase.from('proposals').update({ pdf_url: versionedUrl }).eq('id', proposalId)
+  await service.from('proposals').update({ pdf_url: versionedUrl }).eq('id', proposalId)
 
   return versionedUrl
 }

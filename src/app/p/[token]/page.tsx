@@ -496,14 +496,8 @@ export default function PublicProposalPage() {
             <span>Emitida em {fmtDate(proposal.created_at)}</span>
             {proposal.valid_until && <span>Válida até {fmtDate(proposal.valid_until)}</span>}
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-100 flex" style={{ gap: 'calc(16rem + 1cm)' }}>
-            {proposal.clients && (
-              <div>
-                <p className="text-[11px] text-gray-400 uppercase tracking-wide font-semibold mb-1">Para</p>
-                <p className="text-sm font-semibold text-gray-900">{proposal.clients.name}</p>
-                {proposal.clients.email && <p className="text-xs text-gray-500 mt-0.5">{proposal.clients.email}</p>}
-              </div>
-            )}
+          <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-8">
+            {/* Fornecedor — always left */}
             <div>
               <p className="text-[11px] text-gray-400 uppercase tracking-wide font-semibold mb-1">Fornecedor</p>
               <p className="text-sm font-semibold text-gray-900">{displayName}</p>
@@ -514,6 +508,16 @@ export default function PublicProposalPage() {
                 <p className="text-xs text-gray-500 mt-0.5">{profile.phone}</p>
               )}
             </div>
+            {/* Cliente — right, empty column when absent keeps layout stable */}
+            {proposal.clients ? (
+              <div>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wide font-semibold mb-1">Para</p>
+                <p className="text-sm font-semibold text-gray-900">{proposal.clients.name}</p>
+                {proposal.clients.email && <p className="text-xs text-gray-500 mt-0.5">{proposal.clients.email}</p>}
+              </div>
+            ) : (
+              <div />
+            )}
           </div>
         </div>
 

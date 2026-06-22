@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
@@ -66,22 +66,20 @@ const nav = [
 
 const ADMIN_EMAIL = 'rodrigosc19@gmail.com'
 
-type UserInfo = { name: string; isPro: boolean; email: string }
+type UserInfo = { name: string; isPro: boolean; email: string; viewingAs?: string }
 
-export default function Sidebar() {
+export default function Sidebar({ initialData }: { initialData?: UserInfo }) {
   const [open, setOpen]               = useState(false)
-  const [userInfo, setUserInfo]       = useState<UserInfo | null>(null)
+  const [userInfo, setUserInfo]       = useState<UserInfo | null>(initialData ?? null)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const pathname = usePathname()
   const router   = useRouter()
 
-  async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
-
-  function fetchUserInfo() {
+  // Fetch client-side apenas quando não há dados do servidor (ex.: layout do admin).
+  // Nunca re-busca em cada navegação — elimina o gargalo de 3 requests por troca de página.
+  const hasServerData = !!initialData
+  useEffect(() => {
+    if (hasServerData) return
     const supabase = createClient()
     Promise.all([
       fetch('/api/profile',       { cache: 'no-store' }).then(r => r.json()).catch(() => ({})),
@@ -94,11 +92,13 @@ export default function Sidebar() {
         email: user?.email ?? '',
       })
     })
-  }
+  }, [hasServerData])
 
-  useEffect(() => {
-    fetchUserInfo()
-  }, [pathname]) // re-busca a cada navegação
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
@@ -224,12 +224,29 @@ export default function Sidebar() {
             </div>
           )}
 
+          {/* Indicador discreto de impersonação */}
+          {userInfo?.viewingAs && (
+            <div className="mt-1 mb-1 px-2 py-1.5 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span className="text-[11px] text-purple-700 truncate">{userInfo.viewingAs}</span>
+              </div>
+              <form action="/api/admin/stop-impersonate" method="post">
+                <button type="submit" className="text-[10px] font-medium text-purple-500 hover:text-purple-800 shrink-0 transition-colors">
+                  sair
+                </button>
+              </form>
+            </div>
+          )}
+
           <div className="border-t border-gray-100 my-1" />
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
-            {/* logout icon */}
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
