@@ -410,7 +410,7 @@ export default function LandingPage() {
       <NavHeader />
 
       {/* ━━━ HERO ━━━ */}
-      <section className="pt-32 pb-0 px-4 sm:px-6">
+      <section className="pt-20 sm:pt-24 pb-0 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <span style={{ animationDelay: '0ms' }} className="anim-fade-in inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#1D9E75]/10 text-[#1D9E75] mb-6">
             Para freelancers e agências brasileiras
