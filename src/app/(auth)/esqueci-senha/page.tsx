@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
-export default function EsqueciSenhaPage() {
+function EsqueciSenhaForm() {
   const [email,   setEmail]   = useState('')
   const [loading, setLoading] = useState(false)
   const [sent,    setSent]    = useState(false)
@@ -121,5 +121,13 @@ export default function EsqueciSenhaPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function EsqueciSenhaPage() {
+  return (
+    <Suspense>
+      <EsqueciSenhaForm />
+    </Suspense>
   )
 }
