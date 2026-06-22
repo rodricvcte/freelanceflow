@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 export default function EsqueciSenhaPage() {
   const [email,   setEmail]   = useState('')
   const [loading, setLoading] = useState(false)
   const [sent,    setSent]    = useState(false)
   const [error,   setError]   = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const linkExpired = searchParams.get('erro') === '1'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -63,6 +66,12 @@ export default function EsqueciSenhaPage() {
                   Informe seu email e enviaremos um link para redefinir sua senha.
                 </p>
               </div>
+
+              {linkExpired && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm">
+                  Link expirado ou inválido. Solicite um novo link abaixo.
+                </div>
+              )}
 
               {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
