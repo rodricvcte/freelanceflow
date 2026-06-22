@@ -2,25 +2,32 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase-browser'
 
 export default function EsqueciSenhaPage() {
   const [email,   setEmail]   = useState('')
   const [loading, setLoading] = useState(false)
   const [sent,    setSent]    = useState(false)
+  const [error,   setError]   = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setError(null)
     setLoading(true)
     try {
-      const supabase = createClient()
-      await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/redefinir-senha`,
+      const res = await fetch('/api/auth/reset-password', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email }),
       })
-    } catch (err) {
-      console.error('resetPasswordForEmail error:', err)
-    } finally {
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Erro ao enviar. Tente novamente.')
+        return
+      }
       setSent(true)
+    } catch {
+      setError('Erro de conexão. Tente novamente.')
+    } finally {
       setLoading(false)
     }
   }
@@ -56,6 +63,12 @@ export default function EsqueciSenhaPage() {
                   Informe seu email e enviaremos um link para redefinir sua senha.
                 </p>
               </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
