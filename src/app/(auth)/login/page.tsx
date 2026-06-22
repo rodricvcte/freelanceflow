@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import PasswordInput from '@/components/PasswordInput'
@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const passwordReset = searchParams.get('reset') === '1'
 
   async function handleGoogle() {
     setGoogleLoading(true)
@@ -59,6 +61,12 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          {passwordReset && (
+            <div className="mb-6 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+              Senha redefinida com sucesso. Faça login com a nova senha.
+            </div>
+          )}
+
           <div className="mb-6">
             <h1 className="text-xl font-bold text-gray-900">Entrar na sua conta</h1>
             <p className="text-sm text-gray-500 mt-1">Bem-vindo de volta</p>
@@ -117,9 +125,14 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Senha
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Senha
+                </label>
+                <Link href="/esqueci-senha" className="text-xs text-[#1D9E75] hover:underline">
+                  Esqueci minha senha
+                </Link>
+              </div>
               <PasswordInput
                 id="password"
                 value={password}
