@@ -52,6 +52,7 @@ function fmtBRL(v: number) {
 function fmtFullDate(date: Date): string {
   const raw = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    timeZone: 'America/Sao_Paulo',
   }).format(date)
   return raw.charAt(0).toUpperCase() + raw.slice(1)
 }
