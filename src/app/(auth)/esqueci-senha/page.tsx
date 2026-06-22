@@ -12,12 +12,17 @@ export default function EsqueciSenhaPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const supabase = createClient()
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin}/redefinir-senha`,
-    })
-    setSent(true)
-    setLoading(false)
+    try {
+      const supabase = createClient()
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/redefinir-senha`,
+      })
+    } catch (err) {
+      console.error('resetPasswordForEmail error:', err)
+    } finally {
+      setSent(true)
+      setLoading(false)
+    }
   }
 
   return (
