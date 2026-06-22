@@ -108,12 +108,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Este e-mail não está cadastrado.' }, { status: 404 })
   }
 
+  // Usa APP_URL (server-only, configurada no Vercel) ou fallback para produção.
+  // NEXT_PUBLIC_APP_URL não é confiável aqui porque em dev é localhost, que não está
+  // na lista de redirect URLs do Supabase e seria ignorado.
+  const appUrl = process.env.APP_URL ?? 'https://freelanceflow.com.br'
+
   // Gera o link de recuperação via admin (sem enviar email pelo Supabase)
   const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
     type: 'recovery',
     email: normalized,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://freelanceflow.com.br'}/redefinir-senha`,
+      redirectTo: `${appUrl}/redefinir-senha`,
     },
   })
 

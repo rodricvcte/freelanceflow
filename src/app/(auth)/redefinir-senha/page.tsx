@@ -6,42 +6,39 @@ import { createClient } from '@/lib/supabase-browser'
 import PasswordInput from '@/components/PasswordInput'
 
 export default function RedefinirSenhaPage() {
-  const [password,     setPassword]     = useState('')
-  const [confirm,      setConfirm]      = useState('')
-  const [error,        setError]        = useState<string | null>(null)
-  const [loading,      setLoading]      = useState(false)
-  const [sessionReady, setSessionReady] = useState<boolean | null>(null)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false)
+  const [password, setPassword] = useState('')
+  const [confirm,  setConfirm]  = useState('')
+  const [error,    setError]    = useState<string | null>(null)
+  const [loading,  setLoading]  = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const supabase = createClient()
-    let done = false
 
-    function resolve(value: boolean) {
-      if (done) return
-      done = true
-      if (value) {
-        setSessionReady(true)
-      } else {
-        router.replace('/esqueci-senha?erro=1')
-      }
-    }
-
-    // Verifica sessão existente — o Supabase processa o hash automaticamente
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) resolve(true)
-    })
-
-    // Captura evento PASSWORD_RECOVERY (hash-based: #access_token=...&type=recovery)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') resolve(true)
-      if (event === 'SIGNED_IN' && session) resolve(true)
+      if (event === 'PASSWORD_RECOVERY') {
+        setMostrarFormulario(true)
+      }
     })
 
-    // Sem sessão em 2s → link inválido ou expirado
-    const timer = setTimeout(() => resolve(false), 2000)
+    // Verifica sessão já existente (ex: refresh de página)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setMostrarFormulario(true)
+    })
 
-    return () => { subscription.unsubscribe(); clearTimeout(timer) }
+    // Se PASSWORD_RECOVERY não disparar em 3s, link inválido ou expirado
+    const timer = setTimeout(() => {
+      setMostrarFormulario(prev => {
+        if (!prev) router.replace('/esqueci-senha?erro=1')
+        return prev
+      })
+    }, 3000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timer)
+    }
   }, [router])
 
   const passwordMismatch = confirm.length > 0 && password !== confirm
@@ -66,7 +63,7 @@ export default function RedefinirSenhaPage() {
     router.push('/login?reset=1')
   }
 
-  if (sessionReady === null) {
+  if (!mostrarFormulario) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <svg className="animate-spin h-6 w-6 text-[#1D9E75]" fill="none" viewBox="0 0 24 24">
