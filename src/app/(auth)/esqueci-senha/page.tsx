@@ -49,7 +49,7 @@ export default function EsqueciSenhaPage() {
               </div>
               <h1 className="text-xl font-bold text-gray-900 mb-2">Verifique seu email</h1>
               <p className="text-sm text-gray-500 mb-6">
-                Se esse e-mail estiver cadastrado, você receberá um link em instantes.
+                Enviamos um link de recuperação para <strong>{email}</strong>. Verifique sua caixa de entrada.
               </p>
               <Link href="/login" className="text-sm text-[#1D9E75] font-medium hover:underline">
                 Voltar para o login
