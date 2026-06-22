@@ -75,8 +75,10 @@ function fmtBRL(v: number | null) {
 
 function fmtDate(iso: string | null) {
   if (!iso) return '—'
-  const [y, m, d] = iso.split('T')[0].split('-').map(Number)
-  return new Intl.DateTimeFormat('pt-BR').format(new Date(y, m - 1, d))
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    timeZone: 'America/Sao_Paulo',
+  }).format(new Date(iso))
 }
 
 function fmtRowBRL(v: string | number | null | undefined) {
