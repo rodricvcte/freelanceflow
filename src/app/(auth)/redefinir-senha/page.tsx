@@ -57,8 +57,11 @@ export default function RedefinirSenhaPage() {
     setLoading(false)
 
     if (updateError) {
-      console.error('[redefinir-senha] updateUser error:', updateError.message)
-      setError(`[debug] ${updateError.message}`)
+      if (updateError.message.includes('New password should be different')) {
+        setError('A nova senha deve ser diferente da senha atual.')
+      } else {
+        setError('Não foi possível redefinir a senha. Tente solicitar um novo link.')
+      }
       return
     }
 
