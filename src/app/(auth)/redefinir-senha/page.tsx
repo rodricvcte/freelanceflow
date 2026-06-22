@@ -18,27 +18,28 @@ export default function RedefinirSenhaPage() {
   useEffect(() => {
     const supabase = createClient()
 
-    // Aguarda o Supabase processar o hash da URL antes de verificar sessão
-    const timer = setTimeout(async () => {
+    async function processSession() {
+      // Caso 1: sessão já existe (ex: refresh de página após setSession)
       const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        setPronto(true)
-      } else {
-        setExpirado(true)
-      }
-    }, 1000)
+      if (session) { setPronto(true); return }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-        clearTimeout(timer)
-        setPronto(true)
-      }
-    })
+      // Caso 2: @supabase/ssr não processa o hash automaticamente —
+      // lê os tokens diretamente da URL e chama setSession explicitamente
+      const params = new URLSearchParams(window.location.hash.slice(1))
+      const accessToken  = params.get('access_token')
+      const refreshToken = params.get('refresh_token') ?? ''
+      const type         = params.get('type')
 
-    return () => {
-      clearTimeout(timer)
-      subscription.unsubscribe()
+      if (accessToken && type === 'recovery') {
+        const { data, error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+        if (data.session && !error) { setPronto(true); return }
+      }
+
+      // Sem hash válido e sem sessão → link expirado ou inválido
+      setExpirado(true)
     }
+
+    processSession()
   }, [])
 
   const passwordMismatch = confirm.length > 0 && password !== confirm
