@@ -33,7 +33,7 @@ export type TemplateSeed = {
 
 export const TEMPLATES: TemplateSeed[] = [
   {
-    template_nicho:  'Gestor de Tráfego Pago',
+    template_nicho:  'Gestão de Tráfego',
     template_icon:   '📊',
     title:           'Gestão de Tráfego Pago — [Nome do Cliente]',
     status:          'rascunho',
@@ -79,7 +79,7 @@ export const TEMPLATES: TemplateSeed[] = [
     ],
   },
   {
-    template_nicho:  'Designer Freelancer',
+    template_nicho:  'Design',
     template_icon:   '🎨',
     title:           'Identidade Visual — [Nome do Cliente]',
     status:          'rascunho',
@@ -124,7 +124,7 @@ export const TEMPLATES: TemplateSeed[] = [
     ],
   },
   {
-    template_nicho:  'Dev Freelancer',
+    template_nicho:  'Desenvolvimento',
     template_icon:   '💻',
     title:           'Desenvolvimento de Site/Sistema — [Nome do Cliente]',
     status:          'rascunho',
@@ -219,7 +219,7 @@ export const TEMPLATES: TemplateSeed[] = [
     ],
   },
   {
-    template_nicho:  'Copywriter',
+    template_nicho:  'Copywriting',
     template_icon:   '✍️',
     title:           'Copy e Conteúdo Estratégico — [Nome do Cliente]',
     status:          'rascunho',
