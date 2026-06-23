@@ -44,6 +44,22 @@ body {
 .anim-fade-in   { opacity: 0; animation: fadeIn  0.6s ease forwards; }
 .anim-scale-in  { opacity: 0; animation: scaleIn 0.7s ease forwards; }
 
+/* Se o usuário tem Reduce Motion ativado, exibe direto sem animar */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up,
+  .anim-fade-in,
+  .anim-scale-in {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* scroll-reveal: starts hidden, JS adds .revealed */
 .reveal {
   opacity: 0;
