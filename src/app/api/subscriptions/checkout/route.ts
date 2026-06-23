@@ -4,10 +4,16 @@ import { createServiceClient } from '@/lib/supabase-service'
 import { stripe } from '@/lib/stripe'
 import { APP_URL } from '@/lib/app-url'
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   try {
-    const priceId = process.env.STRIPE_PRICE_MONTHLY
-    if (!priceId) return NextResponse.json({ error: 'STRIPE_PRICE_MONTHLY não configurado' }, { status: 500 })
+    const PRICE_MONTHLY = process.env.STRIPE_PRICE_MONTHLY
+    const PRICE_YEARLY  = process.env.STRIPE_PRICE_YEARLY
+    if (!PRICE_MONTHLY) return NextResponse.json({ error: 'STRIPE_PRICE_MONTHLY não configurado' }, { status: 500 })
+
+    const body     = await request.json().catch(() => ({}))
+    const bodyPrice = (body as { price_id?: string }).price_id
+    const ALLOWED   = [PRICE_MONTHLY, PRICE_YEARLY].filter(Boolean)
+    const priceId   = bodyPrice && ALLOWED.includes(bodyPrice) ? bodyPrice : PRICE_MONTHLY
 
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
