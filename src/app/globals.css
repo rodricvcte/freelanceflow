@@ -35,6 +35,10 @@ body {
   }
 }
 
+/* ── Hide scrollbar utility ── */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 /* ── Animations ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
