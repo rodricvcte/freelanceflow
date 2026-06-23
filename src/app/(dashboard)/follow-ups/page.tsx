@@ -36,9 +36,9 @@ function ruleLabel(rule: string) { return RULE_CFG[rule]?.label ?? rule }
 function ruleCls(rule: string)   { return RULE_CFG[rule]?.cls   ?? 'bg-gray-100 text-gray-600' }
 
 function fmtScheduledDate(ymd: string): string {
-  const today    = new Date().toISOString().split('T')[0]
-  const tomorrowDt = new Date(); tomorrowDt.setDate(tomorrowDt.getDate() + 1)
-  const tomorrow = tomorrowDt.toISOString().split('T')[0]
+  const today    = new Date().toLocaleDateString('sv', { timeZone: 'America/Sao_Paulo' })
+  const tomorrowDt = new Date(Date.now() + 86_400_000)
+  const tomorrow = tomorrowDt.toLocaleDateString('sv', { timeZone: 'America/Sao_Paulo' })
 
   if (ymd === today)    return 'Hoje'
   if (ymd === tomorrow) return 'Amanhã'
@@ -51,6 +51,7 @@ function fmtSentDate(iso: string): string {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
   }).format(new Date(iso))
 }
 
@@ -65,7 +66,7 @@ function RuleBadge({ rule }: { rule: string }) {
 }
 
 function ScheduledCard({ item }: { item: ScheduledItem }) {
-  const isToday   = item.scheduled_date === new Date().toISOString().split('T')[0]
+  const isToday   = item.scheduled_date === new Date().toLocaleDateString('sv', { timeZone: 'America/Sao_Paulo' })
   const isExpiry  = item.rule === 'expires_tomorrow'
 
   return (
