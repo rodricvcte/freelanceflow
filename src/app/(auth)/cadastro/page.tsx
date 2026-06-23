@@ -44,6 +44,7 @@ export default function CadastroPage() {
     setLoading(false)
 
     if (loginError) { setError(loginError.message); return }
+    ;(window as unknown as { fbq?: (...args: unknown[]) => void }).fbq?.('track', 'CompleteRegistration')
     router.push('/dashboard')
     router.refresh()
   }
