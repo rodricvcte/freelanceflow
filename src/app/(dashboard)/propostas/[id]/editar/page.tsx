@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { maskPhone } from '@/lib/masks'
 
 // ── Section types ─────────────────────────────────────────────────────────────
 
@@ -858,7 +859,7 @@ export default function EditarPropostaPage() {
                 </div>
                 <div>
                   <label className={labelCls}>Telefone</label>
-                  <input type="tel" value={newClient.phone} onChange={e => setNewClient(p => ({ ...p, phone: e.target.value }))} placeholder="(11) 9 9999-9999" className={inputCls} />
+                  <input type="tel" value={newClient.phone} onChange={e => setNewClient(p => ({ ...p, phone: maskPhone(e.target.value) }))} placeholder="(11) 99999-9999" className={inputCls} />
                 </div>
               </div>
               <div className="flex gap-2">

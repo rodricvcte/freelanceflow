@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { maskPhone } from '@/lib/masks'
 
 const EMPTY = { name: '', email: '', phone: '', notes: '' }
 
@@ -21,7 +22,7 @@ export default function EditarClientePage() {
         setForm({
           name:  d.name  ?? '',
           email: d.email ?? '',
-          phone: d.phone ?? '',
+          phone: maskPhone(d.phone ?? ''),
           notes: d.notes ?? '',
         })
         setLoad(false)
@@ -100,7 +101,7 @@ export default function EditarClientePage() {
             </div>
             <div>
               <label className={labelCls}>Telefone</label>
-              <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} className={inputCls} />
+              <input type="tel" value={form.phone} onChange={e => set('phone', maskPhone(e.target.value))} placeholder="(11) 99999-9999" className={inputCls} />
             </div>
           </div>
           <div>

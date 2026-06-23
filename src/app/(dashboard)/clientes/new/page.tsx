@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { maskPhone } from '@/lib/masks'
 import UpgradeModal from '@/components/UpgradeModal'
 
 const EMPTY = { name: '', email: '', phone: '', notes: '' }
@@ -142,7 +143,7 @@ export default function NovoClientePage() {
               <input
                 type="tel"
                 value={form.phone}
-                onChange={e => set('phone', e.target.value)}
+                onChange={e => set('phone', maskPhone(e.target.value))}
                 placeholder="(11) 99999-9999"
                 className={inputCls}
               />

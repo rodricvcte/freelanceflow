@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { maskPhone } from '@/lib/masks'
 
 // ─── Masks ────────────────────────────────────────────────────────────────────
 
@@ -123,7 +124,7 @@ export default function OnboardingPage() {
               </div>
               <div>
                 <label className={labelCls}>Telefone</label>
-                <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+                <input type="tel" value={form.phone} onChange={e => set('phone', maskPhone(e.target.value))}
                   placeholder="(11) 99999-9999" className={inputCls} />
               </div>
             </div>

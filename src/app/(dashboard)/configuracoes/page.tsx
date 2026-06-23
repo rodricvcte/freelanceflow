@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import { maskPhone } from '@/lib/masks'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -91,7 +92,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
   const [form, setForm] = useState({
     full_name:      initial.full_name      ?? '',
     business_name:  initial.business_name  ?? '',
-    phone:          initial.phone          ?? '',
+    phone:          maskPhone(initial.phone ?? ''),
     email_business: initial.email_business ?? '',
     address:        initial.address        ?? '',
     website:        initial.website        ?? '',
@@ -269,7 +270,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Telefone</label>
-            <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+            <input type="tel" value={form.phone} onChange={e => set('phone', maskPhone(e.target.value))}
               placeholder="(11) 99999-9999" className={inputCls} />
           </div>
           <div>
