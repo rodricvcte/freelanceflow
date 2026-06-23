@@ -82,12 +82,13 @@ export async function buildProposalCode(
   }).split('/').reverse().join('')  // YYYYMMDD em horário de Brasília
   const prefix  = `RC${String(userSeq).padStart(3, '0')}`
 
-  // Count proposals already coded (current proposal has code = null, so not counted)
+  // Count only root proposals (version 1 / no parent) — versions must not inflate the seq
   const { count } = await authSupabase
     .from('proposals')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
     .not('code', 'is', null)
+    .is('parent_proposal_id', null)
 
   let propSeq = (count ?? 0) + 1
 
