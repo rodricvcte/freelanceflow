@@ -59,13 +59,17 @@ export default function ProposalActions({ proposalId, status, version, newerVers
   const dropdownRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!showSendDropdown) return
-    function handleClickOutside(e: MouseEvent) {
+    function handleOutside(e: MouseEvent | TouchEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowSendDropdown(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleOutside)
+    document.addEventListener('touchstart', handleOutside, { passive: true })
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('touchstart', handleOutside)
+    }
   }, [showSendDropdown])
   const [cancelling,        setCancelling]         = useState(false)
   const [cancelError,       setCancelError]        = useState<string | null>(null)
@@ -253,7 +257,7 @@ export default function ProposalActions({ proposalId, status, version, newerVers
             </button>
 
             {showSendDropdown && (
-              <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
                 <button
                   onClick={() => {
                     setShowSendDropdown(false)
