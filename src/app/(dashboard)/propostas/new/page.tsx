@@ -873,7 +873,16 @@ function NewProposalInner() {
     setSections(prev => prev.map(s => s.id === id ? { ...s, ...patch } as Section : s))
   }
 
+  const todayMin = (() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  })()
+
   async function handleSubmit(mode: 'draft' | 'pdf') {
+    if (form.valid_until && form.valid_until < todayMin) {
+      setError('A data de validade não pode ser anterior a hoje')
+      return
+    }
     setError(null)
     setSubmitting(mode)
     try {
@@ -1054,7 +1063,7 @@ function NewProposalInner() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col">
               <label className={labelCls}>Válida até</label>
-              <input type="date" value={form.valid_until} onChange={e => setField('valid_until', e.target.value)} placeholder="dd/mm/aaaa" className={inputCls + ' mt-auto'} />
+              <input type="date" value={form.valid_until} onChange={e => setField('valid_until', e.target.value)} min={todayMin} placeholder="dd/mm/aaaa" className={inputCls + ' mt-auto'} />
             </div>
             <div className="flex flex-col">
               <label className={labelCls}>Condições de pagamento</label>

@@ -69,10 +69,13 @@ function fmtBRL(v: number | null) {
 
 function fmtDate(iso: string | null) {
   if (!iso) return '—'
+  // Date-only strings (YYYY-MM-DD) are parsed as UTC midnight by Date constructor,
+  // which shifts to prev day in UTC-3. Add noon to keep the date stable across timezones.
+  const d = iso.includes('T') ? new Date(iso) : new Date(`${iso}T12:00:00`)
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     timeZone: 'America/Sao_Paulo',
-  }).format(new Date(iso))
+  }).format(d)
 }
 
 function fmtRowBRL(v: string | number | null | undefined) {
