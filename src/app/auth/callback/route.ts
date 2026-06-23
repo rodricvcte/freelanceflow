@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-service'
-import { APP_URL } from '@/lib/app-url'
 
 async function ensureFreelancerCode(userId: string, fullName: string | null) {
   const service = createServiceClient()
@@ -101,11 +100,11 @@ export async function GET(request: Request) {
             .update({ terms_accepted_at: new Date().toISOString(), terms_accepted_ip: ip })
             .eq('id', data.user.id)
         } else {
-          return NextResponse.redirect(`${APP_URL}/aceitar-termos`)
+          return NextResponse.redirect(`${origin}/aceitar-termos`)
         }
       }
     }
   }
 
-  return NextResponse.redirect(`${APP_URL}/dashboard`)
+  return NextResponse.redirect(`${origin}/dashboard`)
 }
