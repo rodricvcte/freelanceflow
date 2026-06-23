@@ -204,8 +204,10 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
       if (!res.ok) throw new Error(data.error)
       setMsg({ text: 'Perfil salvo com sucesso!', ok: true })
       window.dispatchEvent(new Event('ff:profile-updated'))
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (e: unknown) {
       setMsg({ text: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
       setSaving(false)
     }
@@ -740,8 +742,10 @@ function FollowUpsTab({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setMsg({ text: 'Configurações salvas!', ok: true })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (e) {
       setMsg({ text: e instanceof Error ? e.message : 'Erro ao salvar', ok: false })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
       setSaving(false)
     }
