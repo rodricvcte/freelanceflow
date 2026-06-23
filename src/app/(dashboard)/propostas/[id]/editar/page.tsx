@@ -866,32 +866,34 @@ export default function EditarPropostaPage() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div className="flex flex-col">
               <label className={labelCls}>Valor <span className="text-red-500">*</span></label>
-              <div className="relative">
+              <div className="relative mt-auto">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">R$</span>
                 <input type="number" min="0" step="0.01" required value={form.value}
                   onChange={e => setField('value', e.target.value)} className={inputCls + ' pl-9'} />
               </div>
             </div>
-            <div>
-              <label className={labelCls}>Prazo de entrega (dias)</label>
+            <div className="flex flex-col">
+              <label className={labelCls}>Prazo de entrega</label>
               <input type="number" min="1" value={form.deadline_days}
-                onChange={e => setField('deadline_days', e.target.value)} className={inputCls} />
+                onChange={e => setField('deadline_days', e.target.value)}
+                placeholder="Ex: 30 dias" className={inputCls + ' mt-auto'} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div className="flex flex-col">
               <label className={labelCls}>Válida até</label>
               <input type="date" value={form.valid_until}
-                onChange={e => setField('valid_until', e.target.value)} className={inputCls} />
+                onChange={e => setField('valid_until', e.target.value)}
+                placeholder="dd/mm/aaaa" className={inputCls + ' mt-auto'} />
             </div>
-            <div>
+            <div className="flex flex-col">
               <label className={labelCls}>Condições de pagamento</label>
               <input type="text" value={form.payment_terms}
                 onChange={e => setField('payment_terms', e.target.value)}
-                placeholder="Ex: 50% antecipado" className={inputCls} />
+                placeholder="Ex: 50% antecipado" className={inputCls + ' mt-auto'} />
             </div>
           </div>
 
