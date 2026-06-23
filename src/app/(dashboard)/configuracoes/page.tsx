@@ -850,7 +850,6 @@ const NOTIF_LABELS: Record<NotifKeys, { title: string; desc: string }> = {
 
 function NotificationsTab() {
   const [prefs, setPrefs] = useState<Record<NotifKeys, boolean>>(NOTIF_DEFAULTS)
-  const [saved,  setSaved] = useState(false)
 
   useEffect(() => {
     try {
@@ -866,13 +865,6 @@ function NotificationsTab() {
       localStorage.setItem('ff_notif_prefs', JSON.stringify(next))
       return next
     })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
   }
 
   return (
@@ -897,18 +889,6 @@ function NotificationsTab() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">
-          E-mails serão enviados quando a integração de envio automático for configurada.
-        </p>
-        <button
-          type="button"
-          onClick={handleSave}
-          className="px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#188f68] transition-colors"
-        >
-          {saved ? 'Salvo!' : 'Salvar preferências'}
-        </button>
-      </div>
     </div>
   )
 }
