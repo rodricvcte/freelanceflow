@@ -53,7 +53,7 @@ export default function ClientesPage() {
   const canAdd = isPro || clients.length < 5
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl">
+    <div className="p-4 md:p-8 max-w-6xl">
       <UpgradeModal
         open={showUpgrade}
         onClose={() => setShowUpgrade(false)}
@@ -63,7 +63,7 @@ export default function ClientesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Clientes</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {clients.length} no total
             {!isPro && ` · limite: 5 no plano Free`}
@@ -77,7 +77,7 @@ export default function ClientesPage() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Novo Cliente
+            Novo
           </Link>
         ) : (
           <button

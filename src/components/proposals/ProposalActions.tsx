@@ -257,7 +257,7 @@ export default function ProposalActions({ proposalId, status, version, newerVers
             </button>
 
             {showSendDropdown && (
-              <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
+              <div className="absolute left-0 top-full mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
                 <button
                   onClick={() => {
                     setShowSendDropdown(false)

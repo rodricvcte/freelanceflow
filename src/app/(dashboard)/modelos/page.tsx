@@ -60,7 +60,7 @@ export default function ModelosPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl">
+    <div className="p-4 md:p-8 max-w-4xl">
       <UpgradeModal
         open={showUpgrade}
         onClose={() => setShowUpgrade(false)}
@@ -69,7 +69,7 @@ export default function ModelosPage() {
 
       <div className="mb-6 flex items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Modelos</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Modelos</h1>
           <p className="text-sm text-gray-500 mt-0.5">Crie propostas com agilidade a partir de estruturas prontas</p>
         </div>
         {!isPro && (

@@ -204,11 +204,11 @@ export default async function DashboardPage() {
   // ── Empty state para novos usuários ──────────────────────────────────────────
   if (proposals.length === 0) {
     return (
-      <div className="p-6 md:p-8 max-w-[1200px]">
+      <div className="p-4 md:p-8 max-w-[1200px]">
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-[18px] font-medium text-gray-900 leading-snug">Olá, {firstName}!</h1>
-            <p className="text-[12px] text-gray-400 mt-0.5">{fmtFullDate(now)}</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Olá, {firstName}!</h1>
+            <p className="text-xs text-gray-400 mt-0.5">{fmtFullDate(now)}</p>
           </div>
           <Link
             href="/propostas/new"
@@ -260,7 +260,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-[1200px]">
+    <div className="p-4 md:p-8 max-w-[1200px]">
 
       <Suspense fallback={null}>
         <UpgradedBanner />
@@ -269,10 +269,8 @@ export default async function DashboardPage() {
       {/* ── Header ────────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4 mb-7">
         <div>
-          <h1 className="text-[18px] font-medium text-gray-900 leading-snug">
-            Olá, {firstName}!
-          </h1>
-          <p className="text-[12px] text-gray-400 mt-0.5">{fmtFullDate(now)}</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Olá, {firstName}!</h1>
+          <p className="text-xs text-gray-400 mt-0.5">{fmtFullDate(now)}</p>
         </div>
         <Link
           href="/propostas/new"
@@ -307,7 +305,7 @@ export default async function DashboardPage() {
         {/* Valor aprovado */}
         <div className="rounded-[8px] px-[14px] py-3" style={{ background: 'var(--color-background-secondary)' }}>
           <p className="text-xs font-medium text-gray-400 mb-1.5">Valor aprovado</p>
-          <p className="text-2xl font-bold leading-tight tabular-nums text-[#1D9E75]">
+          <p className="text-base md:text-2xl font-bold leading-tight tabular-nums text-[#1D9E75]">
             {fmtBRL(totalApprovedValue)}
           </p>
           <p className="text-xs text-gray-400 mt-1.5">
