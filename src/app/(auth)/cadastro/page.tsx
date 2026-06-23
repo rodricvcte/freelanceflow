@@ -14,7 +14,7 @@ export default function CadastroPage() {
   const [loading,       setLoading]       = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
-  const canSubmit = !loading && password.length >= 8 && email.length > 0
+  const canSubmit = !loading
 
   async function handleGoogle() {
     document.cookie = 'ff_terms_accepted=1; max-age=300; path=/; SameSite=Lax'
@@ -61,7 +61,7 @@ export default function CadastroPage() {
 
           {/* 1. Headline */}
           <div className="mb-7 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 leading-snug">Comece grátis — sem cartão</h1>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 whitespace-nowrap">Comece grátis, sem cartão</h1>
             <p className="text-sm text-gray-500 mt-2 leading-snug">
               Crie propostas profissionais e saiba quando o cliente abriu.
             </p>
