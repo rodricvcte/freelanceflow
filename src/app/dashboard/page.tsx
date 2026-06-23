@@ -49,6 +49,16 @@ function fmtBRL(v: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
 }
 
+// Mobile stat card is ~138px wide. Shrink font only when value is long enough to overflow.
+// md+ always uses text-2xl (card is wide enough for any realistic value).
+function brlFontCls(formatted: string) {
+  const len = formatted.length
+  if (len <= 9)  return 'text-2xl'             // R$ 0,00 – R$ 999,00
+  if (len <= 12) return 'text-xl md:text-2xl'  // R$ 1.000,00 – R$ 99.999,00
+  if (len <= 15) return 'text-lg md:text-2xl'  // R$ 100.000,00 – R$ 9.999.999,00
+  return 'text-base md:text-2xl'               // R$ 10.000.000,00+
+}
+
 function fmtFullDate(date: Date): string {
   const raw = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
@@ -305,7 +315,7 @@ export default async function DashboardPage() {
         {/* Valor aprovado */}
         <div className="rounded-[8px] px-[14px] py-3" style={{ background: 'var(--color-background-secondary)' }}>
           <p className="text-xs font-medium text-gray-400 mb-1.5">Valor aprovado</p>
-          <p className="text-base md:text-2xl font-bold leading-tight tabular-nums text-[#1D9E75]">
+          <p className={`${brlFontCls(fmtBRL(totalApprovedValue))} font-bold leading-tight tabular-nums text-[#1D9E75]`}>
             {fmtBRL(totalApprovedValue)}
           </p>
           <p className="text-xs text-gray-400 mt-1.5">
