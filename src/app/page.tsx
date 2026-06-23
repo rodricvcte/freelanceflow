@@ -429,12 +429,6 @@ export default function LandingPage() {
             >
               Começar grátis — sem cartão
             </Link>
-            <a
-              href="#funcionalidades"
-              className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:scale-[1.02] transition-all text-sm"
-            >
-              Ver demonstração
-            </a>
           </div>
           <p style={{ animationDelay: '360ms' }} className="anim-fade-in mt-5 text-sm text-gray-400">
             Grátis para sempre · 5 propostas/mês no plano Free
