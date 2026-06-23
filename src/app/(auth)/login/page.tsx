@@ -15,6 +15,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const passwordReset = searchParams.get('reset') === '1'
+  const authError     = searchParams.get('auth_error') === '1'
 
   async function handleGoogle() {
     setGoogleLoading(true)
@@ -64,6 +65,11 @@ function LoginForm() {
           {passwordReset && (
             <div className="mb-6 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
               Senha redefinida com sucesso. Faça login com a nova senha.
+            </div>
+          )}
+          {authError && (
+            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm">
+              O link de login com Google expirou ou já foi usado. Tente entrar novamente.
             </div>
           )}
 

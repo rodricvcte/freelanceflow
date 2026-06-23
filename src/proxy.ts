@@ -31,6 +31,17 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
+
+  // Supabase redireciona erros OAuth para o Site URL (/) com ?error=...
+  // Captura aqui e manda pro login com mensagem amigável
+  if (pathname === '/' && request.nextUrl.searchParams.get('error')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.search = ''
+    url.searchParams.set('auth_error', '1')
+    return NextResponse.redirect(url)
+  }
+
   const isPublicRoute =
     publicRoutes.includes(pathname) ||
     pathname.startsWith('/p/') ||
