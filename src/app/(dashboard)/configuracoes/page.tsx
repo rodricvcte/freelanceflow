@@ -507,7 +507,11 @@ function PlanTab({ sub }: { sub: SubInfo }) {
     }
   }
 
-  async function handleCheckout(priceId: string) {
+  async function handleCheckout(priceId: string | undefined) {
+    if (!priceId || !priceId.startsWith('price_')) {
+      setErr('Configuração de preço não encontrada. Contate o suporte.')
+      return
+    }
     setLoading(priceId)
     setErr(null)
     try {
@@ -539,8 +543,8 @@ function PlanTab({ sub }: { sub: SubInfo }) {
     }
   }
 
-  const PRICE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY ?? 'price_monthly'
-  const PRICE_YEARLY  = process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY  ?? 'price_yearly'
+  const PRICE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY
+  const PRICE_YEARLY  = process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY
 
   return (
     <div className="space-y-4">
