@@ -99,6 +99,7 @@ export async function GET(request: Request) {
             .from('profiles')
             .update({ terms_accepted_at: new Date().toISOString(), terms_accepted_ip: ip })
             .eq('id', data.user.id)
+          return NextResponse.redirect(`${origin}/dashboard?registered=1`)
         } else {
           return NextResponse.redirect(`${origin}/aceitar-termos`)
         }

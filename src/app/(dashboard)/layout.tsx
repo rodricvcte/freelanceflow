@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { fetchSidebarData } from '@/lib/sidebar-data'
 import Sidebar from '@/components/sidebar'
 import ProfileCompleteBanner from '@/components/ProfileCompleteBanner'
+import PixelCompleteRegistration from '@/components/PixelCompleteRegistration'
 
 async function SidebarWithData() {
   const data = await fetchSidebarData()
@@ -37,6 +38,9 @@ export default function DashboardGroupLayout({ children }: { children: React.Rea
           <BannerWithData />
         </Suspense>
         {children}
+        <Suspense fallback={null}>
+          <PixelCompleteRegistration />
+        </Suspense>
       </main>
     </div>
   )
