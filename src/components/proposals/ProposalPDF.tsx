@@ -655,7 +655,7 @@ export function ProposalPDFDocument({
   const ref = proposal.code
     ?? proposal.proposal_number
     ?? ('#' + proposal.token.substring(0, 8).toUpperCase() + ' · v' + proposal.version)
-  const today        = new Intl.DateTimeFormat('pt-BR').format(new Date())
+  const today        = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo' }).format(new Date())
   const docFormatted = fmtDoc(profile.document_type, profile.cpf_cnpj)
   const sections     = proposal.sections ?? []
 

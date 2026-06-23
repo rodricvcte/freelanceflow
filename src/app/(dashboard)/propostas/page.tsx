@@ -86,7 +86,7 @@ function fmtDate(iso: string | null) {
 
 function fmtDateTime(iso: string) {
   const d = new Date(iso)
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(d)
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }).format(d)
 }
 
 function getPeriodCutoff(period: string): number {

@@ -41,11 +41,11 @@ function fmtDay(key: string) {
 }
 
 function fmtTime(iso: string) {
-  return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso))
+  return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }).format(new Date(iso))
 }
 
 function fmtDateTime(iso: string) {
-  const date = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
+  const date = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(new Date(iso))
   const time = fmtTime(iso)
   return `${date}, ${time}`
 }

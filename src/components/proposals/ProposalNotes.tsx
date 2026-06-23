@@ -13,7 +13,7 @@ function fmtRelative(iso: string): string {
   if (mins  < 60)  return `há ${mins} min`
   if (hours < 24)  return `há ${hours}h`
   if (days  < 7)   return `há ${days}d`
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(iso))
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'America/Sao_Paulo' }).format(new Date(iso))
 }
 
 export default function ProposalNotes({
