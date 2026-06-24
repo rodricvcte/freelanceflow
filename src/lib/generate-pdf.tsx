@@ -65,8 +65,10 @@ export async function generateAndSaveProposalPDF(
       instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
       signature_data: null,
     }),
-    // Always use current signature_data — snapshot doesn't carry it
-    signature_data: profileRaw?.signature_data ?? null,
+    // Always use current identity fields — snapshot may predate the user filling these in
+    business_name:  profileRaw?.business_name  ?? null,
+    full_name:      profileRaw?.full_name       ?? null,
+    signature_data: profileRaw?.signature_data  ?? null,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
