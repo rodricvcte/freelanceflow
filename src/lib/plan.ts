@@ -78,8 +78,8 @@ export async function canUseFollowUps(_userId: string, _supabase: SupabaseClient
   return true
 }
 
-export async function canUseTemplates(userId: string, supabase: SupabaseClient): Promise<boolean> {
-  return isPro(userId, supabase)
+export async function canUseTemplates(_userId: string, _supabase: SupabaseClient): Promise<boolean> {
+  return true
 }
 
 export async function canUseIdentityExtractor(userId: string, supabase: SupabaseClient): Promise<boolean> {
