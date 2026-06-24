@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Suspense fallback={<Sidebar />}>
         <SidebarWithData />
       </Suspense>
-      <main className="flex-1 md:ml-60 min-w-0">
+      <main className="flex-1 md:ml-60 min-w-0 pt-16 md:pt-0">
         {children}
       </main>
     </div>
