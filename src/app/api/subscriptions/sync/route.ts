@@ -36,7 +36,13 @@ export async function POST() {
   )
 
   if (!active) {
-    // Nenhuma assinatura ativa — mantém free
+    await service.from('subscriptions').update({
+      plan: 'free',
+      status: 'active',
+      stripe_subscription_id: null,
+      stripe_price_id: null,
+      current_period_end: null,
+    }).eq('user_id', user.id)
     return NextResponse.json({ plan: 'free', status: 'active', synced: true })
   }
 
