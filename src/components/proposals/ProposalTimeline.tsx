@@ -51,34 +51,25 @@ function fmtDateTime(iso: string) {
 }
 
 function buildDisplayList(events: TimelineEvent[]): DisplayItem[] {
-  // Group viewed events by calendar day (desc order preserved — first seen = most recent)
-  const viewsByDay = new Map<string, TimelineEvent[]>()
-  for (const ev of events) {
-    if (ev.event_type === 'viewed') {
-      const k = dayKey(ev.created_at)
-      const arr = viewsByDay.get(k) ?? []
-      arr.push(ev)
-      viewsByDay.set(k, arr)
-    }
-  }
-
-  const emitted = new Set<string>()
+  // Group only CONSECUTIVE viewed events on the same calendar day.
+  // Views separated by another event type (e.g. accepted) produce separate groups,
+  // preserving their chronological position in the timeline.
   const items: DisplayItem[] = []
+  let i = 0
 
-  for (const ev of events) {
+  while (i < events.length) {
+    const ev = events[i]
     if (ev.event_type !== 'viewed') {
       items.push({ kind: 'single', ev })
+      i++
     } else {
-      const k = dayKey(ev.created_at)
-      if (!emitted.has(k)) {
-        emitted.add(k)
-        items.push({
-          kind: 'view_group',
-          dayKey: k,
-          dayLabel: fmtDay(k),
-          events: viewsByDay.get(k)!,
-        })
+      const startDay = dayKey(ev.created_at)
+      const group: TimelineEvent[] = []
+      while (i < events.length && events[i].event_type === 'viewed' && dayKey(events[i].created_at) === startDay) {
+        group.push(events[i])
+        i++
       }
+      items.push({ kind: 'view_group', dayKey: startDay, dayLabel: fmtDay(startDay), events: group })
     }
   }
 
