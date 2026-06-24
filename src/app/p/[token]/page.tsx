@@ -393,7 +393,8 @@ export default function PublicProposalPage() {
   const [confirm, setConfirm]   = useState<'accept' | 'decline' | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
-  const tracked = useRef(false)
+  const tracked   = useRef(false)
+  const isPreview = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('preview') === '1'
 
   useEffect(() => {
     fetch(`/api/p/${token}`)
@@ -408,12 +409,11 @@ export default function PublicProposalPage() {
 
   // Track direct URL access. Skip when ?_t=1 (redirect already recorded) or ?preview=1 (owner preview).
   useEffect(() => {
-    if (!token || tracked.current) return
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('_t') === '1' || params.get('preview') === '1') return
+    if (!token || tracked.current || isPreview) return
+    if (new URLSearchParams(window.location.search).get('_t') === '1') return
     tracked.current = true
     fetch(`/api/track/view/${token}`, { redirect: 'manual' }).catch(() => {})
-  }, [token])
+  }, [token, isPreview])
 
   async function handleAction(action: 'accept' | 'decline') {
     setActing(action)
@@ -487,7 +487,7 @@ export default function PublicProposalPage() {
       </header>
 
       {/* ── Main content ───────────────────────────────────── */}
-      <main className={`max-w-2xl mx-auto px-4 py-7 space-y-8 ${!isFinal && !isInactive ? 'pb-32' : 'pb-12'}`}>
+      <main className={`max-w-2xl mx-auto px-4 py-7 space-y-8 ${!isFinal && !isInactive && !isPreview ? 'pb-32' : 'pb-12'}`}>
 
         {/* Title + meta */}
         <div>
@@ -639,7 +639,7 @@ export default function PublicProposalPage() {
       </main>
 
       {/* ── Sticky action bar ──────────────────────────────── */}
-      {!isFinal && !isInactive && (
+      {!isFinal && !isInactive && !isPreview && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-2xl px-4 py-3"
           style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
           <div className="max-w-2xl mx-auto">
