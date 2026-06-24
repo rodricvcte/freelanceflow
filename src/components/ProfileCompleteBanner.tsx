@@ -83,7 +83,7 @@ export default function ProfileCompleteBanner({ initialPercent }: { initialPerce
 
         {/* CTA */}
         <Link
-          href="/configuracoes"
+          href="/configuracoes?tab=perfil"
           className="text-[11px] font-medium text-[#1D9E75] hover:underline shrink-0"
         >
           Completar →
