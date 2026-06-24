@@ -537,10 +537,10 @@ export default async function ProposalDetailPage({
       <div className="flex items-center justify-start mb-6">
         <ProposalActions
           proposalId={proposal.id}
+          proposalToken={proposal.token}
           status={proposal.status}
           version={proposal.version ?? 1}
           newerVersion={otherVersions[0]?.version && otherVersions[0].version > version ? otherVersions[0].version : null}
-          initialPdfUrl={proposal.pdf_url}
           duplicate={{
             title:               proposal.title,
             service_description: proposal.service_description,
