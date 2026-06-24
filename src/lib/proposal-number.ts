@@ -1,12 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-// ─── Format: PC{USER_SEQ}-YYYYMMDD-{PROP_SEQ}-vN ─────────────────────────────
-// Example: PC002-20260614-006-v1
-// PC prefix is fixed. USER_SEQ is the user's global sequential number.
+// ─── Format: C{USER_SEQ}-YYYYMMDD-{PROP_SEQ}-vN ──────────────────────────────
+// Example: C002-20260614-006-v1
+// C prefix is fixed. USER_SEQ is the user's global sequential number.
 // PROP_SEQ is the user's lifetime proposal count (never resets).
 
 /**
- * Bump version suffix: PC001-20260611-001-v1 → PC001-20260611-001-v2
+ * Bump version suffix: C001-20260611-001-v1 → C001-20260611-001-v2
  * Handles old formats gracefully (appends -v2 if no version found).
  */
 export function bumpProposalVersion(value: string | null): string | null {
@@ -62,7 +62,7 @@ async function getOrAssignUserSeq(
 }
 
 /**
- * Build a new proposal code: PC{USER_SEQ}-{YYYYMMDD}-{PROP_SEQ}-v{VERSION}
+ * Build a new proposal code: C{USER_SEQ}-{YYYYMMDD}-{PROP_SEQ}-v{VERSION}
  *
  * PROP_SEQ = count of this user's proposals that already have a code, + 1.
  * Call this AFTER the proposal row is inserted (so it exists but code is still null).
@@ -80,7 +80,7 @@ export async function buildProposalCode(
     timeZone: 'America/Sao_Paulo',
     year: 'numeric', month: '2-digit', day: '2-digit',
   }).split('/').reverse().join('')  // YYYYMMDD em horário de Brasília
-  const prefix  = `PC${String(userSeq).padStart(3, '0')}`
+  const prefix  = `C${String(userSeq).padStart(3, '0')}`
 
   // Count only root proposals (version 1 / no parent) — versions must not inflate the seq
   const { count } = await authSupabase
