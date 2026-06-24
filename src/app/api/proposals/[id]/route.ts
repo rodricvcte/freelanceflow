@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { buildProposalCode } from '@/lib/proposal-number'
+import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 
 export const runtime = 'nodejs'
 
@@ -149,5 +150,12 @@ export async function PUT(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json(data)
+  let pdfUrl: string | null = (data as Record<string, unknown>).pdf_url as string | null ?? null
+  try {
+    pdfUrl = await generateAndSaveProposalPDF(id, user.id)
+  } catch (e) {
+    console.error('[PDF] Falha ao regenerar PDF do rascunho', id, e)
+  }
+
+  return NextResponse.json({ ...data, pdf_url: pdfUrl })
 }
