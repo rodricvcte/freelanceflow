@@ -16,7 +16,7 @@ type Proposal = {
   version: number
   code: string | null
   proposal_number: string | null
-  pdf_url: string | null
+  token: string
   clients: { id: string; name: string } | null
 }
 
@@ -158,23 +158,19 @@ const selectCls = 'px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-wh
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 
-const PdfIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-    <path d="M9 17h1a1 1 0 0 0 1 -1v-2a1 1 0 0 0 -1 -1h-1v4" />
-    <path d="M14 13h1.5a1.5 1.5 0 0 1 0 3h-1.5v-3" />
-    <path d="M17 17v-4" />
-  </svg>
-)
-
 const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none"
     viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     <path strokeLinecap="round" strokeLinejoin="round"
       d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  </svg>
+)
+
+const ArrowRightIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none"
+    viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
   </svg>
 )
 
@@ -533,13 +529,11 @@ function ProposalsPageInner() {
                           {/* Ações */}
                           <td className="px-3 py-2">
                             <div className="flex items-center gap-0.5">
-                              {p.pdf_url && (
-                                <IconBtn href={p.pdf_url} tooltip="Ver PDF">
-                                  <PdfIcon />
-                                </IconBtn>
-                              )}
-                              <IconBtn onClick={() => router.push(`/propostas/${p.id}`)} tooltip="Ver detalhes">
+                              <IconBtn href={`/p/${p.token}`} tooltip="Visualizar">
                                 <EyeIcon />
+                              </IconBtn>
+                              <IconBtn onClick={() => router.push(`/propostas/${p.id}`)} tooltip="Ver detalhes">
+                                <ArrowRightIcon />
                               </IconBtn>
                             </div>
                           </td>

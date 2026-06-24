@@ -245,7 +245,7 @@ export default function ProposalTimeline({
           {visibleItems.map((item, i) => {
             const isLast = i === visibleItems.length - 1 && (showAll || hiddenItems === 0)
             return item.kind === 'view_group'
-              ? <ViewGroupNode key={item.dayKey} item={item} isLast={isLast} />
+              ? <ViewGroupNode key={item.events[0].id} item={item} isLast={isLast} />
               : <SingleNode key={item.ev.id} item={item} isLast={isLast} />
           })}
 
