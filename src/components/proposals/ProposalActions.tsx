@@ -28,10 +28,10 @@ type SendProps = {
 
 type Props = {
   proposalId: string
+  proposalToken: string
   status: string
   version: number
   newerVersion: number | null
-  initialPdfUrl: string | null
   duplicate: DuplicateData
   sendProps?: SendProps
 }
@@ -45,7 +45,7 @@ const NEW_VERSION_CONFIG: Record<string, { confirm: string } | { confirm: null }
   recusada:  { confirm: null },
 }
 
-export default function ProposalActions({ proposalId, status, version, newerVersion, initialPdfUrl, duplicate, sendProps }: Props) {
+export default function ProposalActions({ proposalId, proposalToken, status, version, newerVersion, duplicate, sendProps }: Props) {
   const router = useRouter()
 
   const [duplicating,         setDuplicating]         = useState(false)
@@ -222,19 +222,14 @@ export default function ProposalActions({ proposalId, status, version, newerVers
           </button>
         )}
 
-        {/* PDF */}
-        {initialPdfUrl && (
-          <a href={initialPdfUrl} target="_blank" rel="noopener noreferrer" className={secondaryCls}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-              <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-              <path d="M9 17h1a1 1 0 0 0 1 -1v-2a1 1 0 0 0 -1 -1h-1v4" />
-              <path d="M14 13h1.5a1.5 1.5 0 0 1 0 3h-1.5v-3" />
-              <path d="M17 17v-4" />
-            </svg>
-            PDF
-          </a>
-        )}
+        {/* Visualizar — abre a página pública em nova aba */}
+        <a href={`/p/${proposalToken}`} target="_blank" rel="noopener noreferrer" className={secondaryCls}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+            <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+          </svg>
+          Visualizar
+        </a>
 
         {/* Separador antes de Enviar / Reenviar */}
         {(isDraft || isResend) && sendProps && sep}
