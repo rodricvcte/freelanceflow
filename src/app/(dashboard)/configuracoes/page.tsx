@@ -921,6 +921,12 @@ export default function ConfiguracoesPage() {
 function ConfiguracoesInner() {
   const searchParams = useSearchParams()
   const [tab, setTab]       = useState<Tab>((searchParams.get('tab') as Tab) ?? 'perfil')
+
+  useEffect(() => {
+    const t = searchParams.get('tab') as Tab | null
+    if (t) setTab(t)
+  }, [searchParams])
+
   const [profile, setProfile] = useState<Profile | null>(null)
   const [sub,     setSub]     = useState<SubInfo | null>(null)
   const [loading, setLoading] = useState(true)
