@@ -529,7 +529,7 @@ function ProposalsPageInner() {
                           {/* Ações */}
                           <td className="px-3 py-2">
                             <div className="flex items-center gap-0.5">
-                              <IconBtn href={`/p/${p.token}`} tooltip="Visualizar">
+                              <IconBtn href={`/p/${p.token}?preview=1`} tooltip="Visualizar">
                                 <EyeIcon />
                               </IconBtn>
                               <IconBtn onClick={() => router.push(`/propostas/${p.id}`)} tooltip="Ver detalhes">
