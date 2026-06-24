@@ -606,7 +606,7 @@ export default function LandingPage() {
                 </span>
               </div>
               <Link
-                href="/cadastro"
+                href="/cadastro?next=checkout"
                 className="block w-full text-center py-2.5 px-4 bg-[#1D9E75] text-white rounded-lg text-sm font-medium hover:bg-[#188f68] transition-colors mb-6"
               >
                 Assinar Pro

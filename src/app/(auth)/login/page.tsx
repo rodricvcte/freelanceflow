@@ -50,6 +50,20 @@ function LoginForm() {
       return
     }
 
+    const next = searchParams.get('next')
+    if (next === 'checkout') {
+      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY
+      if (priceId) {
+        const res  = await fetch('/api/subscriptions/checkout', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ price_id: priceId }),
+        })
+        const data = await res.json()
+        if (data.url) { window.location.href = data.url; return }
+      }
+    }
+
     router.push('/dashboard')
     router.refresh()
   }
@@ -160,7 +174,10 @@ function LoginForm() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Não tem uma conta?{' '}
-            <Link href="/cadastro" className="text-[#1D9E75] font-medium hover:underline">
+            <Link
+              href={searchParams.get('next') ? `/cadastro?next=${searchParams.get('next')}` : '/cadastro'}
+              className="text-[#1D9E75] font-medium hover:underline"
+            >
               Cadastre-se grátis
             </Link>
           </p>

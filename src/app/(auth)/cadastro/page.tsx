@@ -1,13 +1,33 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import PasswordInput from '@/components/PasswordInput'
 
-export default function CadastroPage() {
+async function redirectAfterAuth(next: string | null, router: ReturnType<typeof useRouter>) {
+  if (next === 'checkout') {
+    const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY
+    if (priceId) {
+      const res  = await fetch('/api/subscriptions/checkout', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ price_id: priceId }),
+      })
+      const data = await res.json()
+      if (data.url) { window.location.href = data.url; return }
+    }
+  }
+  router.push('/dashboard')
+  router.refresh()
+}
+
+function CadastroForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next')
+
   const [email,         setEmail]         = useState('')
   const [password,      setPassword]      = useState('')
   const [error,         setError]         = useState<string | null>(null)
@@ -45,8 +65,7 @@ export default function CadastroPage() {
 
     if (loginError) { setError(loginError.message); return }
     ;(window as unknown as { fbq?: (...args: unknown[]) => void }).fbq?.('track', 'CompleteRegistration')
-    router.push('/dashboard')
-    router.refresh()
+    await redirectAfterAuth(next, router)
   }
 
   return (
@@ -122,7 +141,7 @@ export default function CadastroPage() {
               />
             </div>
 
-            {/* 5. Senha (sem confirmar) */}
+            {/* 5. Senha */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Senha
@@ -154,7 +173,7 @@ export default function CadastroPage() {
             </button>
           </form>
 
-          {/* 7. LGPD sem checkbox */}
+          {/* 7. LGPD */}
           <p className="mt-3 text-xs text-gray-400 text-center leading-snug">
             Ao criar sua conta você concorda com nossa{' '}
             <Link href="/privacidade" className="underline hover:text-gray-600 transition-colors">
@@ -166,7 +185,7 @@ export default function CadastroPage() {
           {/* 8. Link login */}
           <p className="mt-5 text-center text-sm text-gray-500">
             Já tem conta?{' '}
-            <Link href="/login" className="text-[#1D9E75] font-medium hover:underline">
+            <Link href={next ? `/login?next=${next}` : '/login'} className="text-[#1D9E75] font-medium hover:underline">
               Entrar
             </Link>
           </p>
@@ -174,5 +193,13 @@ export default function CadastroPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense>
+      <CadastroForm />
+    </Suspense>
   )
 }
