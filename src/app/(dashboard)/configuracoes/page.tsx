@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { maskPhone } from '@/lib/masks'
 
@@ -920,12 +920,8 @@ export default function ConfiguracoesPage() {
 
 function ConfiguracoesInner() {
   const searchParams = useSearchParams()
-  const [tab, setTab]       = useState<Tab>((searchParams.get('tab') as Tab) ?? 'perfil')
-
-  useEffect(() => {
-    const t = searchParams.get('tab') as Tab | null
-    if (t) setTab(t)
-  }, [searchParams])
+  const router       = useRouter()
+  const tab = (searchParams.get('tab') as Tab) ?? 'perfil'
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [sub,     setSub]     = useState<SubInfo | null>(null)
@@ -973,7 +969,7 @@ function ConfiguracoesInner() {
         {tabs.map(t => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => router.replace(`/configuracoes?tab=${t.id}`, { scroll: false })}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap shrink-0 ${
               tab === t.id
                 ? 'border-[#1D9E75] text-[#1D9E75]'
