@@ -575,11 +575,9 @@ function PlanTab({ sub }: { sub: SubInfo }) {
               )}
             </div>
           </div>
-          {sub.current_period_end && (
+          {isPro && sub.current_period_end && (
             <div className="text-right">
-              <p className="text-xs text-gray-400">
-                {isCanceled ? 'Acesso até' : 'Renova em'}
-              </p>
+              <p className="text-xs text-gray-400">Renova em</p>
               <p className="text-sm font-medium text-gray-700">{fmtDate(sub.current_period_end)}</p>
             </div>
           )}
