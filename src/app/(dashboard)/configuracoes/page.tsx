@@ -494,10 +494,10 @@ function PlanTab({ sub }: { sub: SubInfo }) {
     try {
       const res  = await fetch('/api/subscriptions/sync', { method: 'POST', cache: 'no-store' })
       const data = await res.json()
-      if (data.plan === 'pro') {
+      if (data.synced) {
         window.location.reload()
       } else {
-        setErr('Nenhuma assinatura ativa encontrada no Stripe.')
+        setErr('Erro ao sincronizar com o Stripe.')
       }
     } catch {
       setErr('Erro ao verificar plano.')
