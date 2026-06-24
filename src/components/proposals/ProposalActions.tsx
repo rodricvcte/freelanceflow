@@ -223,7 +223,7 @@ export default function ProposalActions({ proposalId, proposalToken, status, ver
         )}
 
         {/* Visualizar — abre a página pública em nova aba */}
-        <a href={`/p/${proposalToken}`} target="_blank" rel="noopener noreferrer" className={secondaryCls}>
+        <a href={`/p/${proposalToken}?preview=1`} target="_blank" rel="noopener noreferrer" className={secondaryCls}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
             <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
