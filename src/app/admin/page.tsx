@@ -75,9 +75,9 @@ export default async function AdminPage({
     <div className="p-6 md:p-8 max-w-7xl">
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-        <p className="text-sm text-gray-500 mt-0.5">FreelanceFlow</p>
+      <div className="mb-5 md:mb-6">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Painel Administrativo</h1>
+        <p className="text-sm text-gray-400 mt-0.5">FreelanceFlow</p>
       </div>
 
       {/* Tabs */}
