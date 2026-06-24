@@ -57,6 +57,79 @@ function IconGrid() {
     </svg>
   )
 }
+function IconBriefcase() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <rect x="2" y="7" width="20" height="14" rx="2" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+      <line x1="12" y1="12" x2="12" y2="12" />
+      <path d="M2 12h20" />
+    </svg>
+  )
+}
+function IconTrendingUp() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
+  )
+}
+function IconPen() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  )
+}
+function IconCode() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
+  )
+}
+function IconPalette() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+    </svg>
+  )
+}
+function IconShare() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  )
+}
+function IconBuilding() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <rect x="3" y="3" width="18" height="18" rx="1" />
+      <path d="M3 9h18" />
+      <path d="M9 21V9" />
+    </svg>
+  )
+}
+function IconUser() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
+}
 function Check({ ok }: { ok: boolean }) {
   return ok ? (
     <svg className="w-5 h-5 text-[#1D9E75] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -536,6 +609,80 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-base font-semibold text-gray-900 mb-2">{feat.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </RevealSection>
+      </section>
+
+      {/* ━━━ PARA QUEM ━━━ */}
+      <section id="para-quem" className="py-20 px-4 sm:px-6 bg-white">
+        <RevealSection className="max-w-5xl mx-auto">
+          <div className="text-center mb-14 reveal">
+            <span className="text-xs font-semibold uppercase tracking-widest text-[#1D9E75] mb-3 block">
+              Para quem é
+            </span>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Feito para quem vende serviço
+            </h2>
+            <p className="text-gray-500 mt-3 max-w-xl mx-auto text-sm leading-relaxed">
+              Seja freelancer solo ou agência com time, o FreelanceFlow encurta o caminho entre a conversa e o contrato assinado.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                icon: <IconUser />,
+                title: 'Freelancers',
+                desc: 'Feche mais projetos com propostas que impressionam desde o primeiro contato.',
+              },
+              {
+                icon: <IconBuilding />,
+                title: 'Agências',
+                desc: 'Escale o volume de propostas sem aumentar o time — padronize e agilize.',
+              },
+              {
+                icon: <IconTrendingUp />,
+                title: 'Gestores de Tráfego',
+                desc: 'Apresente resultados e precificação de forma clara e profissional.',
+              },
+              {
+                icon: <IconPen />,
+                title: 'Copywriters',
+                desc: 'Venda seu texto antes de escrever uma palavra — com propostas que convencem.',
+              },
+              {
+                icon: <IconPalette />,
+                title: 'Designers',
+                desc: 'Mostre seu valor antes do briefing e chegue ao projeto já aprovado.',
+              },
+              {
+                icon: <IconCode />,
+                title: 'Desenvolvedores',
+                desc: 'Estime projetos com clareza e feche contratos mais rápido.',
+              },
+              {
+                icon: <IconShare />,
+                title: 'Social Media',
+                desc: 'Proponha pacotes mensais recorrentes e reduza negociações repetidas.',
+              },
+              {
+                icon: <IconBriefcase />,
+                title: 'Consultores',
+                desc: 'Transmita autoridade desde a primeira proposta e justifique seu preço.',
+              },
+            ].map((item, i) => (
+              <div
+                key={item.title}
+                className={`reveal reveal-delay-${(i % 6) + 1} flex flex-col gap-3 bg-[#F4F5F7] rounded-2xl p-5 border border-gray-100 hover:shadow-md hover:-translate-y-0.5 hover:border-[#1D9E75]/20 transition-all duration-300`}
+              >
+                <div className="w-9 h-9 rounded-lg bg-[#1D9E75]/10 flex items-center justify-center text-[#1D9E75]">
+                  {item.icon}
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1">{item.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
+                </div>
               </div>
             ))}
           </div>
