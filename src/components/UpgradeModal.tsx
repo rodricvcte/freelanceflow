@@ -6,7 +6,6 @@ const BENEFITS = [
   'Propostas ilimitadas',
   'Clientes ilimitados',
   'PDF sem marca d\'água',
-  'Modelos prontos de proposta',
 ]
 
 type Props = {

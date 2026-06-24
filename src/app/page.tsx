@@ -374,14 +374,14 @@ function JsonLd() {
             name: 'Free',
             price: '0',
             priceCurrency: 'BRL',
-            description: '5 propostas por mês, rastreamento de abertura, follow-up automático e envio por e-mail e WhatsApp.',
+            description: '5 propostas por mês, modelos prontos, rastreamento de abertura, follow-up automático e envio por e-mail e WhatsApp.',
           },
           {
             '@type': 'Offer',
             name: 'Pro',
             price: '19',
             priceCurrency: 'BRL',
-            description: "Propostas ilimitadas, clientes ilimitados, PDF sem marca d'água, modelos prontos e todos os recursos do plano Free.",
+            description: "Propostas ilimitadas, clientes ilimitados, PDF sem marca d'água e todos os recursos do plano Free.",
           },
         ],
       },
@@ -723,8 +723,8 @@ export default function LandingPage() {
                   { t: 'Envio por e-mail e WhatsApp', ok: true },
                   { t: 'Rastreamento de abertura', ok: true },
                   { t: 'Follow-up automático', ok: true },
+                  { t: 'Modelos de proposta', ok: true },
                   { t: 'PDF com marca FreelanceFlow', ok: true },
-                  { t: 'Modelos de proposta', ok: false },
                   { t: "PDF sem marca d'água", ok: false },
                 ].map(item => (
                   <li key={item.t} className="flex items-center gap-3">
@@ -764,7 +764,7 @@ export default function LandingPage() {
                   { t: 'Clientes ilimitados', ok: true },
                   { t: 'Envio por e-mail e WhatsApp', ok: true },
                   { t: "PDF sem marca d'água", ok: true },
-                  { t: 'Modelos prontos de proposta', ok: true },
+                  { t: 'Modelos de proposta', ok: true },
                   { t: 'Rastreamento de abertura', ok: true },
                   { t: 'Follow-up automático', ok: true },
                 ].map(item => (

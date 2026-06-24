@@ -473,7 +473,6 @@ const PRO_FEATURES = [
   'Propostas ilimitadas',
   'Clientes ilimitados',
   'PDF sem marca d\'água',
-  'Modelos prontos de proposta',
   'Follow-up automático para o cliente',
   'Rastreamento de abertura em tempo real',
 ]
