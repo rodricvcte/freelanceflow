@@ -406,11 +406,11 @@ export default function PublicProposalPage() {
       .catch(() => { setNotFound(true); setLoading(false) })
   }, [token])
 
-  // Track direct URL access. Skip when ?_t=1 is present — the /api/track/view redirect
-  // already recorded the event, so we must not call it again.
+  // Track direct URL access. Skip when ?_t=1 (redirect already recorded) or ?preview=1 (owner preview).
   useEffect(() => {
     if (!token || tracked.current) return
-    if (new URLSearchParams(window.location.search).get('_t') === '1') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('_t') === '1' || params.get('preview') === '1') return
     tracked.current = true
     fetch(`/api/track/view/${token}`, { redirect: 'manual' }).catch(() => {})
   }, [token])
