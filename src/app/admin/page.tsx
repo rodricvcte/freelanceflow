@@ -72,7 +72,7 @@ export default async function AdminPage({
       : 'px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent -mb-px transition-colors'
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl">
+    <div className="p-4 md:p-8 max-w-7xl">
 
       {/* Header */}
       <div className="mb-5 md:mb-6">
