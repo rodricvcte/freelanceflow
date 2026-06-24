@@ -390,6 +390,7 @@ export default function PublicProposalPage() {
   const [loading, setLoading]   = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [acting, setActing]     = useState<'accept' | 'decline' | null>(null)
+  const [confirm, setConfirm]   = useState<'accept' | 'decline' | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   const tracked = useRef(false)
@@ -647,32 +648,24 @@ export default function PublicProposalPage() {
             )}
             <div className="flex gap-2.5">
               <button
-                onClick={() => handleAction('decline')}
+                onClick={() => setConfirm('decline')}
                 disabled={acting !== null}
                 className="flex-none flex items-center justify-center gap-1.5 py-3 px-5 rounded-xl text-gray-600 font-semibold text-sm border border-gray-200 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
               >
-                {acting === 'decline' ? (
-                  <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                )}
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
                 Recusar
               </button>
               <button
-                onClick={() => handleAction('accept')}
+                onClick={() => setConfirm('accept')}
                 disabled={acting !== null}
                 style={{ backgroundColor: accent }}
                 className="flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl text-white font-bold text-sm transition-opacity disabled:opacity-60"
               >
-                {acting === 'accept' ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
                 Aceitar esta proposta
               </button>
             </div>
@@ -684,6 +677,65 @@ export default function PublicProposalPage() {
       <footer className="text-center py-6">
         <p className="text-xs text-gray-300">Enviado via FreelanceFlow</p>
       </footer>
+
+      {/* ── Confirmation modal ─────────────────────────────── */}
+      {confirm && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 px-4"
+          onClick={() => { if (acting === null) setConfirm(null) }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 mb-4 sm:mb-0"
+            onClick={e => e.stopPropagation()}
+          >
+            {confirm === 'accept' ? (
+              <>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${accent}20` }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke={accent} strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-base font-bold text-gray-900 text-center mb-1">Aceitar proposta?</h2>
+                <p className="text-sm text-gray-500 text-center mb-6">Ao confirmar, o fornecedor será notificado do aceite.</p>
+                <button
+                  onClick={async () => { await handleAction('accept'); setConfirm(null) }}
+                  disabled={acting !== null}
+                  style={{ backgroundColor: accent }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-bold text-sm mb-2 disabled:opacity-60"
+                >
+                  {acting === 'accept' && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  Sim, aceitar
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h2 className="text-base font-bold text-gray-900 text-center mb-1">Recusar proposta?</h2>
+                <p className="text-sm text-gray-500 text-center mb-6">Esta ação não pode ser desfeita.</p>
+                <button
+                  onClick={async () => { await handleAction('decline'); setConfirm(null) }}
+                  disabled={acting !== null}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-800 text-white font-bold text-sm mb-2 disabled:opacity-60"
+                >
+                  {acting === 'decline' && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  Sim, recusar
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => setConfirm(null)}
+              disabled={acting !== null}
+              className="w-full py-2.5 text-sm text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Lightbox ───────────────────────────────────────── */}
       {lightboxUrl && (
