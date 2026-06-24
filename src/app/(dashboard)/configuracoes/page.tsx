@@ -478,8 +478,7 @@ const PRO_FEATURES = [
 ]
 
 function PlanTab({ sub }: { sub: SubInfo }) {
-  const isPro    = sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
-  const isCanceled = sub.plan === 'pro' && sub.status === 'canceled'
+  const isPro      = sub.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
   const isPastDue  = sub.status === 'past_due'
   const st         = STATUS_LABELS[sub.status] ?? { label: sub.status, cls: 'bg-gray-100 text-gray-600' }
   const usagePct   = isPro ? 0 : Math.min(100, (sub.used / sub.limit) * 100)
@@ -487,6 +486,16 @@ function PlanTab({ sub }: { sub: SubInfo }) {
   const [loadingBtn, setLoading] = useState<string | null>(null)
   const [err, setErr]            = useState<string | null>(null)
   const [syncing, setSyncing]    = useState(false)
+
+  // Auto-sync silencioso ao abrir a aba — detecta cancelamentos que o webhook não entregou
+  useEffect(() => {
+    if (!sub.stripe_customer_id) return
+    fetch('/api/subscriptions/sync', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => { if (data.synced && data.plan !== sub.plan) window.location.reload() })
+      .catch(() => {})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handleSync() {
     setSyncing(true)
@@ -557,8 +566,8 @@ function PlanTab({ sub }: { sub: SubInfo }) {
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Plano atual</p>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900">{isPro || isCanceled ? 'Pro' : 'Free'}</span>
-              {(isPro || isCanceled || isPastDue) && (
+              <span className="text-xl font-bold text-gray-900">{isPro ? 'Pro' : 'Free'}</span>
+              {(isPro || isPastDue) && (
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.cls}`}>{st.label}</span>
               )}
               {isPro && (
@@ -577,7 +586,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
         </div>
 
         {/* Free: usage bar */}
-        {!isPro && !isCanceled && (
+        {!isPro && (
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1.5">
               <span>Propostas este mês</span>
@@ -595,7 +604,7 @@ function PlanTab({ sub }: { sub: SubInfo }) {
         )}
 
         {/* Pro: features list + manage button */}
-        {(isPro || isCanceled) && (
+        {isPro && (
           <div className="space-y-3">
             <ul className="space-y-1.5">
               {PRO_FEATURES.map(f => (
@@ -607,9 +616,6 @@ function PlanTab({ sub }: { sub: SubInfo }) {
                 </li>
               ))}
             </ul>
-            {isCanceled && (
-              <p className="text-xs text-gray-400">Acesso Pro disponível até o fim do período contratado.</p>
-            )}
             {sub.stripe_customer_id && (
               <button
                 onClick={handlePortal}
