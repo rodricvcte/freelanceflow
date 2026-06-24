@@ -17,9 +17,25 @@ export async function POST() {
       .eq('user_id', user.id)
       .maybeSingle()
 
-    const customerId = sub?.stripe_customer_id as string | undefined
+    let customerId = sub?.stripe_customer_id as string | undefined
     if (!customerId) {
       return NextResponse.json({ error: 'Nenhuma assinatura encontrada' }, { status: 404 })
+    }
+
+    // Validate customer still exists in current Stripe mode (test vs live)
+    try {
+      await stripe.customers.retrieve(customerId)
+    } catch (err: unknown) {
+      const stripeErr = err as { code?: string }
+      if (stripeErr.code === 'resource_missing') {
+        customerId = undefined
+      } else {
+        throw err
+      }
+    }
+
+    if (!customerId) {
+      return NextResponse.json({ error: 'Assinatura de teste detectada. Assine novamente pelo plano.' }, { status: 404 })
     }
 
     const session = await stripe.billingPortal.sessions.create({
