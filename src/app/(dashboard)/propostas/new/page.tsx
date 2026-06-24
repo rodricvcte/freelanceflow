@@ -943,13 +943,10 @@ function NewProposalInner() {
     return <UpgradeModal used={plan.used} limit={plan.limit} />
   }
 
-  const isPro = !planLoading && plan?.plan !== 'free'
-
   return (
     <div className="p-6 md:p-8 max-w-2xl">
       <TemplatePickerModal
         open={showTemplatePicker}
-        isPro={isPro}
         templates={templates}
         loading={templatesLoading}
         loadingNicho={null}
