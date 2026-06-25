@@ -1,9 +1,9 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Svg, Path } from '@react-pdf/renderer'
 
-const GREEN = '#1D9E75'
-const GRAY  = '#6b7280'
-const DARK  = '#111827'
-const LIGHT = '#f9fafb'
+const GREEN  = '#1D9E75'
+const GRAY   = '#6b7280'
+const DARK   = '#111827'
+const LIGHT  = '#f9fafb'
 const BORDER = '#e5e7eb'
 
 const s = StyleSheet.create({
@@ -24,6 +24,11 @@ const s = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   headerBrand: { fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#ffffff' },
   headerTitle: { fontSize: 9, color: 'rgba(255,255,255,0.75)' },
   title: {
@@ -41,6 +46,14 @@ const s = StyleSheet.create({
   },
   divider: { borderBottomWidth: 1, borderBottomColor: BORDER, marginBottom: 20 },
   section: { marginBottom: 18 },
+  sectionSeparated: {
+    marginBottom: 0,
+    paddingBottom: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+    marginTop: 0,
+  },
+  sectionAfterSeparator: { marginBottom: 18, marginTop: 18 },
   sectionLabel: {
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
@@ -75,7 +88,6 @@ const s = StyleSheet.create({
     borderColor: GREEN,
     borderRadius: 6,
     padding: 14,
-    marginBottom: 20,
     backgroundColor: '#f0fdf8',
   },
   signatureName: {
@@ -98,16 +110,16 @@ const s = StyleSheet.create({
 })
 
 export type CertificateData = {
-  proposalTitle:    string
-  proposalCode:     string | null
-  proposalValue:    number | null
-  deadlineDays:     number | null
-  freelancerName:   string
-  clientName:       string
-  ip:               string
-  userAgent:        string
-  timestamp:        string
-  contentHash:      string
+  proposalTitle:  string
+  proposalCode:   string | null
+  proposalValue:  number | null
+  deadlineDays:   number | null
+  freelancerName: string
+  clientName:     string
+  ip:             string
+  userAgent:      string
+  timestamp:      string
+  contentHash:    string
 }
 
 function fmtBRL(v: number | null) {
@@ -127,6 +139,50 @@ function fmtDatetime(iso: string) {
   }
 }
 
+function parseUserAgent(ua: string): string {
+  if (!ua) return '—'
+
+  let browser = ''
+  const opr = ua.match(/OPR\/(\d+)/)
+  const edg = ua.match(/Edg\/(\d+)/)
+  const ffx = ua.match(/Firefox\/(\d+)/)
+  const chr = ua.match(/Chrome\/(\d+)/)
+  const saf = ua.match(/Version\/(\d+).*Safari/)
+
+  if (opr)      browser = `Opera ${opr[1]}`
+  else if (edg) browser = `Edge ${edg[1]}`
+  else if (ffx) browser = `Firefox ${ffx[1]}`
+  else if (chr) browser = `Chrome ${chr[1]}`
+  else if (saf) browser = `Safari ${saf[1]}`
+
+  let os = ''
+  const and = ua.match(/Android (\d+)/)
+  if (/Windows NT 10\.0/.test(ua))     os = 'Windows 10'
+  else if (/Windows NT 6\.3/.test(ua)) os = 'Windows 8.1'
+  else if (/Windows NT 6\.2/.test(ua)) os = 'Windows 8'
+  else if (/Windows NT 6\.1/.test(ua)) os = 'Windows 7'
+  else if (/Windows NT/.test(ua))      os = 'Windows'
+  else if (/iPhone/.test(ua))          os = 'iPhone'
+  else if (/iPad/.test(ua))            os = 'iPad'
+  else if (and)                        os = `Android ${and[1]}`
+  else if (/Mac OS X/.test(ua))        os = 'macOS'
+  else if (/Linux/.test(ua))           os = 'Linux'
+
+  if (browser && os) return `${browser} · ${os}`
+  return browser || os || ua
+}
+
+function FreelanceFlowLogo() {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 32 32">
+      {/* rounded rect background */}
+      <Path fill="white" d="M7,0 L25,0 Q32,0 32,7 L32,25 Q32,32 25,32 L7,32 Q0,32 0,25 L0,7 Q0,0 7,0 Z" />
+      {/* F letter */}
+      <Path fill="#1D9E75" d="M8 6h16v5H13v4h11v5H13v12H8V6z" />
+    </Svg>
+  )
+}
+
 export function CertificatePDFDocument({ data }: { data: CertificateData }) {
   return (
     <Document title="Certificado de Aceite — FreelanceFlow">
@@ -134,7 +190,10 @@ export function CertificatePDFDocument({ data }: { data: CertificateData }) {
 
         {/* Header */}
         <View style={s.headerBar}>
-          <Text style={s.headerBrand}>FreelanceFlow</Text>
+          <View style={s.headerLeft}>
+            <FreelanceFlowLogo />
+            <Text style={s.headerBrand}>FreelanceFlow</Text>
+          </View>
           <Text style={s.headerTitle}>Documento com validade jurídica</Text>
         </View>
 
@@ -146,8 +205,8 @@ export function CertificatePDFDocument({ data }: { data: CertificateData }) {
 
         <View style={s.divider} />
 
-        {/* Proposal info */}
-        <View style={s.section}>
+        {/* Proposta — com separador inferior */}
+        <View style={s.sectionSeparated}>
           <Text style={s.sectionLabel}>PROPOSTA</Text>
           <View style={s.card}>
             <View style={s.row}>
@@ -171,18 +230,20 @@ export function CertificatePDFDocument({ data }: { data: CertificateData }) {
           </View>
         </View>
 
-        {/* Signature */}
-        <View style={s.section}>
-          <Text style={s.sectionLabel}>ASSINATURA DO CLIENTE</Text>
-          <View style={s.signatureBox}>
-            <Text style={s.signatureName}>{data.clientName}</Text>
-            <Text style={s.signatureCaption}>Nome digitado pelo cliente no momento do aceite</Text>
+        {/* Assinatura — com separador inferior */}
+        <View style={s.sectionAfterSeparator}>
+          <View style={s.sectionSeparated}>
+            <Text style={s.sectionLabel}>ASSINATURA DO CLIENTE</Text>
+            <View style={s.signatureBox}>
+              <Text style={s.signatureName}>{data.clientName}</Text>
+              <Text style={s.signatureCaption}>Nome digitado pelo cliente no momento do aceite</Text>
+            </View>
           </View>
         </View>
 
-        {/* Technical record */}
-        <View style={s.section}>
-          <Text style={s.sectionLabel}>REGISTRO TECNICO DO ACEITE</Text>
+        {/* Registro técnico */}
+        <View style={s.sectionAfterSeparator}>
+          <Text style={s.sectionLabel}>REGISTRO TÉCNICO DO ACEITE</Text>
           <View style={s.card}>
             <View style={s.row}>
               <Text style={s.fieldLabel}>Data e hora</Text>
@@ -194,7 +255,7 @@ export function CertificatePDFDocument({ data }: { data: CertificateData }) {
             </View>
             <View style={s.rowLast}>
               <Text style={s.fieldLabel}>Dispositivo</Text>
-              <Text style={s.fieldValue}>{data.userAgent || '—'}</Text>
+              <Text style={s.fieldValue}>{parseUserAgent(data.userAgent)}</Text>
             </View>
             <View style={s.hashBox}>
               <Text style={s.hashLabel}>Hash SHA-256 do conteúdo da proposta</Text>
