@@ -200,8 +200,17 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
           cpf_cnpj: form.cpf_cnpj.replace(/\D/g, '') || null,
         }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      let data: Record<string, unknown> = {}
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error(
+          res.status === 413
+            ? 'Dados muito grandes para salvar. Tente regenerar a assinatura.'
+            : `Erro ${res.status} ao salvar perfil.`
+        )
+      }
+      if (!res.ok) throw new Error((data.error as string | undefined) ?? 'Erro ao salvar')
       setMsg({ text: 'Perfil salvo com sucesso!', ok: true })
       window.dispatchEvent(new Event('ff:profile-updated'))
       window.scrollTo({ top: 0, behavior: 'smooth' })
