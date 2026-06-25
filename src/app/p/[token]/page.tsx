@@ -500,7 +500,8 @@ export default function PublicProposalPage() {
     setActionError(null)
     try {
       const body = action === 'accept' ? JSON.stringify({ client_name: clientName.trim() }) : undefined
-      const res  = await fetch(`/p/${token}/${action === 'accept' ? 'accept' : 'decline'}`, {
+      const url  = action === 'accept' ? `/api/p/${token}/accept` : `/p/${token}/decline`
+      const res  = await fetch(url, {
         method: 'POST',
         headers: action === 'accept' ? { 'Content-Type': 'application/json' } : undefined,
         body,
