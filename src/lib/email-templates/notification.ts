@@ -2,10 +2,9 @@
 // Reply-To should be the client's email so the freelancer can reply directly.
 
 export type NotifData = {
-  proposalTitle:   string
-  clientName:      string
-  proposalUrl:     string
-  certificateUrl?: string
+  proposalTitle: string
+  clientName:    string
+  proposalUrl:   string
 }
 
 function wrap(content: string): string {
@@ -59,13 +58,6 @@ export function buildViewedNotificationHtml(d: NotifData): string {
 }
 
 export function buildAcceptedNotificationHtml(d: NotifData): string {
-  const certBtn = d.certificateUrl
-    ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px">
-        <tr><td>
-          <a href="${d.certificateUrl}" style="display:inline-block;background:#f3f4f6;color:#374151;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;border:1px solid #e5e7eb">Baixar Certificado de Aceite →</a>
-        </td></tr>
-      </table>`
-    : ''
   return wrap(`
     <p style="margin:0 0 6px;font-size:22px">🎉</p>
     <h1 style="margin:0 0 12px;font-size:18px;font-weight:700;color:#111827">
@@ -74,11 +66,13 @@ export function buildAcceptedNotificationHtml(d: NotifData): string {
     <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.6">
       <strong>${d.clientName}</strong> aceitou sua proposta <strong>${d.proposalTitle}</strong>.
     </p>
-    <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6">
+    <p style="margin:0 0 16px;font-size:14px;color:#6b7280;line-height:1.6">
       Entre em contato para confirmar os próximos passos e dar início ao projeto.
     </p>
+    <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;padding:12px 16px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb">
+      📎 O <strong>Certificado de Aceite</strong> com validade jurídica está em anexo neste e-mail.
+    </p>
     ${cta(d.proposalUrl, 'Ver proposta')}
-    ${certBtn}
   `)
 }
 

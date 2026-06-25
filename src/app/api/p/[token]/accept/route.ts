@@ -4,9 +4,9 @@ import { Resend } from 'resend'
 import { createServiceClient } from '@/lib/supabase-service'
 import { buildAcceptedNotificationHtml } from '@/lib/email-templates/notification'
 import { APP_URL } from '@/lib/app-url'
-import { generateAndSaveCertificate } from '@/lib/generate-certificate'
+import { generateCertificateBuffer } from '@/lib/generate-certificate'
 
-export const runtime   = 'nodejs'
+export const runtime    = 'nodejs'
 export const maxDuration = 30
 
 type ProposalRow = {
@@ -28,7 +28,7 @@ type ProposalRow = {
 async function sendAcceptedNotification(
   service: ReturnType<typeof createServiceClient>,
   proposal: ProposalRow,
-  certificateUrl: string | null
+  certBuffer: Buffer | null
 ) {
   try {
     const { data: { user: freelancer } } = await service.auth.admin.getUserById(proposal.user_id)
@@ -36,6 +36,7 @@ async function sendAcceptedNotification(
 
     const resend     = new Resend(process.env.RESEND_API_KEY)
     const clientName = proposal.recipient_name || 'Seu cliente'
+
     await resend.emails.send({
       from:    'FreelanceFlow <contato@freelanceflow.com.br>',
       to:      freelancer.email,
@@ -43,17 +44,19 @@ async function sendAcceptedNotification(
       subject: `${clientName} aceitou sua proposta — ${proposal.title ?? 'Proposta'}`,
       html:    buildAcceptedNotificationHtml({
         clientName,
-        proposalTitle:  proposal.title ?? 'Proposta',
-        proposalUrl:    `${APP_URL}/propostas/${proposal.id}`,
-        certificateUrl: certificateUrl ?? undefined,
+        proposalTitle: proposal.title ?? 'Proposta',
+        proposalUrl:   `${APP_URL}/propostas/${proposal.id}`,
       }),
+      attachments: certBuffer
+        ? [{ filename: 'Certificado-de-Aceite.pdf', content: certBuffer }]
+        : [],
     })
   } catch (err) {
     console.error('[accept notification]', err)
   }
 }
 
-// GET — email link click (legacy, keeps working but no certificate for GET flow)
+// GET — email link click (legacy)
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ token: string }> }
@@ -73,11 +76,9 @@ export async function GET(
   }
 
   if (!['aceita', 'recusada'].includes(proposal.status)) {
-    const now = new Date().toISOString()
-
     await service
       .from('proposals')
-      .update({ status: 'aceita', responded_at: now })
+      .update({ status: 'aceita', responded_at: new Date().toISOString() })
       .eq('id', proposal.id)
 
     await service
@@ -90,7 +91,7 @@ export async function GET(
   return NextResponse.redirect(new URL(`/p/${token}/confirmed?action=accepted`, APP_URL))
 }
 
-// POST — called by the public page accept button (includes client_name)
+// POST — called by the public page accept button
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ token: string }> }
@@ -113,10 +114,9 @@ export async function POST(
     return NextResponse.json({ error: 'Proposta não disponível para resposta' }, { status: 409 })
   }
 
-  const now       = new Date().toISOString()
+  const now        = new Date().toISOString()
   const clientName = (body.client_name ?? '').trim() || (proposal.recipient_name ?? 'Cliente')
 
-  // Content hash — fingerprint of what the client accepted
   const contentPayload = JSON.stringify(
     (proposal.sections as unknown[])?.length
       ? proposal.sections
@@ -127,32 +127,32 @@ export async function POST(
   const ip        = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? ''
   const userAgent = request.headers.get('user-agent') ?? ''
 
-  const eventMetadata = {
-    client_name:  clientName,
-    ip,
-    user_agent:   userAgent,
-    timestamp:    now,
-    content_hash: contentHash,
-  }
-
   await service.from('proposals')
     .update({ status: 'aceita', responded_at: now })
     .eq('id', proposal.id)
 
-  await service.from('proposal_events')
-    .insert({ proposal_id: proposal.id, event_type: 'accepted', metadata: eventMetadata })
+  await service.from('proposal_events').insert({
+    proposal_id: proposal.id,
+    event_type:  'accepted',
+    metadata: { client_name: clientName, ip, user_agent: userAgent, timestamp: now, content_hash: contentHash },
+  })
 
-  // Generate certificate
-  const snap        = (proposal.snapshot_profile as Record<string, unknown> | null)
-  const freelancerName = (snap?.business_name ?? snap?.full_name ?? '') as string ||
-    (await (async () => {
-      const { data: p } = await service.from('profiles').select('full_name, business_name').eq('id', proposal.user_id).single()
-      return p?.business_name ?? p?.full_name ?? 'Freelancer'
-    })())
+  // Resolve freelancer display name from snapshot or profiles table
+  const snap = (proposal.snapshot_profile as Record<string, unknown> | null)
+  let freelancerName = (snap?.business_name ?? snap?.full_name ?? '') as string
+  if (!freelancerName) {
+    const { data: p } = await service
+      .from('profiles')
+      .select('full_name, business_name')
+      .eq('id', proposal.user_id)
+      .single()
+    freelancerName = p?.business_name ?? p?.full_name ?? 'Freelancer'
+  }
 
-  let certificateUrl: string | null = null
+  // Generate certificate PDF buffer and send as email attachment
+  let certBuffer: Buffer | null = null
   try {
-    certificateUrl = await generateAndSaveCertificate(proposal.id, {
+    certBuffer = await generateCertificateBuffer({
       proposalTitle:  proposal.title ?? 'Proposta',
       proposalCode:   (proposal.code ?? proposal.proposal_number) as string | null,
       proposalValue:  proposal.value as number | null,
@@ -168,7 +168,7 @@ export async function POST(
     console.error('[accept] Falha ao gerar certificado', proposal.id, e)
   }
 
-  await sendAcceptedNotification(service, proposal as ProposalRow, certificateUrl)
+  await sendAcceptedNotification(service, proposal as ProposalRow, certBuffer)
 
-  return NextResponse.json({ ok: true, certificate_url: certificateUrl })
+  return NextResponse.json({ ok: true })
 }
