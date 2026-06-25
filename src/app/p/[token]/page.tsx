@@ -422,8 +422,7 @@ function SocialIcon({ network }: { network: string }) {
 
 function SocialLinks({ profile }: { profile: Profile }) {
   const entries = (['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok'] as const)
-    .map(net => ({ net, value: profile[net] }))
-    .filter((e): e is { net: string; value: string } => !!e.value)
+    .flatMap(net => { const v = profile[net]; return v ? [{ net, value: v }] : [] })
 
   if (!entries.length) return null
 
