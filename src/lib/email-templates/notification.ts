@@ -17,8 +17,8 @@ function wrap(content: string): string {
     <tr><td align="center">
       <table width="480" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;width:100%;background:white;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb">
         <tr>
-          <td style="padding:20px 28px 0;background:#1D9E75">
-            <p style="margin:0;font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.5px">FreelanceFlow</p>
+          <td style="padding:20px 28px 18px;background:#1D9E75">
+            <p style="margin:0;font-size:16px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.5px">FreelanceFlow</p>
           </td>
         </tr>
         <tr><td style="padding:28px 28px 24px">
