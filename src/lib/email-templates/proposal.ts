@@ -64,8 +64,8 @@ export function buildProposalEmailHtml(d: ProposalEmailData): string {
       <table width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;width:100%">
 
         <!-- Header -->
-        <tr><td style="background:${accent};padding:18px 24px 0;border-radius:10px 10px 0 0">
-          <p style="margin:0 0 16px;color:white;font-size:15px;font-weight:700;line-height:1">${logoHtml}${d.freelancerName}</p>
+        <tr><td style="background:${accent};padding:20px 24px 0;border-radius:10px 10px 0 0">
+          <p style="margin:0 0 18px;color:white;font-size:15px;font-weight:700;line-height:1">${logoHtml}${d.freelancerName}</p>
           <div style="height:3px;background:${accent};opacity:0.35;border-radius:2px 2px 0 0"></div>
         </td></tr>
 
