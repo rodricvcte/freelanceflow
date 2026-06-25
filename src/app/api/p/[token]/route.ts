@@ -1,6 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-service'
 
+type ProfileData = {
+  full_name: string | null
+  business_name: string | null
+  logo_url: string | null
+  accent_color: string | null
+  email_business: string | null
+  phone: string | null
+  instagram: string | null
+  linkedin: string | null
+  facebook: string | null
+  youtube: string | null
+  tiktok: string | null
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ token: string }> }
@@ -19,7 +33,7 @@ export async function GET(
   const isDraft  = proposal.status === 'rascunho'
   const snapshot = (proposal as Record<string, unknown>).snapshot_profile as Record<string, unknown> | null
 
-  const EMPTY_PROFILE = {
+  const EMPTY_PROFILE: ProfileData = {
     full_name: null, business_name: null, logo_url: null, accent_color: null,
     email_business: null, phone: null,
     instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
@@ -27,7 +41,7 @@ export async function GET(
 
   // Non-draft proposals must use the snapshot so profile changes don't bleed into sent/accepted proposals.
   // Draft proposals (still being edited) use the live profile so the freelancer sees current data.
-  let profileData: typeof EMPTY_PROFILE
+  let profileData: ProfileData
 
   if (!isDraft && snapshot) {
     profileData = {
