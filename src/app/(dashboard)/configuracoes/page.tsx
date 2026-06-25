@@ -162,6 +162,7 @@ function ProfileTab({ initial, isPro }: { initial: Profile; isPro: boolean }) {
   }
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setMsg(null)
     const file = e.target.files?.[0]
     if (!file) return
     setPreview(URL.createObjectURL(file))
