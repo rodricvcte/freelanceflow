@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Svg, Path, Rect } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Svg, Path } from '@react-pdf/renderer'
 
 const GREEN  = '#1D9E75'
 const GRAY   = '#6b7280'
@@ -174,10 +174,11 @@ function parseUserAgent(ua: string): string {
 
 function FreelanceFlowLogo() {
   return (
-    <Svg width="22" height="22" viewBox="0 0 32 32" style={{ flexShrink: 0 }}>
-      <Rect x="0" y="0" width="32" height="32" rx="7" ry="7" fill="white" />
-      <Path fill="#1D9E75" d="M8 6h16v5H13v4h11v5H13v12H8V6z" />
-    </Svg>
+    <View style={{ width: 22, height: 22, backgroundColor: 'white', borderRadius: 4, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <Svg width="13" height="13" viewBox="0 0 16 16">
+        <Path fill="#1D9E75" d="M0 0h8v2.5H2.5v2h5.5v2.5H2.5V11H0V0z" />
+      </Svg>
+    </View>
   )
 }
 
