@@ -14,7 +14,7 @@ type Props = {
   resend?: boolean
 }
 
-const DEFAULT_MESSAGE = 'Olá! Segue em anexo a proposta comercial conforme conversamos. Fico à disposição para qualquer dúvida.'
+const DEFAULT_MESSAGE = 'Olá! Segue a proposta comercial conforme conversamos. Fico à disposição para qualquer dúvida.'
 
 export default function SendProposalModal({
   open, onClose,
