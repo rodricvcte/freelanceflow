@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { bumpProposalVersion } from '@/lib/proposal-number'
-import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 
 export const runtime = 'nodejs'
 
@@ -90,12 +89,6 @@ export async function POST(
   if (error || !draft) return NextResponse.json({ error: error?.message ?? 'Erro ao criar versão' }, { status: 500 })
 
   await supabase.from('proposal_events').insert({ proposal_id: draft.id, event_type: 'created', metadata: { version: newVersion } })
-
-  try {
-    await generateAndSaveProposalPDF(draft.id, user.id)
-  } catch (e) {
-    console.error('[PDF] Falha ao gerar PDF da nova versão', draft.id, e)
-  }
 
   return NextResponse.json({ id: draft.id }, { status: 201 })
 }
