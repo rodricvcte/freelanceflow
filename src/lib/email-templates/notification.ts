@@ -5,6 +5,7 @@ export type NotifData = {
   proposalTitle: string
   clientName:    string
   proposalUrl:   string
+  proposalCode?: string | null
 }
 
 function wrap(content: string): string {
@@ -36,9 +37,14 @@ function wrap(content: string): string {
 function cta(url: string, label: string): string {
   return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:20px">
     <tr><td>
-      <a href="${url}" style="display:inline-block;background:#1D9E75;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">${label} →</a>
+      <a href="${url}" style="display:inline-block;border:1px solid #e5e7eb;color:#6b7280;padding:9px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500">${label} →</a>
     </td></tr>
   </table>`
+}
+
+function codeTag(code: string | null | undefined): string {
+  if (!code) return ''
+  return `<p style="margin:12px 0 0;font-size:12px;color:#9ca3af">Código: <strong style="color:#6b7280">${code}</strong></p>`
 }
 
 export function buildViewedNotificationHtml(d: NotifData): string {
@@ -53,6 +59,7 @@ export function buildViewedNotificationHtml(d: NotifData): string {
     <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6">
       A proposta ainda aguarda uma resposta. Este pode ser um bom momento para entrar em contato.
     </p>
+    ${codeTag(d.proposalCode)}
     ${cta(d.proposalUrl, 'Ver proposta')}
   `)
 }
@@ -69,9 +76,10 @@ export function buildAcceptedNotificationHtml(d: NotifData): string {
     <p style="margin:0 0 16px;font-size:14px;color:#6b7280;line-height:1.6">
       Entre em contato para confirmar os próximos passos e dar início ao projeto.
     </p>
-    <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.6;padding:12px 16px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb">
+    <p style="margin:0 0 0;font-size:13px;color:#6b7280;line-height:1.6;padding:12px 16px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb">
       📎 O <strong>Certificado de Aceite</strong> com validade jurídica está em anexo neste e-mail.
     </p>
+    ${codeTag(d.proposalCode)}
     ${cta(d.proposalUrl, 'Ver proposta')}
   `)
 }
@@ -103,6 +111,7 @@ export function buildDeclinedNotificationHtml(d: NotifData): string {
     <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6">
       Considere entrar em contato para entender os motivos e, se necessário, apresentar uma nova versão.
     </p>
+    ${codeTag(d.proposalCode)}
     ${cta(d.proposalUrl, 'Ver proposta')}
   `)
 }
