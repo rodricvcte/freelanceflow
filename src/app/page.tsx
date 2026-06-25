@@ -1,6 +1,17 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import NavHeader from '@/components/NavHeader'
 import RevealSection from '@/components/RevealSection'
+
+export const metadata: Metadata = {
+  title: 'FreelanceFlow',
+  description: 'Propostas comerciais em minutos.',
+  openGraph: {
+    title: 'FreelanceFlow',
+    description: 'Propostas comerciais em minutos.',
+    images: [],
+  },
+}
 
 /* ─── Icons ─── */
 function IconFileText() {
