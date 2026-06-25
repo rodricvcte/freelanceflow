@@ -34,6 +34,7 @@ type ProposalRow = {
   valid_until: string | null
   status: string
   pdf_url: string | null
+  certificate_url: string | null
   token: string
   code: string | null
   proposal_number: string | null
@@ -419,7 +420,7 @@ export default async function ProposalDetailPage({
   const [proposalRes, eventsRes, notesRes, profileRes] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, token, proposal_number, code, version, client_id, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
+      .select('id, title, service_description, value, payment_terms, deadline_days, valid_until, status, pdf_url, certificate_url, token, proposal_number, code, version, client_id, created_at, sections, recipient_email, recipient_name, clients(id, name, email, phone)')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -534,7 +535,7 @@ export default async function ProposalDetailPage({
       </div>
 
       {/* ── Botões de ação ── */}
-      <div className="flex items-center justify-start mb-6">
+      <div className="flex items-center justify-start mb-6 gap-2 flex-wrap">
         <ProposalActions
           proposalId={proposal.id}
           proposalToken={proposal.token}
@@ -560,6 +561,19 @@ export default async function ProposalDetailPage({
             proposalValidUntil: proposal.valid_until,
           }}
         />
+        {proposal.status === 'aceita' && proposal.certificate_url && (
+          <a
+            href={proposal.certificate_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-[#1D9E75] bg-[#1D9E75]/8 border border-[#1D9E75]/30 rounded-lg hover:bg-[#1D9E75]/15 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            Certificado de Aceite
+          </a>
+        )}
       </div>
 
       {/* ── Banner cancelada ── */}

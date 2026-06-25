@@ -2,9 +2,10 @@
 // Reply-To should be the client's email so the freelancer can reply directly.
 
 export type NotifData = {
-  proposalTitle: string
-  clientName:    string
-  proposalUrl:   string
+  proposalTitle:   string
+  clientName:      string
+  proposalUrl:     string
+  certificateUrl?: string
 }
 
 function wrap(content: string): string {
@@ -58,6 +59,13 @@ export function buildViewedNotificationHtml(d: NotifData): string {
 }
 
 export function buildAcceptedNotificationHtml(d: NotifData): string {
+  const certBtn = d.certificateUrl
+    ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px">
+        <tr><td>
+          <a href="${d.certificateUrl}" style="display:inline-block;background:#f3f4f6;color:#374151;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;border:1px solid #e5e7eb">Baixar Certificado de Aceite →</a>
+        </td></tr>
+      </table>`
+    : ''
   return wrap(`
     <p style="margin:0 0 6px;font-size:22px">🎉</p>
     <h1 style="margin:0 0 12px;font-size:18px;font-weight:700;color:#111827">
@@ -70,6 +78,7 @@ export function buildAcceptedNotificationHtml(d: NotifData): string {
       Entre em contato para confirmar os próximos passos e dar início ao projeto.
     </p>
     ${cta(d.proposalUrl, 'Ver proposta')}
+    ${certBtn}
   `)
 }
 

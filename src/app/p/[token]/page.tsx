@@ -467,9 +467,11 @@ export default function PublicProposalPage() {
   const [profile, setProfile]   = useState<Profile | null>(null)
   const [loading, setLoading]   = useState(true)
   const [notFound, setNotFound] = useState(false)
-  const [acting, setActing]     = useState<'accept' | 'decline' | null>(null)
-  const [confirm, setConfirm]   = useState<'accept' | 'decline' | null>(null)
+  const [acting, setActing]       = useState<'accept' | 'decline' | null>(null)
+  const [confirm, setConfirm]     = useState<'accept' | 'decline' | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [clientName, setClientName]   = useState('')
+  const [termsChecked, setTermsChecked] = useState(false)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   const tracked   = useRef(false)
   const isPreview = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('preview') === '1'
@@ -497,7 +499,12 @@ export default function PublicProposalPage() {
     setActing(action)
     setActionError(null)
     try {
-      const res  = await fetch(`/p/${token}/${action === 'accept' ? 'accept' : 'decline'}`, { method: 'POST' })
+      const body = action === 'accept' ? JSON.stringify({ client_name: clientName.trim() }) : undefined
+      const res  = await fetch(`/p/${token}/${action === 'accept' ? 'accept' : 'decline'}`, {
+        method: 'POST',
+        headers: action === 'accept' ? { 'Content-Type': 'application/json' } : undefined,
+        body,
+      })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setProposal(prev => prev ? { ...prev, status: action === 'accept' ? 'aceita' : 'recusada' } : prev)
@@ -763,7 +770,7 @@ export default function PublicProposalPage() {
       {confirm && (
         <div
           className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 px-4"
-          onClick={() => { if (acting === null) setConfirm(null) }}
+          onClick={() => { if (acting === null) { setConfirm(null); setClientName(''); setTermsChecked(false) } }}
         >
           <div
             className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 mb-4 sm:mb-0"
@@ -776,16 +783,48 @@ export default function PublicProposalPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h2 className="text-base font-bold text-gray-900 text-center mb-1">Aceitar proposta?</h2>
-                <p className="text-sm text-gray-500 text-center mb-6">Ao confirmar, o fornecedor será notificado do aceite.</p>
+                <h2 className="text-base font-bold text-gray-900 text-center mb-1">Confirmar aceite</h2>
+                <p className="text-sm text-gray-500 text-center mb-5">Preencha os dados abaixo para registrar sua aceitação com validade jurídica.</p>
+
+                {/* Nome completo */}
+                <div className="mb-4">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Seu nome completo <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={clientName}
+                    onChange={e => setClientName(e.target.value)}
+                    placeholder="Digite seu nome completo"
+                    disabled={acting !== null}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-60"
+                    style={{ '--tw-ring-color': accent } as React.CSSProperties}
+                  />
+                </div>
+
+                {/* Checkbox termos */}
+                <label className="flex items-start gap-2.5 mb-5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={termsChecked}
+                    onChange={e => setTermsChecked(e.target.checked)}
+                    disabled={acting !== null}
+                    className="mt-0.5 w-4 h-4 rounded border-gray-300 disabled:opacity-60"
+                    style={{ accentColor: accent }}
+                  />
+                  <span className="text-xs text-gray-600 leading-relaxed">
+                    Li e aceito todos os termos desta proposta, e confirmo que tenho autoridade para aceitar em nome da empresa/pessoa representada.
+                  </span>
+                </label>
+
                 <button
                   onClick={async () => { await handleAction('accept'); setConfirm(null) }}
-                  disabled={acting !== null}
+                  disabled={acting !== null || !clientName.trim() || !termsChecked}
                   style={{ backgroundColor: accent }}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-bold text-sm mb-2 disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-bold text-sm mb-2 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 >
                   {acting === 'accept' && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                  Sim, aceitar
+                  Confirmar aceite
                 </button>
               </>
             ) : (
@@ -808,7 +847,7 @@ export default function PublicProposalPage() {
               </>
             )}
             <button
-              onClick={() => setConfirm(null)}
+              onClick={() => { setConfirm(null); setClientName(''); setTermsChecked(false) }}
               disabled={acting !== null}
               className="w-full py-2.5 text-sm text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
             >
