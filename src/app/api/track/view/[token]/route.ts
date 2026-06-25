@@ -30,9 +30,16 @@ export async function GET(
       .from('proposal_events')
       .insert({ proposal_id: proposal.id, event_type: 'viewed', metadata: {} })
 
-    // Notify the freelancer only on first view
-    if (isFirstView) {
-      try {
+    try {
+      const { data: profile } = await service
+        .from('profiles')
+        .select('notify_email_viewed')
+        .eq('id', proposal.user_id)
+        .single()
+
+      const notifyEnabled = profile?.notify_email_viewed !== false
+
+      if (notifyEnabled) {
         const { data: { user: freelancer } } = await service.auth.admin.getUserById(
           proposal.user_id as string
         )
@@ -49,14 +56,14 @@ export async function GET(
             html:     buildViewedNotificationHtml({
               clientName,
               proposalTitle: (proposal.title as string) ?? 'Proposta',
-              proposalUrl:   `${APP_URL}/p/${token}`,
+              proposalUrl:   `${APP_URL}/p/${token}?preview=1`,
               proposalCode,
             }),
           })
         }
-      } catch (err) {
-        console.error('[view notification]', err)
       }
+    } catch (err) {
+      console.error('[view notification]', err)
     }
   }
 

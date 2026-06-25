@@ -28,24 +28,36 @@ type ProposalRow = {
 async function sendAcceptedNotification(
   service: ReturnType<typeof createServiceClient>,
   proposal: ProposalRow,
-  certBuffer: Buffer | null
+  certBuffer: Buffer | null,
+  token: string
 ) {
   try {
+    const { data: profile } = await service
+      .from('profiles')
+      .select('notify_email_responded')
+      .eq('id', proposal.user_id)
+      .single()
+
+    if (profile?.notify_email_responded === false) return
+
     const { data: { user: freelancer } } = await service.auth.admin.getUserById(proposal.user_id)
     if (!freelancer?.email) return
 
-    const resend     = new Resend(process.env.RESEND_API_KEY)
-    const clientName = proposal.recipient_name || 'Seu cliente'
+    const resend       = new Resend(process.env.RESEND_API_KEY)
+    const clientName   = proposal.recipient_name || 'Seu cliente'
+    const proposalCode = (proposal.code ?? proposal.proposal_number) as string | null
+    const codeSuffix   = proposalCode ? ` · ${proposalCode}` : ''
 
     await resend.emails.send({
       from:    'FreelanceFlow <contato@freelanceflow.com.br>',
       to:      freelancer.email,
       replyTo: proposal.recipient_email ?? undefined,
-      subject: `${clientName} aceitou sua proposta — ${proposal.title ?? 'Proposta'}`,
+      subject: `${clientName} aceitou sua proposta — ${proposal.title ?? 'Proposta'}${codeSuffix}`,
       html:    buildAcceptedNotificationHtml({
         clientName,
         proposalTitle: proposal.title ?? 'Proposta',
-        proposalUrl:   `${APP_URL}/propostas/${proposal.id}`,
+        proposalUrl:   `${APP_URL}/p/${token}?preview=1`,
+        proposalCode,
       }),
       attachments: certBuffer
         ? [{ filename: 'Certificado-de-Aceite.pdf', content: certBuffer.toString('base64') }]
@@ -85,7 +97,7 @@ export async function GET(
       .from('proposal_events')
       .insert({ proposal_id: proposal.id, event_type: 'accepted', metadata: { via: 'email' } })
 
-    await sendAcceptedNotification(service, proposal as ProposalRow, null)
+    await sendAcceptedNotification(service, proposal as ProposalRow, null, token)
   }
 
   return NextResponse.redirect(new URL(`/p/${token}/confirmed?action=accepted`, APP_URL))
@@ -168,7 +180,7 @@ export async function POST(
     console.error('[accept] Falha ao gerar certificado', proposal.id, e)
   }
 
-  await sendAcceptedNotification(service, proposal as ProposalRow, certBuffer)
+  await sendAcceptedNotification(service, proposal as ProposalRow, certBuffer, token)
 
   return NextResponse.json({ ok: true })
 }

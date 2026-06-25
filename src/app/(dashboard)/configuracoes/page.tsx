@@ -861,22 +861,38 @@ const NOTIF_LABELS: Record<NotifKeys, { title: string; desc: string }> = {
 }
 
 function NotificationsTab() {
-  const [prefs, setPrefs] = useState<Record<NotifKeys, boolean>>(NOTIF_DEFAULTS)
+  const [prefs,   setPrefs]   = useState<Record<NotifKeys, boolean>>(NOTIF_DEFAULTS)
+  const [loading, setLoading] = useState(true)
+  const [saving,  setSaving]  = useState<NotifKeys | null>(null)
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('ff_notif_prefs')
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setPrefs({ ...NOTIF_DEFAULTS, ...JSON.parse(raw) })
-    } catch { /* ignore */ }
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(data => {
+        if (!data) return
+        setPrefs({
+          email_viewed:    data.notify_email_viewed    ?? true,
+          email_responded: data.notify_email_responded ?? true,
+          email_followup:  data.notify_email_followup  ?? true,
+        })
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
-  function toggle(k: NotifKeys) {
-    setPrefs(p => {
-      const next = { ...p, [k]: !p[k] }
-      localStorage.setItem('ff_notif_prefs', JSON.stringify(next))
-      return next
-    })
+  async function toggle(k: NotifKeys) {
+    const next = !prefs[k]
+    setPrefs(p => ({ ...p, [k]: next }))
+    setSaving(k)
+    try {
+      await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [`notify_${k}`]: next }),
+      })
+    } catch { /* ignore */ } finally {
+      setSaving(null)
+    }
   }
 
   return (
@@ -891,7 +907,8 @@ function NotificationsTab() {
             <button
               type="button"
               onClick={() => toggle(k)}
-              className={`relative shrink-0 w-10 h-6 rounded-full transition-colors ${prefs[k] ? 'bg-[#1D9E75]' : 'bg-gray-200'}`}
+              disabled={loading || saving === k}
+              className={`relative shrink-0 w-10 h-6 rounded-full transition-colors disabled:opacity-60 ${prefs[k] ? 'bg-[#1D9E75]' : 'bg-gray-200'}`}
               role="switch"
               aria-checked={prefs[k]}
             >
@@ -900,7 +917,6 @@ function NotificationsTab() {
           </div>
         ))}
       </div>
-
     </div>
   )
 }
