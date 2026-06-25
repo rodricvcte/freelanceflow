@@ -10,17 +10,47 @@ export async function GET(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, title, proposal_number, service_description, sections, value, payment_terms, deadline_days, valid_until, status, token, created_at, pdf_url, user_id, clients(name, email)')
+    .select('id, title, proposal_number, service_description, sections, value, payment_terms, deadline_days, valid_until, status, token, created_at, pdf_url, user_id, snapshot_profile, clients(name, email)')
     .eq('token', token)
     .single()
 
   if (!proposal) return NextResponse.json({ error: 'Proposta não encontrada' }, { status: 404 })
 
-  const { data: profile } = await service
-    .from('profiles')
-    .select('full_name, business_name, logo_url, accent_color, email_business, phone, instagram, linkedin, facebook, youtube, tiktok')
-    .eq('id', proposal.user_id)
-    .single()
+  const isDraft  = proposal.status === 'rascunho'
+  const snapshot = (proposal as Record<string, unknown>).snapshot_profile as Record<string, unknown> | null
+
+  const EMPTY_PROFILE = {
+    full_name: null, business_name: null, logo_url: null, accent_color: null,
+    email_business: null, phone: null,
+    instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
+  }
+
+  // Non-draft proposals must use the snapshot so profile changes don't bleed into sent/accepted proposals.
+  // Draft proposals (still being edited) use the live profile so the freelancer sees current data.
+  let profileData: typeof EMPTY_PROFILE
+
+  if (!isDraft && snapshot) {
+    profileData = {
+      full_name:      (snapshot.full_name      as string | null) ?? null,
+      business_name:  (snapshot.business_name  as string | null) ?? null,
+      logo_url:       (snapshot.logo_url       as string | null) ?? null,
+      accent_color:   (snapshot.accent_color   as string | null) ?? null,
+      email_business: (snapshot.email_business as string | null) ?? null,
+      phone:          (snapshot.phone          as string | null) ?? null,
+      instagram:      (snapshot.instagram      as string | null) ?? null,
+      linkedin:       (snapshot.linkedin       as string | null) ?? null,
+      facebook:       (snapshot.facebook       as string | null) ?? null,
+      youtube:        (snapshot.youtube        as string | null) ?? null,
+      tiktok:         (snapshot.tiktok         as string | null) ?? null,
+    }
+  } else {
+    const { data: liveProfile } = await service
+      .from('profiles')
+      .select('full_name, business_name, logo_url, accent_color, email_business, phone, instagram, linkedin, facebook, youtube, tiktok')
+      .eq('id', proposal.user_id)
+      .single()
+    profileData = liveProfile ?? EMPTY_PROFILE
+  }
 
   return NextResponse.json({
     proposal: {
@@ -41,10 +71,6 @@ export async function GET(
         ? (proposal.clients[0] ?? null)
         : proposal.clients,
     },
-    profile: profile ?? {
-      full_name: null, business_name: null, logo_url: null, accent_color: null,
-      email_business: null, phone: null,
-      instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
-    },
+    profile: profileData,
   })
 }
