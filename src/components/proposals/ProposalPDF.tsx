@@ -920,17 +920,17 @@ export function ProposalPDFDocument({
           </View>
         </View>
 
-        {/* Redes sociais */}
-        {buildSocialLine(profile) && (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          <View wrap={false as any} style={{ marginTop: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f3f4f6', alignItems: 'center' }}>
-            <Text style={{ fontSize: 7.5, color: '#9ca3af' }}>
-              {buildSocialLine(profile)}
-            </Text>
-          </View>
-        )}
-
       </View>
+
+      {/* Redes sociais — rodapé da última página */}
+      {buildSocialLine(profile) && (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        <View wrap={false as any} style={{ marginTop: 'auto' as any, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#eeeeee', alignItems: 'center' }}>
+          <Text style={{ fontSize: 7, color: '#aaaaaa' }}>
+            {buildSocialLine(profile)}
+          </Text>
+        </View>
+      )}
     </Page>
   )
 
