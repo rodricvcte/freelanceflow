@@ -48,7 +48,7 @@ async function sendAcceptedNotification(
         proposalUrl:   `${APP_URL}/propostas/${proposal.id}`,
       }),
       attachments: certBuffer
-        ? [{ filename: 'Certificado-de-Aceite.pdf', content: certBuffer }]
+        ? [{ filename: 'Certificado-de-Aceite.pdf', content: certBuffer.toString('base64') }]
         : [],
     })
   } catch (err) {
