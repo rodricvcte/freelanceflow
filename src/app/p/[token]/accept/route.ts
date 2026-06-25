@@ -6,7 +6,8 @@ import { APP_URL } from '@/lib/app-url'
 
 async function sendAcceptedNotification(
   service: ReturnType<typeof createServiceClient>,
-  proposal: { id: string; user_id: unknown; title: unknown; recipient_name: unknown; recipient_email: unknown }
+  proposal: { id: string; user_id: unknown; title: unknown; code: unknown; proposal_number: unknown; recipient_name: unknown; recipient_email: unknown },
+  token: string
 ) {
   try {
     const { data: { user: freelancer } } = await service.auth.admin.getUserById(
@@ -14,17 +15,20 @@ async function sendAcceptedNotification(
     )
     if (!freelancer?.email) return
 
-    const resend     = new Resend(process.env.RESEND_API_KEY)
-    const clientName = (proposal.recipient_name as string | null) || 'Seu cliente'
+    const resend       = new Resend(process.env.RESEND_API_KEY)
+    const clientName   = (proposal.recipient_name as string | null) || 'Seu cliente'
+    const proposalCode = (proposal.code ?? proposal.proposal_number) as string | null
+    const codeSuffix   = proposalCode ? ` · ${proposalCode}` : ''
     await resend.emails.send({
       from:     'FreelanceFlow <contato@freelanceflow.com.br>',
       to:       freelancer.email,
       replyTo: (proposal.recipient_email as string | null) ?? undefined,
-      subject:  `${clientName} aceitou sua proposta — ${proposal.title ?? 'Proposta'}`,
+      subject:  `${clientName} aceitou sua proposta — ${proposal.title ?? 'Proposta'}${codeSuffix}`,
       html:     buildAcceptedNotificationHtml({
         clientName,
         proposalTitle: (proposal.title as string) ?? 'Proposta',
-        proposalUrl:   `${APP_URL}/propostas/${proposal.id}`,
+        proposalUrl:   `${APP_URL}/p/${token}`,
+        proposalCode,
       }),
     })
   } catch (err) {
@@ -41,7 +45,7 @@ export async function GET(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, status, user_id, title, recipient_name, recipient_email')
+    .select('id, status, user_id, title, code, proposal_number, recipient_name, recipient_email')
     .eq('token', token)
     .single()
 
@@ -63,7 +67,7 @@ export async function GET(
       .from('proposal_events')
       .insert({ proposal_id: proposal.id, event_type: 'accepted', metadata: { via: 'email' } })
 
-    await sendAcceptedNotification(service, proposal)
+    await sendAcceptedNotification(service, proposal, token)
   }
 
   return NextResponse.redirect(
@@ -80,7 +84,7 @@ export async function POST(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, status, user_id, title, recipient_name, recipient_email')
+    .select('id, status, user_id, title, code, proposal_number, recipient_name, recipient_email')
     .eq('token', token)
     .single()
 
@@ -99,7 +103,7 @@ export async function POST(
     .from('proposal_events')
     .insert({ proposal_id: proposal.id, event_type: 'accepted', metadata: {} })
 
-  await sendAcceptedNotification(service, proposal)
+  await sendAcceptedNotification(service, proposal, token)
 
   return NextResponse.json({ ok: true })
 }
