@@ -784,7 +784,7 @@ export default function PublicProposalPage() {
                   </svg>
                 </div>
                 <h2 className="text-base font-bold text-gray-900 text-center mb-1">Confirmar aceite</h2>
-                <p className="text-sm text-gray-500 text-center mb-5">Preencha os dados abaixo para registrar sua aceitação com validade jurídica.</p>
+                <p className="text-sm text-gray-500 text-center mb-5">Antes de aceitar, precisamos de uma confirmação rápida.</p>
 
                 {/* Nome completo */}
                 <div className="mb-4">
