@@ -10,6 +10,14 @@ async function sendAcceptedNotification(
   token: string
 ) {
   try {
+    const { data: profile } = await service
+      .from('profiles')
+      .select('notify_email_responded')
+      .eq('id', proposal.user_id as string)
+      .single()
+
+    if (profile?.notify_email_responded === false) return
+
     const { data: { user: freelancer } } = await service.auth.admin.getUserById(
       proposal.user_id as string
     )
@@ -27,7 +35,7 @@ async function sendAcceptedNotification(
       html:     buildAcceptedNotificationHtml({
         clientName,
         proposalTitle: (proposal.title as string) ?? 'Proposta',
-        proposalUrl:   `${APP_URL}/p/${token}`,
+        proposalUrl:   `${APP_URL}/p/${token}?preview=1`,
         proposalCode,
       }),
     })
