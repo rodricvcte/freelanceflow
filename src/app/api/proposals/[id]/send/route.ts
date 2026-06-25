@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { buildProposalEmailHtml } from '@/lib/email-templates/proposal'
 import { APP_URL } from '@/lib/app-url'
+import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -38,7 +39,7 @@ export async function POST(
       .single(),
     supabase
       .from('profiles')
-      .select('full_name, business_name, logo_url, accent_color, email_business, phone')
+      .select('full_name, business_name, logo_url, accent_color, email_business, phone, instagram, linkedin, facebook, youtube, tiktok')
       .eq('id', user.id)
       .single(),
   ])
@@ -108,17 +109,43 @@ export async function POST(
     )
   }
 
-  // Persist recipient; on first send also mark as enviada (fire-and-forget)
+  // Generate PDF and persist updates
   const service = createServiceClient()
   const proposalUpdate: Record<string, unknown> = {
     recipient_email: body.recipient_email.trim(),
     recipient_name:  body.recipient_name?.trim() ?? null,
   }
+
   if (!body.resend) {
     proposalUpdate.status  = 'enviada'
     proposalUpdate.sent_at = new Date().toISOString()
+
+    // Generate PDF with current proposal data
+    try {
+      proposalUpdate.pdf_url = await generateAndSaveProposalPDF(id, user.id)
+    } catch (e) {
+      console.error('[send] Falha ao gerar PDF ao enviar proposta', id, e)
+    }
+
+    // Freeze profile snapshot at send time
+    if (profile) {
+      proposalUpdate.snapshot_profile = {
+        full_name:      profile.full_name,
+        business_name:  profile.business_name,
+        accent_color:   profile.accent_color,
+        logo_url:       profile.logo_url,
+        phone:          profile.phone,
+        email_business: profile.email_business,
+        instagram:      profile.instagram,
+        linkedin:       profile.linkedin,
+        facebook:       profile.facebook,
+        youtube:        profile.youtube,
+        tiktok:         profile.tiktok,
+      }
+    }
   }
-  void Promise.all([
+
+  await Promise.all([
     service.from('proposals').update(proposalUpdate).eq('id', id),
     service.from('proposal_events').insert({
       proposal_id: id,
