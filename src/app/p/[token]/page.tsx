@@ -44,6 +44,11 @@ type Profile = {
   accent_color: string | null
   email_business: string | null
   phone: string | null
+  instagram: string | null
+  linkedin: string | null
+  facebook: string | null
+  youtube: string | null
+  tiktok: string | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -366,6 +371,80 @@ function RenderCustomTable({ sec, accent }: { sec: CustomTableSection; accent: s
   )
 }
 
+// ── Social links ──────────────────────────────────────────────────────────────
+
+const SOCIAL_CONFIG: Record<string, { label: string; base: string; prefix: string }> = {
+  instagram: { label: 'Instagram', base: 'https://instagram.com/',    prefix: ''  },
+  linkedin:  { label: 'LinkedIn',  base: 'https://linkedin.com/in/',  prefix: ''  },
+  facebook:  { label: 'Facebook',  base: 'https://facebook.com/',     prefix: ''  },
+  youtube:   { label: 'YouTube',   base: 'https://youtube.com/@',     prefix: '@' },
+  tiktok:    { label: 'TikTok',    base: 'https://tiktok.com/@',      prefix: ''  },
+}
+
+function buildSocialHref(network: string, value: string): string {
+  if (value.startsWith('http://') || value.startsWith('https://')) return value
+  if (value.startsWith('www.')) return `https://${value}`
+  const cfg = SOCIAL_CONFIG[network]
+  if (!cfg) return value
+  const handle = value.startsWith('@') ? value.slice(1) : value
+  return cfg.base + handle
+}
+
+function SocialIcon({ network }: { network: string }) {
+  const cls = 'h-3.5 w-3.5'
+  if (network === 'instagram') return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+    </svg>
+  )
+  if (network === 'linkedin') return (
+    <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" />
+    </svg>
+  )
+  if (network === 'facebook') return (
+    <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+  if (network === 'youtube') return (
+    <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" /><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white" />
+    </svg>
+  )
+  if (network === 'tiktok') return (
+    <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.78a8.18 8.18 0 0 0 4.78 1.52V6.85a4.85 4.85 0 0 1-1.01-.16z" />
+    </svg>
+  )
+  return null
+}
+
+function SocialLinks({ profile }: { profile: Profile }) {
+  const entries = (['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok'] as const)
+    .map(net => ({ net, value: profile[net] }))
+    .filter((e): e is { net: string; value: string } => !!e.value)
+
+  if (!entries.length) return null
+
+  return (
+    <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 pt-2">
+      {entries.map(({ net, value }) => (
+        <a
+          key={net}
+          href={buildSocialHref(net, value)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <SocialIcon network={net} />
+          <span>{value}</span>
+        </a>
+      ))}
+    </div>
+  )
+}
+
 function renderSection(sec: Section, accent: string, onImageOpen: (url: string) => void): React.ReactNode {
   switch (sec.type) {
     case 'text':         return <RenderText sec={sec} accent={accent} />
@@ -635,6 +714,9 @@ export default function PublicProposalPage() {
             </a>
           </div>
         )}
+
+        {/* Redes sociais */}
+        <SocialLinks profile={profile} />
 
       </main>
 
