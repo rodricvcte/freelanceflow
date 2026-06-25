@@ -45,7 +45,6 @@ const s = StyleSheet.create({
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
     color: GREEN,
-    textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 8,
   },
@@ -149,7 +148,7 @@ export function CertificatePDFDocument({ data }: { data: CertificateData }) {
 
         {/* Proposal info */}
         <View style={s.section}>
-          <Text style={s.sectionLabel}>Proposta</Text>
+          <Text style={s.sectionLabel}>PROPOSTA</Text>
           <View style={s.card}>
             <View style={s.row}>
               <Text style={s.fieldLabel}>Título</Text>
@@ -174,7 +173,7 @@ export function CertificatePDFDocument({ data }: { data: CertificateData }) {
 
         {/* Signature */}
         <View style={s.section}>
-          <Text style={s.sectionLabel}>Assinatura eletrônica do cliente</Text>
+          <Text style={s.sectionLabel}>ASSINATURA DO CLIENTE</Text>
           <View style={s.signatureBox}>
             <Text style={s.signatureName}>{data.clientName}</Text>
             <Text style={s.signatureCaption}>Nome digitado pelo cliente no momento do aceite</Text>
@@ -183,7 +182,7 @@ export function CertificatePDFDocument({ data }: { data: CertificateData }) {
 
         {/* Technical record */}
         <View style={s.section}>
-          <Text style={s.sectionLabel}>Registro técnico do aceite</Text>
+          <Text style={s.sectionLabel}>REGISTRO TECNICO DO ACEITE</Text>
           <View style={s.card}>
             <View style={s.row}>
               <Text style={s.fieldLabel}>Data e hora</Text>
