@@ -3,7 +3,6 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createServiceClient } from '@/lib/supabase-service'
 import { canCreateProposal } from '@/lib/plan'
 import { buildProposalCode } from '@/lib/proposal-number'
-import { generateAndSaveProposalPDF } from '@/lib/generate-pdf'
 import { getViewAs } from '@/lib/view-as'
 
 export const runtime = 'nodejs'
@@ -116,12 +115,5 @@ export async function POST(request: Request) {
 
   await supabase.from('proposal_events').insert({ proposal_id: data.id, event_type: 'created', metadata: {} })
 
-  let pdfUrl: string | null = data.pdf_url ?? null
-  try {
-    pdfUrl = await generateAndSaveProposalPDF(data.id, user.id)
-  } catch (e) {
-    console.error('[PDF] Falha ao gerar PDF da proposta', data.id, e)
-  }
-
-  return NextResponse.json({ ...data, pdf_url: pdfUrl }, { status: 201 })
+  return NextResponse.json({ ...data, pdf_url: null }, { status: 201 })
 }
