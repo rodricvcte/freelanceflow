@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data, error } = await queryClient
     .from('profiles')
-    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok, signature_data, followup_enabled, followup_days, followup_expiry_enabled')
+    .select('full_name, business_name, phone, logo_url, accent_color, freelancer_code, address, document_type, cpf_cnpj, email_business, website, instagram, linkedin, facebook, youtube, tiktok, signature_data, followup_enabled, followup_days, followup_expiry_enabled, notify_email_viewed, notify_email_responded, notify_email_followup')
     .eq('id', userId)
     .maybeSingle()
 
@@ -43,7 +43,7 @@ export async function PATCH(request: Request) {
     'signature_data',
   ] as const
   type Field = typeof allowed[number]
-  const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj' | 'followup_enabled' | 'followup_days' | 'followup_expiry_enabled', unknown>> = {}
+  const updates: Partial<Record<Field | 'document_type' | 'cpf_cnpj' | 'followup_enabled' | 'followup_days' | 'followup_expiry_enabled' | 'notify_email_viewed' | 'notify_email_responded' | 'notify_email_followup', unknown>> = {}
 
   for (const key of allowed) {
     if (key in body) {
@@ -56,7 +56,10 @@ export async function PATCH(request: Request) {
     const days = parseInt(body.followup_days, 10)
     updates.followup_days = isNaN(days) || days < 1 ? 1 : days > 30 ? 30 : days
   }
-  if ('followup_expiry_enabled' in body) updates.followup_expiry_enabled = Boolean(body.followup_expiry_enabled)
+  if ('followup_expiry_enabled' in body)   updates.followup_expiry_enabled   = Boolean(body.followup_expiry_enabled)
+  if ('notify_email_viewed' in body)       updates.notify_email_viewed       = Boolean(body.notify_email_viewed)
+  if ('notify_email_responded' in body)    updates.notify_email_responded    = Boolean(body.notify_email_responded)
+  if ('notify_email_followup' in body)     updates.notify_email_followup     = Boolean(body.notify_email_followup)
 
   if ('document_type' in body) {
     updates.document_type = body.document_type === 'cpf' || body.document_type === 'cnpj'
