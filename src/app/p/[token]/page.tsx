@@ -698,8 +698,8 @@ export default function PublicProposalPage() {
           </p>
         </div>
 
-        {/* Baixar PDF */}
-        {proposal.pdf_url && (
+        {/* Baixar PDF — nunca exibir para rascunho, PDF só existe após o envio */}
+        {proposal.pdf_url && proposal.status !== 'rascunho' && (
           <div className="flex justify-center">
             <a
               href={proposal.pdf_url}
