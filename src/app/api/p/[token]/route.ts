@@ -18,7 +18,7 @@ export async function GET(
 
   const { data: profile } = await service
     .from('profiles')
-    .select('full_name, business_name, logo_url, accent_color, email_business, phone')
+    .select('full_name, business_name, logo_url, accent_color, email_business, phone, instagram, linkedin, facebook, youtube, tiktok')
     .eq('id', proposal.user_id)
     .single()
 
@@ -41,6 +41,10 @@ export async function GET(
         ? (proposal.clients[0] ?? null)
         : proposal.clients,
     },
-    profile: profile ?? { full_name: null, business_name: null, logo_url: null, accent_color: null, email_business: null, phone: null },
+    profile: profile ?? {
+      full_name: null, business_name: null, logo_url: null, accent_color: null,
+      email_business: null, phone: null,
+      instagram: null, linkedin: null, facebook: null, youtube: null, tiktok: null,
+    },
   })
 }

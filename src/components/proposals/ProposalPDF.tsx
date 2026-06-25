@@ -639,6 +639,28 @@ function renderSection(sec: Section, accent: string) {
   }
 }
 
+// ── Social helpers ────────────────────────────────────────────────────────────
+
+const SOCIAL_LABELS: Record<string, string> = {
+  instagram: 'Instagram',
+  linkedin:  'LinkedIn',
+  facebook:  'Facebook',
+  youtube:   'YouTube',
+  tiktok:    'TikTok',
+}
+
+function formatSocialEntry(network: string, value: string): string {
+  const label = SOCIAL_LABELS[network] ?? network
+  return `${label}: ${value}`
+}
+
+function buildSocialLine(profile: ProfileForPDF): string | null {
+  const entries = (['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok'] as const)
+    .map(net => profile[net] ? formatSocialEntry(net, profile[net]!) : null)
+    .filter((e): e is string => e !== null)
+  return entries.length ? entries.join(' · ') : null
+}
+
 // ── Main document ─────────────────────────────────────────────────────────────
 
 export function ProposalPDFDocument({
@@ -897,6 +919,17 @@ export function ProposalPDFDocument({
             </View>
           </View>
         </View>
+
+        {/* Redes sociais */}
+        {buildSocialLine(profile) && (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <View wrap={false as any} style={{ marginTop: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f3f4f6', alignItems: 'center' }}>
+            <Text style={{ fontSize: 7.5, color: '#9ca3af' }}>
+              {buildSocialLine(profile)}
+            </Text>
+          </View>
+        )}
+
       </View>
     </Page>
   )
