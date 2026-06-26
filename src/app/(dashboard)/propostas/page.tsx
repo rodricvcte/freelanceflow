@@ -17,6 +17,7 @@ type Proposal = {
   code: string | null
   proposal_number: string | null
   token: string
+  recipient_name: string | null
   clients: { id: string; name: string } | null
 }
 
@@ -508,7 +509,7 @@ function ProposalsPageInner() {
 
                           {/* Cliente */}
                           <td className="px-3 py-2 max-w-[140px]">
-                            <span className="text-sm text-gray-500 truncate block">{p.clients?.name ?? '—'}</span>
+                            <span className="text-sm text-gray-500 truncate block">{p.recipient_name ?? p.clients?.name ?? '—'}</span>
                           </td>
 
                           {/* Data */}
@@ -588,8 +589,8 @@ function ProposalsPageInner() {
 
                 {/* Cliente + Detalhes */}
                 <div className="flex items-center justify-between gap-2">
-                  {p.clients?.name ? (
-                    <span className="text-xs text-gray-400 truncate">{p.clients.name}</span>
+                  {(p.recipient_name ?? p.clients?.name) ? (
+                    <span className="text-xs text-gray-400 truncate">{p.recipient_name ?? p.clients?.name}</span>
                   ) : (
                     <span />
                   )}

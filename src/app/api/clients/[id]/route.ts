@@ -48,6 +48,15 @@ export async function PUT(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Propagate name/email changes only to draft proposals — sent proposals keep their snapshot
+  await supabase
+    .from('proposals')
+    .update({ recipient_name: name.trim(), recipient_email: email?.trim() || null })
+    .eq('client_id', id)
+    .eq('user_id', user.id)
+    .eq('status', 'rascunho')
+
   return NextResponse.json(data)
 }
 
