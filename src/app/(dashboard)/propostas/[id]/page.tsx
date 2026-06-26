@@ -589,14 +589,18 @@ export default async function ProposalDetailPage({
         {/* Cliente */}
         <div className="bg-gray-50 rounded-[8px] border border-gray-100 px-[14px] py-3">
           <p className="text-xs font-medium text-gray-400 mb-1.5">Cliente</p>
-          {client ? (
-            <>
-              <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{client.name}</p>
-              {client.email && <p className="text-xs text-gray-400 mt-0.5 truncate">{client.email}</p>}
-            </>
-          ) : (
-            <p className="text-sm font-semibold text-gray-400">—</p>
-          )}
+          {(() => {
+            const displayName  = (proposalAny.recipient_name  as string | null) ?? client?.name  ?? null
+            const displayEmail = (proposalAny.recipient_email as string | null) ?? client?.email ?? null
+            return displayName ? (
+              <>
+                <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{displayName}</p>
+                {displayEmail && <p className="text-xs text-gray-400 mt-0.5 truncate">{displayEmail}</p>}
+              </>
+            ) : (
+              <p className="text-sm font-semibold text-gray-400">—</p>
+            )
+          })()}
         </div>
 
         {/* Prazo / Pagamento */}
