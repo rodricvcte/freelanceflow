@@ -24,7 +24,7 @@ export async function GET(
 
   const { data: proposal } = await service
     .from('proposals')
-    .select('id, title, proposal_number, service_description, sections, value, payment_terms, deadline_days, valid_until, status, token, created_at, pdf_url, user_id, snapshot_profile, clients(name, email)')
+    .select('id, title, proposal_number, service_description, sections, value, payment_terms, deadline_days, valid_until, status, token, created_at, pdf_url, user_id, snapshot_profile, recipient_name, recipient_email, clients(name, email)')
     .eq('token', token)
     .single()
 
@@ -66,6 +66,18 @@ export async function GET(
     profileData = liveProfile ?? EMPTY_PROFILE
   }
 
+  const proposalAny = proposal as Record<string, unknown>
+  const liveClients = Array.isArray(proposal.clients)
+    ? (proposal.clients[0] ?? null)
+    : proposal.clients
+
+  // For non-draft proposals, use the recipient snapshot stored at send time so that
+  // subsequent client edits don't bleed into already-sent/accepted proposals.
+  const snapshotClients =
+    !isDraft && proposalAny.recipient_name
+      ? { name: proposalAny.recipient_name as string, email: (proposalAny.recipient_email as string | null) ?? null }
+      : liveClients
+
   return NextResponse.json({
     proposal: {
       id: proposal.id,
@@ -81,9 +93,7 @@ export async function GET(
       token: proposal.token,
       created_at: proposal.created_at,
       pdf_url: (proposal.pdf_url as string | null) ?? null,
-      clients: Array.isArray(proposal.clients)
-        ? (proposal.clients[0] ?? null)
-        : proposal.clients,
+      clients: snapshotClients,
     },
     profile: profileData,
   })
