@@ -18,7 +18,7 @@ export async function GET() {
 
   const { data, error } = await queryClient
     .from('proposals')
-    .select('id, title, value, status, created_at, sent_at, version, proposal_number, code, token, clients(id, name)')
+    .select('id, title, value, status, created_at, sent_at, version, proposal_number, code, token, recipient_name, clients(id, name)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
