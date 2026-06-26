@@ -33,7 +33,7 @@ export async function POST(
   const [{ data: proposal }, { data: profile }] = await Promise.all([
     supabase
       .from('proposals')
-      .select('id, title, token, status, value, valid_until, proposal_number, code, snapshot_profile')
+      .select('id, title, token, status, value, valid_until, proposal_number, code, snapshot_profile, client_id, recipient_email, recipient_name')
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
@@ -111,14 +111,19 @@ export async function POST(
 
   // Generate PDF and persist updates
   const service = createServiceClient()
-  const proposalUpdate: Record<string, unknown> = {
-    recipient_email: body.recipient_email.trim(),
-    recipient_name:  body.recipient_name?.trim() ?? null,
-  }
+  const proposalUpdate: Record<string, unknown> = {}
 
   if (!body.resend) {
     proposalUpdate.status  = 'enviada'
     proposalUpdate.sent_at = new Date().toISOString()
+
+    // Freeze recipient snapshot: prefer the value already stored in the proposal
+    // (propagated from the client record), falling back to modal input only if null.
+    // Never overwrite with the modal value — the modal email is delivery-only.
+    const existingEmail = (proposal as Record<string, unknown>).recipient_email as string | null
+    const existingName  = (proposal as Record<string, unknown>).recipient_name  as string | null
+    proposalUpdate.recipient_email = existingEmail ?? body.recipient_email.trim()
+    proposalUpdate.recipient_name  = existingName  ?? (body.recipient_name?.trim() ?? null)
 
     // Generate PDF with current proposal data
     try {
