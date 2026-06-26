@@ -590,8 +590,9 @@ export default async function ProposalDetailPage({
         <div className="bg-gray-50 rounded-[8px] border border-gray-100 px-[14px] py-3">
           <p className="text-xs font-medium text-gray-400 mb-1.5">Cliente</p>
           {(() => {
-            const displayName  = (proposalAny.recipient_name  as string | null) ?? client?.name  ?? null
-            const displayEmail = (proposalAny.recipient_email as string | null) ?? client?.email ?? null
+            const isDraft      = proposal.status === 'rascunho'
+            const displayName  = isDraft ? ((proposalAny.recipient_name  as string | null) ?? client?.name  ?? null) : ((proposalAny.recipient_name  as string | null) ?? null)
+            const displayEmail = isDraft ? ((proposalAny.recipient_email as string | null) ?? client?.email ?? null) : ((proposalAny.recipient_email as string | null) ?? null)
             return displayName ? (
               <>
                 <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{displayName}</p>
