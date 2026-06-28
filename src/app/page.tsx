@@ -582,6 +582,14 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <div className="reveal reveal-delay-3 mt-10 text-center">
+            <Link
+              href="/cadastro"
+              className="inline-flex items-center px-6 py-3 bg-[#1D9E75] text-white font-medium rounded-lg hover:bg-[#188f68] hover:scale-[1.02] transition-all text-sm"
+            >
+              Criar conta grátis — sem cartão
+            </Link>
+          </div>
         </RevealSection>
       </section>
 
@@ -645,6 +653,14 @@ export default function LandingPage() {
                 <p className="text-sm text-gray-500 leading-relaxed">{feat.desc}</p>
               </div>
             ))}
+          </div>
+          <div className="reveal reveal-delay-3 mt-10 text-center">
+            <Link
+              href="/cadastro"
+              className="inline-flex items-center px-6 py-3 bg-[#1D9E75] text-white font-medium rounded-lg hover:bg-[#188f68] hover:scale-[1.02] transition-all text-sm"
+            >
+              Criar conta grátis — sem cartão
+            </Link>
           </div>
         </RevealSection>
       </section>
@@ -719,6 +735,14 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="reveal reveal-delay-3 mt-10 text-center">
+            <Link
+              href="/cadastro"
+              className="inline-flex items-center px-6 py-3 bg-[#1D9E75] text-white font-medium rounded-lg hover:bg-[#188f68] hover:scale-[1.02] transition-all text-sm"
+            >
+              Criar conta grátis — sem cartão
+            </Link>
           </div>
         </RevealSection>
       </section>
