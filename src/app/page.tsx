@@ -4,12 +4,22 @@ import NavHeader from '@/components/NavHeader'
 import RevealSection from '@/components/RevealSection'
 
 export const metadata: Metadata = {
-  title: 'FreelanceFlow',
-  description: 'Propostas comerciais em minutos.',
+  title: 'FreelanceFlow — Proposta Comercial para Freelancers em Minutos',
+  description:
+    'Crie propostas comerciais profissionais, envie por link e saiba quando o cliente visualizou. Aceite com validade legal. Grátis para começar.',
   openGraph: {
-    title: 'FreelanceFlow',
-    description: 'Propostas comerciais em minutos.',
-    images: [],
+    title: 'FreelanceFlow — Proposta Comercial para Freelancers em Minutos',
+    description:
+      'Crie propostas comerciais profissionais, envie por link e saiba quando o cliente visualizou. Aceite com validade legal. Grátis para começar.',
+    url: 'https://freelanceflow.com.br',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'FreelanceFlow — Proposta Comercial para Freelancers',
+      },
+    ],
   },
 }
 
@@ -512,7 +522,7 @@ export default function LandingPage() {
             <span className="text-[#1D9E75]">E você fica sem saber o que aconteceu.</span>
           </h1>
           <p style={{ animationDelay: '180ms' }} className="anim-fade-up text-lg text-gray-500 leading-relaxed mb-8 max-w-2xl mx-auto">
-            Envie propostas comerciais com layout profissional, saiba quando o cliente abriu e nunca perca um negócio por falta de retorno.
+            Crie e envie propostas comerciais para clientes com layout profissional, saiba quando o cliente abriu e nunca perca um negócio por falta de retorno.
           </p>
           <div style={{ animationDelay: '280ms' }} className="anim-fade-up flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -610,8 +620,8 @@ export default function LandingPage() {
               },
               {
                 icon: <IconShieldCheck />,
-                title: 'Aceite com registro jurídico',
-                desc: 'Quando o cliente aceita, o FreelanceFlow registra automaticamente IP, dispositivo e horário — e gera um Certificado de Aceite em PDF embasado no Marco Civil da Internet.',
+                title: 'Aceite com validade legal',
+                desc: 'Quando o cliente aceita a proposta, o FreelanceFlow registra automaticamente IP, dispositivo e horário — e gera um Certificado de Aceite em PDF embasado no Marco Civil da Internet.',
               },
               {
                 icon: <IconUsers />,
@@ -620,8 +630,8 @@ export default function LandingPage() {
               },
               {
                 icon: <IconGrid />,
-                title: 'Modelos prontos',
-                desc: 'Templates profissionais por tipo de serviço. Escolha um modelo ao criar a proposta e comece com tudo preenchido.',
+                title: 'Modelos de proposta prontos',
+                desc: 'Templates profissionais por tipo de serviço. Escolha um modelo de proposta ao criar e comece com tudo preenchido.',
               },
             ].map((feat, i) => (
               <div
