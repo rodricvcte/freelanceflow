@@ -47,7 +47,9 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/p/') ||
     pathname.startsWith('/api/p/') ||
     pathname.startsWith('/api/track/') ||
-    pathname.startsWith('/api/webhooks/')
+    pathname.startsWith('/api/webhooks/') ||
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/modelos-de-proposta')
 
   const isAuthRoute    = pathname.startsWith('/login') || pathname.startsWith('/cadastro')
   const isApiRoute     = pathname.startsWith('/api/')
