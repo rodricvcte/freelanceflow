@@ -20,6 +20,13 @@ export const metadata: Metadata = {
 
 const niches = [
   {
+    slug: 'copywriter',
+    title: 'Copywriter',
+    description:
+      'Proposta com escopo de textos, quantidade de peças, rodadas de revisão, prazo de entrega e condições de pagamento.',
+    tags: ['Landing page', 'E-mail marketing', 'Anúncios'],
+  },
+  {
     slug: 'criador-de-sites',
     title: 'Criador de Sites',
     description:
