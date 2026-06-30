@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: 'https://www.freelanceflow.com.br/modelos-de-proposta', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/modelos-de-proposta/criador-de-sites', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/modelos-de-proposta/designer-grafico', lastModified: new Date() },
+    { url: 'https://www.freelanceflow.com.br/modelos-de-proposta/copywriter', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/modelos-de-proposta/social-media', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/privacidade', lastModified: new Date() },
   ]
