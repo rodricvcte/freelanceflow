@@ -114,6 +114,77 @@ const models: ModelPage[] = [
     ],
   },
   {
+    nicho: 'copywriter',
+    title: 'Modelo de Proposta Comercial para Copywriter Freelancer | FreelanceFlow',
+    description:
+      'Modelo de proposta para copywriter freelancer com escopo de textos, prazo por entrega e aceite com validade legal. Pronto para usar grátis.',
+    h1: 'Modelo de proposta para copywriter freelancer',
+    intro:
+      'Use este modelo de proposta para copywriter freelancer para apresentar seus serviços de forma profissional, definir escopo de textos com clareza e receber o aceite do cliente com validade jurídica — pelo FreelanceFlow.',
+    sections: [
+      {
+        heading: 'O que este modelo de proposta inclui',
+        body: (
+          <ul className="space-y-2 text-gray-600 text-sm leading-relaxed list-disc pl-5">
+            <li>Apresentação do copywriter e exemplos de trabalhos anteriores</li>
+            <li>Entendimento do objetivo: vender, informar, engajar ou posicionar a marca</li>
+            <li>Escopo detalhado: quantidade de peças, tipos de texto e canais (e-mail, landing page, redes sociais, anúncio, blog)</li>
+            <li>Tom de voz e referências de comunicação do cliente</li>
+            <li>Número de rodadas de revisão inclusas e prazo para feedback</li>
+            <li>Cronograma de entregas: briefing, rascunho, revisão, entrega final</li>
+            <li>Investimento por peça ou por pacote com condições de pagamento</li>
+            <li>O que não está incluso (design, imagens, distribuição, tráfego pago)</li>
+            <li>Validade da proposta e próximos passos</li>
+          </ul>
+        ),
+      },
+      {
+        heading: 'Para quais projetos usar',
+        body: (
+          <ul className="space-y-2 text-gray-600 text-sm leading-relaxed list-disc pl-5">
+            <li>Páginas de vendas e landing pages</li>
+            <li>Sequências de e-mail marketing e automações</li>
+            <li>Roteiros de vídeo (YouTube, Reels, VSL)</li>
+            <li>Conteúdo para blog e artigos de SEO</li>
+            <li>Anúncios para Meta Ads e Google Ads</li>
+            <li>Textos institucionais: sobre, missão, proposta de valor</li>
+            <li>Pacotes mensais de produção de conteúdo</li>
+          </ul>
+        ),
+      },
+      {
+        heading: 'Dicas para fechar mais contratos como copywriter',
+        body: (
+          <div className="space-y-3 text-gray-600 text-sm leading-relaxed">
+            <p>
+              <strong className="text-gray-800">Mostre resultado, não só texto.</strong>{' '}
+              Sempre que possível, inclua na proposta dados de performance de trabalhos anteriores — taxa de abertura de e-mail, conversão de landing page ou alcance de post. Isso diferencia seu serviço de outros prestadores de serviço que só mostram amostras de escrita.
+            </p>
+            <p>
+              <strong className="text-gray-800">Deixe o escopo fechado por peça.</strong>{' '}
+              Evite expressões vagas como "conteúdo para o mês". Descreva cada entrega: "4 e-mails da sequência de boas-vindas, com até 400 palavras cada". Isso evita desentendimentos e pedidos de adição sem custo.
+            </p>
+            <p>
+              <strong className="text-gray-800">Registre o aceite da proposta.</strong>{' '}
+              Copywriters costumam trabalhar com prazos curtos e clientes que pedem ajustes de escopo pelo WhatsApp. Ter o aceite registrado no FreelanceFlow — com data, hora e IP — protege seu trabalho e facilita cobrar por extras.
+            </p>
+          </div>
+        ),
+      },
+      {
+        heading: 'Como usar este modelo no FreelanceFlow',
+        body: (
+          <p className="text-gray-600 text-sm leading-relaxed">
+            Crie sua conta grátis, escolha o modelo de proposta para copywriter na biblioteca de templates,
+            preencha as informações do cliente e do projeto e envie por link ou WhatsApp. O cliente aprova
+            com um clique e você recebe um Certificado de Aceite em PDF com data, hora e IP registrados —
+            válido juridicamente com base no Marco Civil da Internet.
+          </p>
+        ),
+      },
+    ],
+  },
+  {
     nicho: 'social-media',
     title: 'Modelo de Proposta para Social Media | FreelanceFlow',
     description:
