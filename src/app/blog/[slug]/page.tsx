@@ -391,6 +391,169 @@ const articles: Article[] = [
       </article>
     ),
   },
+  {
+    slug: 'como-cobrar-cliente-inadimplente',
+    title: 'Como Cobrar Cliente Inadimplente Sendo Freelancer',
+    description:
+      'Guia prático para cobrar de cliente inadimplente sendo freelancer: mensagens prontas, multa, juros e como agir quando o cliente some sem pagar.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Como cobrar de cliente inadimplente sendo freelancer</h1>
+
+        <p>
+          O prazo de pagamento passou, você já entregou o trabalho e a resposta do cliente é
+          silêncio. Esse é um dos problemas mais comuns na vida de quem trabalha como freelancer —
+          e também um dos que mais geram ansiedade, porque cobrar dinheiro de quem te contratou
+          parece, para muita gente, mais desconfortável do que deveria ser.
+        </p>
+
+        <p>
+          A boa notícia é que <strong>cobrar cliente inadimplente</strong> é um processo, não uma
+          cena de constrangimento. Com a mensagem certa, o prazo definido e, se necessário, o
+          respaldo contratual, você recupera o pagamento na maioria dos casos sem precisar recorrer
+          à Justiça.
+        </p>
+
+        <h2>O que fazer no primeiro dia de atraso</h2>
+
+        <p>
+          Antes de qualquer cobrança mais firme, confirme que não houve um erro simples — boleto
+          que não chegou, chave PIX errada, data confusa na proposta. Isso resolve uma boa parte
+          dos casos sem nenhum desgaste:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Confira os dados de pagamento enviados.</strong> Erro de digitação na chave PIX
+            ou no link de pagamento é mais comum do que parece.
+          </li>
+          <li>
+            <strong>Mande uma mensagem simples e neutra</strong> perguntando se está tudo certo
+            para o pagamento. Sem cobrança, só confirmação.
+          </li>
+          <li>
+            <strong>Registre a data de vencimento e a data desse primeiro contato.</strong> Você
+            vai precisar disso se o atraso continuar.
+          </li>
+          <li>
+            <strong>Evite tom acusatório nessa etapa.</strong> Na maioria dos casos é só
+            esquecimento — trate assim até que o histórico mostre o contrário.
+          </li>
+        </ul>
+
+        <h2>Mensagens de cobrança para cliente inadimplente (prontas para usar)</h2>
+
+        <p>
+          O tom da cobrança deve ficar mais firme conforme o atraso aumenta. Veja três modelos por
+          estágio:
+        </p>
+
+        <p><strong>No dia do vencimento — lembrete neutro:</strong></p>
+        <blockquote>
+          <p>
+            &quot;Oi [nome], tudo bem? Passando para lembrar que o pagamento do projeto vence hoje.
+            Segue novamente a chave PIX/link, caso precise: [dado]. Qualquer coisa, me avisa!&quot;
+          </p>
+        </blockquote>
+
+        <p><strong>3 a 5 dias de atraso — cobrança direta:</strong></p>
+        <blockquote>
+          <p>
+            &quot;Oi [nome], vi que o pagamento combinado para o dia [data] ainda não caiu por aqui.
+            Pode verificar se ficou pendente por algum motivo? Preciso organizar meu financeiro e
+            fico no aguardo do retorno.&quot;
+          </p>
+        </blockquote>
+
+        <p><strong>7 dias ou mais de atraso — cobrança formal:</strong></p>
+        <blockquote>
+          <p>
+            &quot;Oi [nome], até o momento não recebi o pagamento referente ao projeto entregue em
+            [data], com vencimento em [data]. Conforme combinado na proposta, peço a regularização
+            até [novo prazo]. Caso haja algum imprevisto, me avise para alinharmos juntos.&quot;
+          </p>
+        </blockquote>
+
+        <p>
+          Reforçar que o valor e o prazo estavam registrados na proposta — e não só combinados de
+          boca — muda o peso da mensagem. O cliente sabe que existe um documento por trás da
+          cobrança, não só a sua palavra.
+        </p>
+
+        <h2>Multa, juros e o que diz a lei sobre atraso de pagamento</h2>
+
+        <p>
+          Se o contrato ou a proposta não definiu nada sobre atraso, a lei brasileira ainda garante
+          alguns direitos ao freelancer:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Multa por atraso:</strong> quando prevista em contrato, é comum praticar entre
+            2% e 10% do valor da parcela em aberto. Sem previsão contratual, não há multa automática
+            — por isso vale deixar essa cláusula escrita já na proposta.
+          </li>
+          <li>
+            <strong>Juros de mora:</strong> mesmo sem cláusula específica, o Código Civil (art. 406)
+            garante juros de 1% ao mês sobre o valor em atraso.
+          </li>
+          <li>
+            <strong>Correção monetária:</strong> para atrasos longos, pode ser aplicada com base em
+            um índice como o IPCA, para o valor não perder poder de compra.
+          </li>
+          <li>
+            <strong>Sem contrato ou proposta formal, fica mais difícil cobrar multa e juros</strong> —
+            porque não há o que apresentar como prova do combinado.
+          </li>
+        </ul>
+
+        <h2>Quando escalar a cobrança (e quando deixar para lá)</h2>
+
+        <p>
+          Se as mensagens não resolverem, existem caminhos antes de desistir do valor:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Notificação extrajudicial:</strong> um e-mail ou carta formal, cobrando o valor
+            com um prazo final claro, antes de qualquer medida judicial.
+          </li>
+          <li>
+            <strong>Negociação com parcelamento:</strong> às vezes o cliente não some por má-fé, só
+            não tem o valor todo disponível. Receber parcelado é melhor do que não receber nada.
+          </li>
+          <li>
+            <strong>Juizado Especial Cível:</strong> para causas de até 40 salários mínimos, e sem
+            necessidade de advogado até 20 salários mínimos. Processo relativamente rápido e
+            gratuito para abrir.
+          </li>
+        </ul>
+
+        <p>
+          Para valores pequenos, avalie o custo-benefício de escalar — o tempo e o desgaste de um
+          processo às vezes superam o que está em jogo. Para valores maiores, ter a proposta e as
+          mensagens de cobrança documentadas facilita muito o processo, caso ele seja necessário.
+        </p>
+
+        <h2>Como evitar cliente inadimplente na próxima proposta</h2>
+
+        <p>
+          A forma mais eficiente de lidar com cliente inadimplente é reduzir a chance de isso
+          acontecer de novo. Cobrar uma entrada antes de começar o projeto, deixar a cláusula de
+          multa e juros explícita na proposta e ter o aceite do cliente registrado com data e hora
+          são práticas simples que já eliminam boa parte do problema.
+        </p>
+
+        <p>
+          O FreelanceFlow gera automaticamente um Certificado em PDF com data, hora e IP do aceite
+          da proposta — o registro que faltava para embasar uma cobrança quando o cliente diz que
+          &quot;não lembra&quot; dos termos combinados. Você monta a proposta com as condições de
+          pagamento já claras, envia por link e tem prova do que foi aceito, sem esforço extra.
+        </p>
+      </article>
+    ),
+  },
 ]
 
 const articleMap = Object.fromEntries(articles.map(a => [a.slug, a]))

@@ -40,6 +40,13 @@ const articles = [
       'Modelo pronto de proposta para quem cria sites — com escopo, precificação e cláusulas essenciais.',
     date: '28 de junho de 2026',
   },
+  {
+    slug: 'como-cobrar-cliente-inadimplente',
+    title: 'Como cobrar de cliente inadimplente sendo freelancer',
+    description:
+      'Mensagens prontas, multa, juros e quando escalar a cobrança quando o cliente some sem pagar.',
+    date: '9 de julho de 2026',
+  },
 ]
 
 export default function BlogIndex() {
