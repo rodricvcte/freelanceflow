@@ -90,8 +90,8 @@ const articles: Article[] = [
             mostrar que você entendeu a dor do cliente. Só então apresente a solução.
           </li>
           <li>
-            <strong>Seja específico no escopo.</strong> Evite termos vagos como "criação de conteúdo" ou
-            "suporte técnico". Defina quantidade, formato, canais e limites de revisão.
+            <strong>Seja específico no escopo.</strong> Evite termos vagos como &quot;criação de conteúdo&quot; ou
+            &quot;suporte técnico&quot;. Defina quantidade, formato, canais e limites de revisão.
           </li>
           <li>
             <strong>Facilite o aceite.</strong> Inclua um botão ou link para o cliente aprovar com um clique.
@@ -108,7 +108,7 @@ const articles: Article[] = [
         <ul>
           <li><strong>Enviar por WhatsApp em formato de texto corrido.</strong> Isso passa falta de profissionalismo e dificulta o cliente de ter um documento de referência.</li>
           <li><strong>Não colocar validade.</strong> Proposta sem prazo de validade pode ser aceita meses depois, com custos e contexto completamente diferentes.</li>
-          <li><strong>Não detalhar o que está fora do escopo.</strong> "Revisões ilimitadas" é um convite para projetos que nunca terminam.</li>
+          <li><strong>Não detalhar o que está fora do escopo.</strong> &quot;Revisões ilimitadas&quot; é um convite para projetos que nunca terminam.</li>
           <li><strong>Não fazer follow-up.</strong> Menos de 30% dos clientes respondem na primeira vez. O retorno faz parte do processo de venda.</li>
           <li><strong>Copiar e colar da proposta anterior sem personalizar.</strong> O cliente percebe quando a proposta é genérica. Personalize pelo menos o problema e o escopo.</li>
         </ul>
@@ -218,26 +218,26 @@ const articles: Article[] = [
         <p><strong>Follow-up 1 — confirmação de recebimento (24h):</strong></p>
         <blockquote>
           <p>
-            "Oi [nome], tudo bem? Passei para confirmar que enviei a proposta e ver se chegou certinho.
-            Qualquer dúvida, me chame. Estou à disposição!"
+            &quot;Oi [nome], tudo bem? Passei para confirmar que enviei a proposta e ver se chegou certinho.
+            Qualquer dúvida, me chame. Estou à disposição!&quot;
           </p>
         </blockquote>
 
         <p><strong>Follow-up 2 — principal (3–5 dias):</strong></p>
         <blockquote>
           <p>
-            "Oi [nome], passando para ver se conseguiu dar uma olhada na proposta que enviei.
+            &quot;Oi [nome], passando para ver se conseguiu dar uma olhada na proposta que enviei.
             Se tiver alguma pergunta sobre o escopo ou valores, fico feliz em conversar.
-            Me conta como estão as coisas aí?"
+            Me conta como estão as coisas aí?&quot;
           </p>
         </blockquote>
 
         <p><strong>Follow-up 3 — fechamento do ciclo (7–10 dias):</strong></p>
         <blockquote>
           <p>
-            "Oi [nome], só para deixar registrado: a proposta tem validade até [data]. Se fizer sentido
+            &quot;Oi [nome], só para deixar registrado: a proposta tem validade até [data]. Se fizer sentido
             avançar, é só me dar um sinal e a gente marca uma conversa rápida para alinhar os próximos
-            passos. Se o projeto ficou para depois, tudo bem também — qualquer coisa, estarei por aqui!"
+            passos. Se o projeto ficou para depois, tudo bem também — qualquer coisa, estarei por aqui!&quot;
           </p>
         </blockquote>
 
@@ -550,6 +550,619 @@ const articles: Article[] = [
           da proposta — o registro que faltava para embasar uma cobrança quando o cliente diz que
           &quot;não lembra&quot; dos termos combinados. Você monta a proposta com as condições de
           pagamento já claras, envia por link e tem prova do que foi aceito, sem esforço extra.
+        </p>
+      </article>
+    ),
+  },
+  {
+    slug: 'como-fazer-proposta-comercial',
+    title: 'Como Fazer Proposta Comercial Freelancer (Rápido)',
+    description:
+      'Aprenda como fazer proposta comercial freelancer em poucos passos: modelo pronto, o que incluir e erros que fazem o cliente sumir.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Como fazer proposta comercial freelancer em 15 minutos</h1>
+
+        <p>
+          O cliente pediu um orçamento agora e você travou na frente da tela, sem saber por onde
+          começar. Isso acontece porque a maioria dos freelancers monta a proposta do zero toda
+          vez, reescrevendo as mesmas seções com palavras diferentes. Com uma estrutura fixa e um
+          modelo para preencher, dá para montar uma proposta comercial freelancer completa em
+          15 minutos — sem perder qualidade.
+        </p>
+
+        <h2>O que uma proposta comercial freelancer precisa ter (checklist rápido)</h2>
+
+        <p>
+          Antes de escrever qualquer linha, tenha esses pontos resolvidos — é isso que separa uma
+          proposta profissional de um orçamento avulso:
+        </p>
+
+        <ul>
+          <li><strong>Nome do cliente e do projeto</strong> — personalização mínima que já eleva a percepção de cuidado.</li>
+          <li><strong>Resumo do problema</strong> — uma frase mostrando que você entendeu o que o cliente precisa.</li>
+          <li><strong>Escopo</strong> — o que está incluso, em itens, sem parágrafo corrido.</li>
+          <li><strong>Prazo</strong> — data de entrega ou marcos, se o projeto for longo.</li>
+          <li><strong>Valor e forma de pagamento</strong> — total, parcelas e política de reajuste.</li>
+          <li><strong>Validade</strong> — até quando aquele preço vale.</li>
+          <li><strong>Botão ou link de aceite</strong> — quanto menor o atrito para aprovar, maior a conversão.</li>
+        </ul>
+
+        <h2>Modelo de proposta comercial freelancer para preencher agora</h2>
+
+        <p>
+          Use essa estrutura como ponto de partida. Copie, substitua o que está entre colchetes e
+          ajuste o tom para o seu cliente:
+        </p>
+
+        <ol>
+          <li><strong>Abertura:</strong> &quot;Oi [nome], segue a proposta para [projeto], conforme conversamos.&quot;</li>
+          <li><strong>Entendimento:</strong> &quot;Pelo que você me passou, o objetivo é [resumo do problema em uma frase].&quot;</li>
+          <li><strong>Escopo:</strong> liste 3 a 6 itens do que será entregue.</li>
+          <li><strong>Prazo:</strong> &quot;O prazo estimado é de [X dias/semanas], com entrega em [data].&quot;</li>
+          <li><strong>Investimento:</strong> &quot;O valor total é de R$ [valor], podendo ser dividido em [condições].&quot;</li>
+          <li><strong>Fechamento:</strong> &quot;Essa proposta é válida até [data]. Qualquer dúvida, me chama!&quot;</li>
+        </ol>
+
+        <h2>Exemplos rápidos de proposta comercial freelancer por área</h2>
+
+        <p>
+          O modelo acima funciona para qualquer nicho, mas o escopo muda bastante dependendo da
+          área. Alguns exemplos de como preencher a seção de escopo:
+        </p>
+
+        <ul>
+          <li><strong>Design gráfico:</strong> &quot;3 propostas de logo, 2 rodadas de revisão, entrega em PNG, SVG e PDF.&quot;</li>
+          <li><strong>Redação/copywriting:</strong> &quot;5 textos de blog de 800 palavras, com otimização básica de SEO.&quot;</li>
+          <li><strong>Social media:</strong> &quot;12 posts mensais, calendário editorial e relatório de desempenho.&quot;</li>
+          <li><strong>Fotografia:</strong> &quot;Cobertura de 4 horas, 40 fotos editadas em alta resolução.&quot;</li>
+          <li><strong>Consultoria:</strong> &quot;Diagnóstico inicial + 3 sessões de acompanhamento mensais.&quot;</li>
+        </ul>
+
+        <h2>Erros que fazem a proposta comercial freelancer ser ignorada</h2>
+
+        <p>
+          Mesmo com um bom modelo, alguns erros continuam afastando clientes:
+        </p>
+
+        <ul>
+          <li><strong>Mandar em texto corrido pelo WhatsApp</strong>, sem nenhuma formatação ou separação visual.</li>
+          <li><strong>Não colocar prazo de validade</strong>, deixando a proposta em aberto indefinidamente.</li>
+          <li><strong>Ser vago no escopo</strong>, o que gera discussão sobre o que estava incluso depois que o projeto já começou.</li>
+          <li><strong>Demorar dias para enviar</strong> depois da conversa inicial — o interesse do cliente esfria rápido.</li>
+        </ul>
+
+        <p>
+          Ter um modelo pronto resolve o maior gargalo, que é o tempo entre o cliente pedir o
+          orçamento e você conseguir enviar algo profissional. Quanto mais rápido e mais organizado
+          for esse envio, maior a chance de fechar antes que o cliente peça orçamento a outro
+          freelancer.
+        </p>
+
+        <p>
+          O FreelanceFlow já vem com modelos de proposta comercial por nicho prontos para adaptar —
+          você preenche os campos, envia por link e recebe notificação assim que o cliente abrir.
+          Sem precisar montar layout nem formatar PDF na mão toda vez que fecha um projeto novo.
+        </p>
+      </article>
+    ),
+  },
+  {
+    slug: 'como-precificar-servicos-freelancer',
+    title: 'Quanto Cobrar Pelo Meu Trabalho Sendo Freelancer',
+    description:
+      'Quanto cobrar pelo meu trabalho freelancer? Aprenda a calcular seu valor-hora, precificar por projeto e reajustar sem perder cliente.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Quanto cobrar pelo seu trabalho sendo freelancer</h1>
+
+        <p>
+          Você olha para uma proposta de projeto e não sabe se R$ 500 é pouco, R$ 2.000 é caro ou
+          se está deixando dinheiro na mesa. Esse é provavelmente o problema mais comum entre
+          freelancers no Brasil: ninguém ensina a calcular preço, então cada um chuta um número e
+          espera que o cliente não reclame.
+        </p>
+
+        <p>
+          A resposta para &quot;quanto cobrar pelo meu trabalho freelancer&quot; não é um valor
+          fixo — é uma conta. E depois de fazer essa conta uma vez, você para de precificar no
+          feeling e passa a ter um número que realmente cobre suas contas e ainda sobra margem.
+        </p>
+
+        <h2>Por que cobrar barato &quot;pra pegar experiência&quot; quebra sua carreira</h2>
+
+        <p>
+          Cobrar abaixo do necessário no início parece uma estratégia razoável para conseguir os
+          primeiros clientes, mas cria dois problemas que aparecem mais tarde: você atrai clientes
+          acostumados com preço baixo, que reagem mal quando você tenta reajustar, e você
+          normaliza um padrão de vida que não sustenta o trabalho como freelancer no médio prazo.
+          O caminho mais seguro é precificar certo desde o início e negociar escopo, não preço,
+          quando o orçamento do cliente for menor.
+        </p>
+
+        <h2>Como calcular seu valor-hora antes de precificar qualquer projeto</h2>
+
+        <p>
+          Para saber quanto cobrar pelo seu trabalho freelancer, comece calculando o valor-hora —
+          mesmo que depois você cobre por projeto fechado. A conta básica:
+        </p>
+
+        <ul>
+          <li><strong>Custos fixos mensais</strong> — moradia, internet, equipamentos, softwares, impostos.</li>
+          <li><strong>Custo de vida desejado</strong> — o quanto você quer sobrar livre por mês.</li>
+          <li><strong>Horas produtivas por mês</strong> — não são as horas trabalhadas, são as horas efetivamente faturáveis (geralmente 100–140h, não 160h+).</li>
+          <li><strong>Margem de segurança</strong> — 20 a 30% a mais, para cobrir meses fracos, retrabalho e imposto.</li>
+        </ul>
+
+        <p>
+          Some os custos fixos com o custo de vida desejado, divida pelas horas produtivas e
+          acrescente a margem. Esse número é o piso do seu valor-hora — abaixo dele, você está
+          trabalhando no prejuízo, mesmo que pareça estar ganhando dinheiro.
+        </p>
+
+        <h2>Precificação por projeto vs. por hora: quando usar cada uma</h2>
+
+        <p>
+          Depois de saber seu valor-hora, decida o formato de cobrança:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Por hora:</strong> funciona bem para projetos com escopo indefinido ou
+            consultoria contínua, onde é difícil estimar o tempo total antecipadamente.
+          </li>
+          <li>
+            <strong>Por projeto fechado:</strong> funciona melhor para escopo bem definido —
+            transmite mais confiança ao cliente e evita que ele fique acompanhando cada hora
+            registrada. Estime as horas, aplique seu valor-hora e arredonde para um número fechado.
+          </li>
+        </ul>
+
+        <h2>Referência de preços por nicho no Brasil em 2026</h2>
+
+        <p>
+          Esses valores variam por região, experiência e complexidade, mas servem como ponto de
+          partida:
+        </p>
+
+        <ul>
+          <li><strong>Design gráfico (identidade visual completa):</strong> R$ 800 a R$ 3.500</li>
+          <li><strong>Redação/copywriting (artigo de blog):</strong> R$ 150 a R$ 600 por texto</li>
+          <li><strong>Social media (gestão mensal):</strong> R$ 800 a R$ 3.000</li>
+          <li><strong>Fotografia de evento (diária):</strong> R$ 800 a R$ 4.000</li>
+          <li><strong>Criação de site institucional:</strong> R$ 1.500 a R$ 8.000</li>
+        </ul>
+
+        <h2>Como reajustar preço sem perder o cliente</h2>
+
+        <p>
+          Se você já está cobrando abaixo do que deveria, o reajuste precisa ser comunicado com
+          antecedência — nunca em cima da hora, na renovação de um projeto recorrente. Avise com
+          30 dias, explique o motivo em uma frase (custo de vida, demanda, especialização) e
+          ofereça a chance de conversar caso o valor novo não caiba no orçamento do cliente. Quem
+          valoriza seu trabalho normalmente entende; quem só ficava pelo preço baixo tende a sair —
+          e está tudo bem.
+        </p>
+
+        <p>
+          Uma proposta bem estruturada ajuda a justificar o valor cobrado, mostrando escopo,
+          entregáveis e prazo de forma clara — em vez de só um número solto no WhatsApp. O
+          FreelanceFlow te ajuda a montar essa proposta com o valor já organizado por seção, envia
+          por link e avisa quando o cliente abre. Menos negociação no escuro, mais clareza sobre o
+          que está sendo cobrado.
+        </p>
+      </article>
+    ),
+  },
+  {
+    slug: 'como-fazer-follow-up-proposta',
+    title: 'Como Perguntar se Cliente Aprovou a Proposta',
+    description:
+      'Como perguntar se o cliente aprovou a proposta sem parecer chato. Frases prontas para WhatsApp, e-mail e ligação.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Como perguntar se o cliente aprovou a proposta sem parecer chato</h1>
+
+        <p>
+          Você enviou a proposta, o cliente visualizou e depois disso, nada. Nesse momento bate a
+          dúvida: pergunto se ele aprovou ou espero mais um pouco para não parecer ansioso? A
+          maioria dos freelancers trava exatamente aqui — e acaba deixando a negociação esfriar por
+          medo de incomodar.
+        </p>
+
+        <p>
+          Perguntar se o cliente aprovou a proposta não é chato quando feito do jeito certo. O
+          problema não é perguntar, é como e quando isso é feito.
+        </p>
+
+        <h2>Por que ficar esperando calado é pior do que perguntar</h2>
+
+        <p>
+          Muitos freelancers evitam perguntar porque associam a cobrança de resposta a
+          desespero. Na prática, é o contrário: clientes lidam com dezenas de mensagens e
+          fornecedores diferentes, e a proposta que você enviou pode simplesmente ter descido na
+          lista de prioridades. Uma pergunta objetiva e educada não passa desespero — passa
+          organização. Quem não pergunta é quem realmente perde a venda, não quem pergunta.
+        </p>
+
+        <h2>Como formular a pergunta certa</h2>
+
+        <p>
+          Evite perguntas genéricas como &quot;e aí, vai fechar?&quot; — elas soam informais demais
+          e colocam o cliente numa posição de responder sim ou não sem contexto. Prefira perguntas
+          que reabrem a conversa sobre o projeto, não só sobre a decisão:
+        </p>
+
+        <ul>
+          <li>Pergunte sobre dúvidas específicas do escopo, não só sobre &quot;aprovação&quot;.</li>
+          <li>Ofereça ajustar algo, em vez de só cobrar resposta.</li>
+          <li>Dê um motivo real para a pergunta (organização de agenda, fila de projetos).</li>
+        </ul>
+
+        <h2>Frases prontas para perguntar sobre aprovação em diferentes canais</h2>
+
+        <p><strong>Por WhatsApp (tom leve):</strong></p>
+        <blockquote>
+          <p>
+            &quot;Oi [nome], passando para saber se você já teve a chance de olhar a proposta.
+            Ficou alguma dúvida sobre o escopo ou valor?&quot;
+          </p>
+        </blockquote>
+
+        <p><strong>Por e-mail (tom mais formal):</strong></p>
+        <blockquote>
+          <p>
+            &quot;Olá [nome], escrevo para confirmar se a proposta enviada em [data] atende às
+            expectativas do projeto. Estou à disposição para ajustar qualquer ponto antes de
+            avançarmos.&quot;
+          </p>
+        </blockquote>
+
+        <p><strong>Em ligação ou áudio (tom direto):</strong></p>
+        <blockquote>
+          <p>
+            &quot;Queria entender se ainda faz sentido a gente seguir com o projeto — se precisar de
+            mais tempo ou tiver alguma objeção, me conta que a gente resolve.&quot;
+          </p>
+        </blockquote>
+
+        <h2>O que fazer quando a resposta for &quot;ainda estou avaliando&quot;</h2>
+
+        <p>
+          Essa resposta não é um não — mas também não pode virar um limbo sem prazo. Uma boa saída
+          é perguntar diretamente o que falta para a decisão (orçamento, aprovação interna, outras
+          cotações) e propor um novo prazo de retorno. Isso transforma uma resposta vaga em um
+          próximo passo concreto, com data definida.
+        </p>
+
+        <h2>Quando parar de perguntar e seguir em frente</h2>
+
+        <p>
+          Depois de dois ou três follow-ups sem resposta nenhuma — nem &quot;ainda estou vendo&quot;
+          — é hora de deixar a porta aberta e focar em outros clientes. Uma última mensagem
+          educada, mencionando que a proposta continua disponível caso o projeto volte a fazer
+          sentido, fecha o ciclo sem queimar a relação.
+        </p>
+
+        <p>
+          Saber o momento certo de perguntar fica muito mais fácil quando você sabe se o cliente
+          já abriu a proposta ou não. O FreelanceFlow notifica você assim que o cliente visualiza o
+          link — em vez de perguntar no escuro, você pergunta sabendo que a proposta já foi lida.
+        </p>
+      </article>
+    ),
+  },
+  {
+    slug: 'contrato-freelancer-modelo',
+    title: 'Contrato para Freelancer: Modelo Pronto para Usar',
+    description:
+      'Modelo de contrato para freelancer com as cláusulas essenciais: escopo, prazo, pagamento, revisões e rescisão. Pronto para adaptar.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Contrato para freelancer: modelo pronto para usar</h1>
+
+        <p>
+          Você fechou o projeto só com uma troca de mensagens e um &quot;combinado&quot; verbal — e
+          agora o cliente quer mudar o escopo sem pagar a mais, ou some no meio do projeto sem
+          justificativa. Sem contrato, você não tem muito o que fazer além de tentar negociar. Um
+          contrato para freelancer simples resolve os dois problemas antes que eles aconteçam.
+        </p>
+
+        <h2>Por que só a proposta comercial não te protege juridicamente</h2>
+
+        <p>
+          A proposta comercial é ótima para vender o projeto, mas normalmente não tem a força de um
+          documento contratual completo — faltam cláusulas de rescisão, confidencialidade,
+          responsabilidade por atrasos e propriedade intelectual. Para projetos pequenos e rápidos,
+          a proposta com aceite registrado já costuma bastar. Para projetos maiores ou de longo
+          prazo, vale ter um contrato para freelancer separado, assinado antes de começar.
+        </p>
+
+        <h2>Cláusulas que não podem faltar no contrato para freelancer</h2>
+
+        <ul>
+          <li><strong>Identificação das partes</strong> — nome completo ou razão social, CPF/CNPJ e endereço de ambos.</li>
+          <li><strong>Objeto do contrato</strong> — descrição clara do serviço prestado.</li>
+          <li><strong>Escopo e entregáveis</strong> — o que está incluso, formatos e quantidade de revisões.</li>
+          <li><strong>Prazo</strong> — data de início, marcos e data final.</li>
+          <li><strong>Valor e forma de pagamento</strong> — total, parcelas, datas e o que acontece em caso de atraso.</li>
+          <li><strong>Propriedade intelectual</strong> — quando os direitos passam para o cliente (normalmente só após o pagamento total).</li>
+          <li><strong>Confidencialidade</strong> — se o projeto envolve informações sensíveis do cliente.</li>
+          <li><strong>Rescisão</strong> — condições para cancelar o contrato e o que acontece com valores já pagos ou trabalho já feito.</li>
+        </ul>
+
+        <h2>Modelo de contrato para freelancer por seção</h2>
+
+        <p>
+          Estrutura básica para adaptar ao seu projeto:
+        </p>
+
+        <ol>
+          <li><strong>Preâmbulo:</strong> &quot;Pelo presente instrumento, [seu nome/razão social] e [nome do cliente] firmam o presente contrato de prestação de serviços.&quot;</li>
+          <li><strong>Cláusula 1 — Objeto:</strong> descreva o serviço em uma ou duas frases.</li>
+          <li><strong>Cláusula 2 — Escopo e entregáveis:</strong> liste os itens, igual você faria na proposta.</li>
+          <li><strong>Cláusula 3 — Prazo:</strong> data de início e de entrega, com marcos se necessário.</li>
+          <li><strong>Cláusula 4 — Valor e pagamento:</strong> valor total, parcelas, forma e multa por atraso.</li>
+          <li><strong>Cláusula 5 — Rescisão:</strong> regras de cancelamento por qualquer uma das partes.</li>
+          <li><strong>Assinaturas:</strong> local, data e assinatura de ambas as partes (pode ser digital).</li>
+        </ol>
+
+        <h2>Contrato simples vs. contrato registrado em cartório</h2>
+
+        <p>
+          Para a maioria dos projetos freelancer, um contrato assinado digitalmente (por e-mail,
+          por uma ferramenta de assinatura eletrônica ou até com aceite registrado por escrito) já
+          tem validade jurídica no Brasil e é suficiente. Registro em cartório só costuma ser
+          necessário para projetos de valor muito alto ou quando o cliente exige por política
+          interna da empresa — não é padrão para o freelancer comum.
+        </p>
+
+        <h2>Erros que invalidam ou enfraquecem um contrato de freelancer</h2>
+
+        <ul>
+          <li><strong>Deixar o escopo genérico</strong> — &quot;desenvolvimento do projeto conforme combinado&quot; não define nada em caso de disputa.</li>
+          <li><strong>Não definir o que acontece com o pagamento em caso de cancelamento.</strong></li>
+          <li><strong>Esquecer de identificar as partes corretamente</strong> — CPF/CNPJ errado pode gerar problemas de validade.</li>
+          <li><strong>Nunca revisar o modelo</strong> — um contrato genérico da internet pode ter cláusulas que não fazem sentido para o seu tipo de serviço.</li>
+        </ul>
+
+        <p>
+          Para projetos menores, uma alternativa mais rápida é caprichar na proposta comercial e
+          garantir que o aceite do cliente fique registrado com data, hora e os termos completos —
+          já funciona como prova do que foi combinado. O FreelanceFlow gera esse registro
+          automaticamente em um Certificado de aceite, então mesmo sem um contrato formal você tem
+          respaldo caso precise cobrar ou esclarecer o que foi acordado.
+        </p>
+      </article>
+    ),
+  },
+  {
+    slug: 'proposta-comercial-design-grafico',
+    title: 'Proposta Comercial para Design Gráfico (Modelo)',
+    description:
+      'Modelo de proposta comercial para design gráfico: escopo, formatos de entrega, revisões e precificação por tipo de projeto.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Proposta comercial para design gráfico: o que incluir</h1>
+
+        <p>
+          Cliente pediu um &quot;logo bonito&quot; e você mandou um valor solto no WhatsApp — aí
+          vieram 8 rodadas de revisão de graça porque nada disso estava escrito em lugar nenhum.
+          Uma proposta comercial para design gráfico bem estruturada evita exatamente esse tipo de
+          projeto sem fim, porque define desde o início quantas revisões estão inclusas e em quais
+          formatos o material será entregue.
+        </p>
+
+        <h2>O que diferencia uma proposta comercial de design gráfico das genéricas</h2>
+
+        <p>
+          Design tem particularidades que uma proposta genérica não cobre: formatos de arquivo,
+          quantidade de conceitos iniciais, número de rodadas de revisão e direitos de uso da peça
+          final. Sem essas informações explícitas, o cliente assume que tudo está incluso — e é
+          exatamente aí que o projeto vira uma fonte infinita de ajustes não pagos.
+        </p>
+
+        <h2>Estrutura da proposta comercial para design gráfico</h2>
+
+        <ul>
+          <li><strong>Briefing entendido</strong> — resuma o que o cliente pediu, no seu vocabulário, para confirmar alinhamento.</li>
+          <li><strong>Conceitos iniciais</strong> — quantas opções de criação serão apresentadas (ex: 2 a 3 propostas de logo).</li>
+          <li><strong>Rodadas de revisão</strong> — número exato incluso no valor (ex: até 2 rodadas de ajustes).</li>
+          <li><strong>Formatos de entrega</strong> — arquivos finais em quais extensões (PNG, SVG, PDF, AI, PSD).</li>
+          <li><strong>Direitos de uso</strong> — se a peça pode ser usada em qualquer mídia ou só nas combinadas.</li>
+          <li><strong>Prazo</strong> — da apresentação dos conceitos até a entrega final.</li>
+          <li><strong>Investimento</strong> — valor total e forma de pagamento.</li>
+        </ul>
+
+        <h2>Como precificar por tipo de projeto de design gráfico</h2>
+
+        <p>
+          Referência de mercado para ajudar a calibrar sua proposta comercial de design gráfico:
+        </p>
+
+        <ul>
+          <li><strong>Logo simples (sem manual de marca):</strong> R$ 400 a R$ 1.200</li>
+          <li><strong>Identidade visual completa (logo + manual + aplicações):</strong> R$ 1.500 a R$ 5.000</li>
+          <li><strong>Peças para redes sociais (pacote mensal):</strong> R$ 500 a R$ 2.000</li>
+          <li><strong>Design de embalagem:</strong> R$ 800 a R$ 3.000 por peça</li>
+          <li><strong>Apresentação institucional (slides):</strong> R$ 400 a R$ 1.500</li>
+        </ul>
+
+        <h2>Cláusula de direitos de uso e revisões: onde a maioria erra</h2>
+
+        <p>
+          O erro mais comum em proposta comercial de design gráfico é escrever &quot;revisões
+          inclusas&quot; sem número — isso é um convite para ajustes intermináveis. Defina um
+          número fixo (2 é o mais comum) e deixe claro que revisões extras têm um valor adicional
+          por rodada. Da mesma forma, especifique que os direitos de uso da peça final só passam
+          para o cliente após o pagamento completo — isso evita o uso do material antes da
+          quitação.
+        </p>
+
+        <p>
+          Ter uma proposta comercial para design gráfico já estruturada com essas cláusulas
+          significa não precisar reescrever isso a cada projeto novo. O FreelanceFlow tem modelo
+          pronto para design gráfico, com as seções de escopo, revisões e formatos já organizadas —
+          você personaliza os detalhes do cliente, envia por link e acompanha quando ele abre.
+        </p>
+      </article>
+    ),
+  },
+  {
+    slug: 'como-vender-site-para-pequenas-empresas',
+    title: 'Como Vender Site para Pequenas Empresas',
+    description:
+      'Como vender site para pequenas empresas: como abordar sem parecer spam, argumentos que funcionam e como estruturar a proposta.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Como vender site para pequenas empresas sem parecer vendedor chato</h1>
+
+        <p>
+          Você passa na frente de uma padaria, um salão de beleza ou uma clínica pequena, procura
+          o nome no Google e não encontra site nenhum — só uma página do Instagram desatualizada.
+          Isso não é falta de sorte, é a regra: a maioria das pequenas empresas no Brasil ainda não
+          tem site. E isso é oportunidade, não coincidência.
+        </p>
+
+        <h2>Por que pequenas empresas ainda não têm site (e como isso é sua oportunidade)</h2>
+
+        <p>
+          Donos de pequenos negócios geralmente não têm site por três motivos: acham que é caro,
+          não sabem por onde começar ou já tentaram um serviço genérico que não trouxe resultado.
+          Nenhum desses motivos é resolvido com um discurso técnico sobre HTML ou hospedagem — eles
+          são resolvidos mostrando resultado prático: mais clientes encontrando o negócio, mais
+          credibilidade e menos dependência de indicação boca a boca.
+        </p>
+
+        <h2>Como abordar pequenas empresas sem parecer spam</h2>
+
+        <p>
+          A forma mais eficaz de vender site para pequenas empresas é a abordagem pessoal e local,
+          não mensagem em massa. Algumas táticas que funcionam:
+        </p>
+
+        <ul>
+          <li><strong>Visite o negócio pessoalmente</strong> ou mande mensagem citando algo específico do estabelecimento — mostra que não é copy-paste em massa.</li>
+          <li><strong>Mostre, não conte.</strong> Leve um exemplo real ou um mockup rápido de como o site do negócio poderia ficar.</li>
+          <li><strong>Fale de resultado, não de tecnologia.</strong> &quot;Cliente te encontra no Google&quot; converte muito mais que &quot;site responsivo com SEO otimizado&quot;.</li>
+          <li><strong>Comece pela dor específica do nicho.</strong> Uma clínica quer agendamento facilitado; um restaurante quer cardápio e localização visíveis.</li>
+        </ul>
+
+        <h2>Argumentos de venda que funcionam com donos de pequenos negócios</h2>
+
+        <p>
+          Alguns argumentos que costumam converter melhor do que discurso técnico:
+        </p>
+
+        <ul>
+          <li>&quot;Seu concorrente já aparece no Google e você não — isso está custando cliente todo mês.&quot;</li>
+          <li>&quot;Um site profissional custa menos do que parece e se paga com 1 ou 2 clientes novos.&quot;</li>
+          <li>&quot;Diferente do Instagram, o site é seu — não depende de algoritmo para ser visto.&quot;</li>
+          <li>&quot;Dá para ter pronto em poucas semanas, sem complicação para você administrar.&quot;</li>
+        </ul>
+
+        <h2>Como estruturar a proposta comercial de site para fechar mais rápido</h2>
+
+        <p>
+          Depois que o dono do negócio topa conversar, a proposta precisa ser simples de entender —
+          evite termos técnicos. Estruture com: quantidade de páginas, funcionalidades incluídas
+          (formulário de contato, botão de WhatsApp, localização no mapa), prazo de entrega e
+          valor. Ofereça um pacote de manutenção mensal como item opcional — muitas pequenas
+          empresas preferem pagar um valor fixo para não se preocupar com atualizações depois.
+        </p>
+
+        <p>
+          Ter uma proposta pronta, com linguagem simples e visual profissional, muda a percepção do
+          dono do pequeno negócio sobre o seu trabalho — passa a impressão de uma empresa
+          organizada, não de um freelancer avulso. O FreelanceFlow tem modelo de proposta para
+          criação de sites já pronto: você adapta ao negócio do cliente, envia por link e recebe
+          aviso assim que ele visualizar.
+        </p>
+      </article>
+    ),
+  },
+  {
+    slug: 'como-fazer-orcamento-fotografia',
+    title: 'Como Fazer Orçamento de Fotografia para Evento',
+    description:
+      'Orçamento fotografia evento: o que incluir além da hora de trabalho, como calcular edição e deslocamento, e modelos por tipo de evento.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Como fazer orçamento de fotografia para evento</h1>
+
+        <p>
+          Você cobrou só pelas horas de cobertura do evento e esqueceu de incluir o tempo de
+          edição, o deslocamento e o desgaste do equipamento — no fim do mês, percebeu que ganhou
+          bem menos do que parecia na hora de fechar o orçamento. Isso é comum entre fotógrafos que
+          calculam o valor só pensando no dia do evento, sem contar tudo o que vem depois.
+        </p>
+
+        <h2>O que incluir no orçamento de fotografia para evento além da hora de trabalho</h2>
+
+        <p>
+          Um orçamento de fotografia para evento completo precisa cobrir muito mais do que as horas
+          no local:
+        </p>
+
+        <ul>
+          <li><strong>Horas de cobertura</strong> — tempo efetivo no evento, incluindo chegada antecipada para preparação.</li>
+          <li><strong>Deslocamento</strong> — combustível, pedágio ou transporte até o local.</li>
+          <li><strong>Edição e seleção</strong> — o tempo gasto depois do evento é, em geral, igual ou maior do que o tempo de cobertura.</li>
+          <li><strong>Desgaste de equipamento</strong> — depreciação de câmera, lentes e flashes.</li>
+          <li><strong>Backup e armazenamento</strong> — espaço em nuvem ou HD para entregar e guardar as fotos.</li>
+          <li><strong>Segundo fotógrafo</strong> — se o evento exigir cobertura de mais de um ângulo simultâneo.</li>
+        </ul>
+
+        <h2>Como calcular o valor considerando edição, deslocamento e equipamento</h2>
+
+        <p>
+          Uma forma prática de montar o orçamento de fotografia para evento:
+        </p>
+
+        <ol>
+          <li>Defina seu valor-hora de cobertura (com base no seu custo de vida e experiência).</li>
+          <li>Multiplique pelas horas de cobertura contratadas.</li>
+          <li>Adicione o tempo estimado de edição, calculado no mesmo valor-hora ou em um valor por foto entregue.</li>
+          <li>Some deslocamento e custos extras (aluguel de equipamento, assistente, segundo fotógrafo).</li>
+          <li>Aplique uma margem de 15 a 20% para imprevistos do dia do evento.</li>
+        </ol>
+
+        <h2>Modelo de orçamento de fotografia por tipo de evento</h2>
+
+        <p>
+          Referência de mercado para calibrar seu orçamento de fotografia de evento:
+        </p>
+
+        <ul>
+          <li><strong>Casamento (cobertura completa, 8h+):</strong> R$ 2.500 a R$ 8.000</li>
+          <li><strong>Evento corporativo (4h):</strong> R$ 800 a R$ 2.500</li>
+          <li><strong>Aniversário/festa infantil (3h):</strong> R$ 500 a R$ 1.500</li>
+          <li><strong>Ensaio + evento pequeno (2h):</strong> R$ 400 a R$ 1.200</li>
+          <li><strong>Ensaio corporativo/perfil profissional:</strong> R$ 300 a R$ 900</li>
+        </ul>
+
+        <h2>Erros que fazem o fotógrafo perder dinheiro no orçamento</h2>
+
+        <ul>
+          <li><strong>Não cobrar a edição separadamente</strong> — tratando como se fosse &quot;de brinde&quot; junto com a cobertura.</li>
+          <li><strong>Esquecer o deslocamento</strong> em eventos fora da cidade ou em horários que exigem transporte especial.</li>
+          <li><strong>Não definir a quantidade de fotos entregues</strong> — abre espaço para o cliente pedir a edição de centenas de fotos extras sem custo adicional.</li>
+          <li><strong>Não cobrar entrada</strong> — em fotografia de evento, o não comparecimento do cliente no dia gera prejuízo total sem sinal pago antecipadamente.</li>
+        </ul>
+
+        <p>
+          Um orçamento de fotografia para evento bem estruturado, com todos esses itens separados,
+          evita que o cliente questione o valor total depois — porque cada parte do preço está
+          justificada. O FreelanceFlow ajuda a montar esse orçamento em formato de proposta
+          profissional, com escopo, valores e condições de pagamento organizados, pronta para
+          enviar por link antes de fechar a data do evento.
         </p>
       </article>
     ),
