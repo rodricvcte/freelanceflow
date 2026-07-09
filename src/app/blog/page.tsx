@@ -96,6 +96,13 @@ const articles = [
       'O que incluir além da hora de cobertura, como calcular edição e deslocamento, e modelos por tipo de evento.',
     date: '9 de julho de 2026',
   },
+  {
+    slug: 'proposta-comercial-redes-sociais',
+    title: 'Proposta comercial para redes sociais: o que incluir e como fechar',
+    description:
+      'O que não pode faltar na proposta, como montar pacotes por objetivo e como acompanhar a resposta do cliente.',
+    date: '9 de julho de 2026',
+  },
 ]
 
 export default function BlogIndex() {

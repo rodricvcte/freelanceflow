@@ -1167,6 +1167,120 @@ const articles: Article[] = [
       </article>
     ),
   },
+  {
+    slug: 'proposta-comercial-redes-sociais',
+    title: 'Proposta Comercial para Redes Sociais: O Que Incluir e Como Fechar',
+    description:
+      'Saiba o que incluir numa proposta comercial de redes sociais, como montar pacotes e como apresentar o valor do seu trabalho ao cliente.',
+    date: '9 de julho de 2026',
+    content: (
+      <article className="prose prose-gray max-w-none">
+        <h1>Proposta comercial para redes sociais: o que incluir e como fechar</h1>
+
+        <p>
+          Você manda uma proposta comercial de redes sociais com &quot;12 posts por mês&quot; e o
+          cliente some. Não é o preço que espantou — é que ele não entendeu o que aquilo vai fazer
+          pelo negócio dele. Uma boa proposta comercial de social media não vende quantidade de
+          post, vende resultado. E é isso que muda a taxa de fechamento.
+        </p>
+
+        <h2>O que o cliente de social media realmente quer saber</h2>
+
+        <p>
+          Quando o cliente pede uma proposta de social media, ele não está comparando quem entrega
+          mais posts por mês. Ele está tentando entender uma coisa: isso vai trazer mais clientes
+          ou não? Uma proposta comercial de redes sociais que lista só &quot;quantidade de posts,
+          stories e reels&quot; sem explicar o resultado esperado soa igual a de qualquer
+          concorrente — e vira decisão só por preço.
+        </p>
+
+        <p>
+          O ajuste é simples: para cada entregável, explique o efeito esperado no negócio.
+          &quot;4 reels por mês&quot; vira &quot;4 reels por mês para aumentar alcance e atrair
+          seguidores qualificados para o perfil&quot;. Isso muda completamente como o cliente lê a
+          proposta comercial de social media — ele passa a enxergar investimento, não gasto.
+        </p>
+
+        <h2>O que não pode faltar na proposta</h2>
+
+        <p>
+          Uma proposta comercial de redes sociais completa precisa deixar claro, sem ambiguidade:
+        </p>
+
+        <ul>
+          <li>
+            <strong>Escopo detalhado</strong> — número de posts, formatos (feed, stories, reels) e
+            quais plataformas estão cobertas (Instagram, TikTok, LinkedIn etc.).
+          </li>
+          <li>
+            <strong>Frequência de publicação e calendário</strong> — quantas vezes por semana em
+            cada formato, e se existe um calendário editorial mensal para aprovação prévia.
+          </li>
+          <li>
+            <strong>Processo de aprovação de conteúdo</strong> — quantos dias de antecedência o
+            conteúdo é enviado, quantas rodadas de ajuste estão inclusas e qual o prazo de resposta
+            esperado do cliente.
+          </li>
+          <li>
+            <strong>O que está fora do escopo</strong> — tráfego pago, criação de vídeo do zero,
+            fotografia profissional e qualquer serviço que normalmente é cobrado à parte.
+          </li>
+          <li>
+            <strong>Prazo de contrato</strong> — social media é trabalho de resultado no médio
+            prazo, então o mínimo recomendado é 3 meses. Contratos mês a mês tendem a ser
+            cancelados antes de mostrar resultado real.
+          </li>
+          <li>
+            <strong>Condições de reajuste</strong> — deixe escrito desde o início quando e como o
+            valor pode ser revisado, para não parecer surpresa depois.
+          </li>
+        </ul>
+
+        <h2>Como apresentar pacotes sem parecer tabela de preço</h2>
+
+        <p>
+          Chamar os pacotes de &quot;Básico, Intermediário e Premium&quot; transforma sua proposta
+          comercial de social media numa comparação fria de quantidade por preço. Uma alternativa
+          que funciona melhor é nomear os pacotes pelo objetivo do cliente:
+        </p>
+
+        <ul>
+          <li><strong>Presença</strong> — para quem ainda não tem constância nas redes e precisa organizar o básico.</li>
+          <li><strong>Crescimento</strong> — para quem já publica, mas quer aumentar alcance e seguidores qualificados.</li>
+          <li><strong>Autoridade</strong> — para quem quer se posicionar como referência no nicho, com conteúdo mais estratégico e frequente.</li>
+        </ul>
+
+        <p>
+          O mais importante é mostrar o que muda entre os pacotes em termos de resultado esperado —
+          não só a quantidade de posts. Uma proposta social media que mostra a evolução em impacto,
+          e não só em volume, justifica o salto de preço entre os pacotes de forma muito mais
+          natural.
+        </p>
+
+        <h2>Como enviar a proposta e acompanhar a resposta</h2>
+
+        <p>
+          Mandar a proposta em PDF por e-mail e esperar é abrir mão do controle sobre o processo de
+          venda. Você não sabe se o cliente abriu, se leu até o fim ou se está comparando com outro
+          orçamento nesse momento — e sem essa informação, o follow-up vira um chute no escuro.
+        </p>
+
+        <p>
+          Saber quando o cliente abriu a proposta, e quantas vezes, muda completamente o timing do
+          seu contato. Um cliente que abriu o modelo de proposta comercial de social media três
+          vezes na mesma tarde está claramente em dúvida entre fechar com você ou com outro
+          profissional — esse é o momento certo para uma mensagem, não daqui a uma semana.
+        </p>
+
+        <p>
+          É exatamente isso que o FreelanceFlow resolve — você envia um link, sabe quando o cliente
+          abriu e recebe alerta para fazer follow-up na hora certa. Sem PDF perdido no e-mail, sem
+          adivinhar se a proposta social media ainda está sendo avaliada.{' '}
+          <Link href="/cadastro">Crie sua proposta grátis</Link>.
+        </p>
+      </article>
+    ),
+  },
 ]
 
 const articleMap = Object.fromEntries(articles.map(a => [a.slug, a]))

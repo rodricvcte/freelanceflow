@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: 'https://www.freelanceflow.com.br/blog/proposta-comercial-design-grafico', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/blog/como-vender-site-para-pequenas-empresas', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/blog/como-fazer-orcamento-fotografia', lastModified: new Date() },
+    { url: 'https://www.freelanceflow.com.br/blog/proposta-comercial-redes-sociais', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/modelos-de-proposta', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/modelos-de-proposta/criador-de-sites', lastModified: new Date() },
     { url: 'https://www.freelanceflow.com.br/modelos-de-proposta/designer-grafico', lastModified: new Date() },
