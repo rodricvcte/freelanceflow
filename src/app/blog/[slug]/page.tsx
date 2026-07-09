@@ -90,8 +90,8 @@ const articles: Article[] = [
             mostrar que você entendeu a dor do cliente. Só então apresente a solução.
           </li>
           <li>
-            <strong>Seja específico no escopo.</strong> Evite termos vagos como "criação de conteúdo" ou
-            "suporte técnico". Defina quantidade, formato, canais e limites de revisão.
+            <strong>Seja específico no escopo.</strong> Evite termos vagos como &quot;criação de conteúdo&quot; ou
+            &quot;suporte técnico&quot;. Defina quantidade, formato, canais e limites de revisão.
           </li>
           <li>
             <strong>Facilite o aceite.</strong> Inclua um botão ou link para o cliente aprovar com um clique.
@@ -108,7 +108,7 @@ const articles: Article[] = [
         <ul>
           <li><strong>Enviar por WhatsApp em formato de texto corrido.</strong> Isso passa falta de profissionalismo e dificulta o cliente de ter um documento de referência.</li>
           <li><strong>Não colocar validade.</strong> Proposta sem prazo de validade pode ser aceita meses depois, com custos e contexto completamente diferentes.</li>
-          <li><strong>Não detalhar o que está fora do escopo.</strong> "Revisões ilimitadas" é um convite para projetos que nunca terminam.</li>
+          <li><strong>Não detalhar o que está fora do escopo.</strong> &quot;Revisões ilimitadas&quot; é um convite para projetos que nunca terminam.</li>
           <li><strong>Não fazer follow-up.</strong> Menos de 30% dos clientes respondem na primeira vez. O retorno faz parte do processo de venda.</li>
           <li><strong>Copiar e colar da proposta anterior sem personalizar.</strong> O cliente percebe quando a proposta é genérica. Personalize pelo menos o problema e o escopo.</li>
         </ul>
@@ -218,26 +218,26 @@ const articles: Article[] = [
         <p><strong>Follow-up 1 — confirmação de recebimento (24h):</strong></p>
         <blockquote>
           <p>
-            "Oi [nome], tudo bem? Passei para confirmar que enviei a proposta e ver se chegou certinho.
-            Qualquer dúvida, me chame. Estou à disposição!"
+            &quot;Oi [nome], tudo bem? Passei para confirmar que enviei a proposta e ver se chegou certinho.
+            Qualquer dúvida, me chame. Estou à disposição!&quot;
           </p>
         </blockquote>
 
         <p><strong>Follow-up 2 — principal (3–5 dias):</strong></p>
         <blockquote>
           <p>
-            "Oi [nome], passando para ver se conseguiu dar uma olhada na proposta que enviei.
+            &quot;Oi [nome], passando para ver se conseguiu dar uma olhada na proposta que enviei.
             Se tiver alguma pergunta sobre o escopo ou valores, fico feliz em conversar.
-            Me conta como estão as coisas aí?"
+            Me conta como estão as coisas aí?&quot;
           </p>
         </blockquote>
 
         <p><strong>Follow-up 3 — fechamento do ciclo (7–10 dias):</strong></p>
         <blockquote>
           <p>
-            "Oi [nome], só para deixar registrado: a proposta tem validade até [data]. Se fizer sentido
+            &quot;Oi [nome], só para deixar registrado: a proposta tem validade até [data]. Se fizer sentido
             avançar, é só me dar um sinal e a gente marca uma conversa rápida para alinhar os próximos
-            passos. Se o projeto ficou para depois, tudo bem também — qualquer coisa, estarei por aqui!"
+            passos. Se o projeto ficou para depois, tudo bem também — qualquer coisa, estarei por aqui!&quot;
           </p>
         </blockquote>
 
