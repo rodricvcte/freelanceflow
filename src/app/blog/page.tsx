@@ -47,6 +47,55 @@ const articles = [
       'Mensagens prontas, multa, juros e quando escalar a cobrança quando o cliente some sem pagar.',
     date: '9 de julho de 2026',
   },
+  {
+    slug: 'como-fazer-proposta-comercial',
+    title: 'Como fazer proposta comercial freelancer em 15 minutos',
+    description:
+      'Modelo pronto para preencher, checklist rápido e exemplos por área para montar sua proposta sem perder tempo.',
+    date: '9 de julho de 2026',
+  },
+  {
+    slug: 'como-precificar-servicos-freelancer',
+    title: 'Quanto cobrar pelo seu trabalho sendo freelancer',
+    description:
+      'Como calcular seu valor-hora, precificar por projeto e reajustar preço sem perder cliente.',
+    date: '9 de julho de 2026',
+  },
+  {
+    slug: 'como-fazer-follow-up-proposta',
+    title: 'Como perguntar se o cliente aprovou a proposta sem parecer chato',
+    description:
+      'Frases prontas para WhatsApp, e-mail e ligação, e o que fazer quando a resposta for "ainda estou avaliando".',
+    date: '9 de julho de 2026',
+  },
+  {
+    slug: 'contrato-freelancer-modelo',
+    title: 'Contrato para freelancer: modelo pronto para usar',
+    description:
+      'Cláusulas essenciais, modelo por seção e a diferença entre contrato simples e registrado em cartório.',
+    date: '9 de julho de 2026',
+  },
+  {
+    slug: 'proposta-comercial-design-grafico',
+    title: 'Proposta comercial para design gráfico: o que incluir',
+    description:
+      'Estrutura, formatos de entrega, revisões e precificação por tipo de projeto de design gráfico.',
+    date: '9 de julho de 2026',
+  },
+  {
+    slug: 'como-vender-site-para-pequenas-empresas',
+    title: 'Como vender site para pequenas empresas sem parecer vendedor chato',
+    description:
+      'Como abordar sem parecer spam, argumentos que funcionam e como estruturar a proposta comercial.',
+    date: '9 de julho de 2026',
+  },
+  {
+    slug: 'como-fazer-orcamento-fotografia',
+    title: 'Como fazer orçamento de fotografia para evento',
+    description:
+      'O que incluir além da hora de cobertura, como calcular edição e deslocamento, e modelos por tipo de evento.',
+    date: '9 de julho de 2026',
+  },
 ]
 
 export default function BlogIndex() {
